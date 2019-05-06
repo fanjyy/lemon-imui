@@ -1,0 +1,48 @@
+/**
+ *   
+ textMessage = {
+    msgId: "msgid",
+    status: "send_going",
+    msgType: "text",
+    isOutgoing: true,
+    text: "text",
+    fromUser: {},
+    extras: {}// option
+}
+
+imageMessage = {
+    msgId: "msgid",
+    msgType: "image",
+    isOutGoing: true,
+    mediaPath: "image path",
+    fromUser: {}，
+    extras: {}// option
+}
+
+videoMessage = {  // video message
+    msgId: "msgid",
+    status: "send_failed",
+    msgType: "video",
+    isOutGoing: true,
+    druation: number,
+    mediaPath: "voice path",
+    fromUser: {},
+    extras: {}// option
+}
+customMessage = {  // custom message
+    msgId: "msgid",
+    msgType: "custom",
+    status: "send_failed",
+    isOutgoing: true,
+    contentSize: {height: 100, width: 100},
+    content: "<h1>custom message will render html string</h1>", // content is html format, avoid to use <script>
+    fromUser: {}, 
+    extras: {}// option
+}
+eventMessage = {  // event message
+    msgId: "msgid",
+    msgType: "event",
+    text: "the event text"
+}
+
+ */

@@ -1,0 +1,94 @@
+//BEM
+$fi-namespace: 'lemon';
+
+@mixin b($block) {
+  $selector: $fi-namespace + '-' + $block;
+  .#{$selector} {
+    @content;
+  }
+}
+@mixin e($element) {
+  $selector: '__' + $element;
+  &#{$selector} {
+    @content;
+  }
+}
+@mixin m($modifier) {
+  $selector: '--' + $modifier;
+  &#{$selector} {
+    @content;
+  }
+}
+
+@mixin bem($block, $element: false, $modifier: false) {
+  $selector: '.';
+  @if $block {
+    $selector: $fi-namespace + '-' + $block;
+  }
+  @if $element {
+    $selector: $selector + '__' + $element;
+  }
+  @if $modifier {
+    $selector: $selector + '--' + $modifier;
+  }
+  & .#{$selector} {
+    @content;
+  }
+}
+
+@mixin user-select($value) {
+  -moz-user-select: $value;
+  -webkit-user-select: $value;
+  -ms-user-select: $value;
+}
+
+@mixin scrollbar-theme($color: #1f252d, $background: #6d6d6d) {
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  &::-webkit-scrollbar-track-piece {
+    background-color: $background;
+  }
+  &::-webkit-scrollbar-thumb:vertical {
+    height: 5px;
+    background-color: $color;
+  }
+  &::-webkit-scrollbar-thumb:horizontal {
+    width: 5px;
+    background-color: $background;
+  }
+}
+@mixin scrollbar-dark() {
+  @include scrollbar-theme();
+}
+@mixin scrollbar-light() {
+  @include scrollbar-theme(#aaa, #fff);
+}
+
+@mixin vertical-center {
+  $selector: &;
+  @at-root {
+    #{$selector}::after {
+      display: inline-block;
+      content: '';
+      height: 100%;
+      vertical-align: middle;
+    }
+  }
+}
+@mixin position-center($type: fixed) {
+  position: $type;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin arrow {
+}

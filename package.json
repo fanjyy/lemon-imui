@@ -3,6 +3,7 @@
   "version": "1.0.2",
   "main": "dist/index.umd.min.js",
   "scripts": {
+    "build-examples": "vue-cli-service build --dest examples/dist examples/main.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --target lib --name index packages/index.js",
     "lint": "vue-cli-service lint"

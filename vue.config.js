@@ -10,6 +10,7 @@ module.exports = {
       filename: "index.html"
     }
   },
+  publicPath:'',
   productionSourceMap:false,
   configureWebpack: {
     resolve: {

@@ -1,7 +1,7 @@
 import Vue from "vue";
 import App from "./App.vue";
-import LemonIM from "../packages";
-Vue.use(LemonIM);
+import LemonIMUI from "../packages";
+Vue.use(LemonIMUI);
 
 Vue.config.productionTip = false;
 

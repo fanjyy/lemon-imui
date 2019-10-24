@@ -3,7 +3,7 @@
  textMessage = {
     msgId: "msgid",
     status: "send_going",
-    msgType: "text",
+    type: "text",
     isOutgoing: true,
     text: "text",
     fromUser: {},
@@ -12,7 +12,7 @@
 
 imageMessage = {
     msgId: "msgid",
-    msgType: "image",
+    type: "image",
     isOutGoing: true,
     mediaPath: "image path",
     fromUser: {}，
@@ -22,7 +22,7 @@ imageMessage = {
 videoMessage = {  // video message
     msgId: "msgid",
     status: "send_failed",
-    msgType: "video",
+    type: "video",
     isOutGoing: true,
     druation: number,
     mediaPath: "voice path",
@@ -31,7 +31,7 @@ videoMessage = {  // video message
 }
 customMessage = {  // custom message
     msgId: "msgid",
-    msgType: "custom",
+    type: "custom",
     status: "send_failed",
     isOutgoing: true,
     contentSize: {height: 100, width: 100},
@@ -41,7 +41,7 @@ customMessage = {  // custom message
 }
 eventMessage = {  // event message
     msgId: "msgid",
-    msgType: "event",
+    type: "event",
     text: "the event text"
 }
 

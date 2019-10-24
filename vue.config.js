@@ -10,6 +10,7 @@ module.exports = {
       filename: "index.html"
     }
   },
+  productionSourceMap:false,
   configureWebpack: {
     resolve: {
       alias: {

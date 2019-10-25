@@ -164,7 +164,7 @@ export default {
       this.appendMessage(message);
       this._emitSend(message, () => {
         this.updateContact(message.toContactId, {
-          lastContent: lastContentRender[message.type].call(this, message),
+          lastContent: this.lastContentRender(message),
           lastSendTime: message.sendTime
         });
       });
@@ -191,7 +191,7 @@ export default {
         message,
         () => {
           this.updateContact(message.toContactId, {
-            lastContent: lastContentRender[message.type].call(this, message),
+            lastContent: this.lastContentRender(message),
             lastSendTime: message.sendTime
           });
         },
@@ -493,6 +493,9 @@ export default {
     setLastContentRender(messageType, render) {
       lastContentRender[messageType] = render;
     },
+    lastContentRender(message) {
+      return lastContentRender[message.type].call(this, message);
+    },
     /**
      * 将字符串内的 EmojiItem.name 替换为 img
      * @param {String} str 被替换的字符串
@@ -789,11 +792,10 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   height 580px
   display flex
   font-size 14px
-  border-radius 5px
   //mask-image radial-gradient(circle, white 100%, black 100%)
   background #efefef
   transition all .4s bezier
-  border-radius 4px
+  position relative
   p
     margin 0
   img
@@ -866,13 +868,13 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   top 0
   right 0
   overflow hidden
-  width drawer-width
   background #f4f4f4
   transition width .4s bezier
-  height 100%
   z-index 1
-  //border-left 1px solid #e9e9e9
+  width drawer-width
+  height 100%
   box-sizing border-box
+  //border-left 1px solid #e9e9e9
 +b(lemon-wrapper)
   +m(drawer-show)
     +b(lemon-drawer)

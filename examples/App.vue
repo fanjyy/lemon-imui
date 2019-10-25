@@ -1,35 +1,78 @@
 <template>
   <div id="app">
-    <lemon-imui
-      :user="user"
-      class="imui-center"
-      ref="IMUI"
-      @change-menu="handleChangeMenu"
-      @change-contact="handleChangeContact"
-      @pull-messages="handlePullMessages"
-      @send="handleSend"
-    >
-      <template #cover>
-        <h1 style="text-indent:20px">自定义封面内容</h1>
-      </template>
-      <!-- <template #contact-info="contact">
+    <div class="imui-center">
+      <lemon-imui
+        :user="user"
+        ref="IMUI"
+        @change-menu="handleChangeMenu"
+        @change-contact="handleChangeContact"
+        @pull-messages="handlePullMessages"
+        @send="handleSend"
+      >
+        <template #cover>
+          <h1 style="text-indent:20px">自定义封面内容</h1>
+        </template>
+        <!-- <template #contact-info="contact">
         <span style="color:blue">contact-info {{ contact }}</span>
       </template> -->
-      <!--
+        <!--
       <template #drawer="contact">
         <h1>自定义抽屉内容</h1>
         <p>{{ contact }}</p>
       </template>
       -->
-      <template #contact-title="contact">
-        <span>{{ contact.displayName }}</span>
-        <small class="more" @click="changeDrawer(contact)">&#8230;</small>
-      </template>
-    </lemon-imui>
+        <template #contact-title="contact">
+          <span>{{ contact.displayName }}</span>
+          <small class="more" @click="changeDrawer(contact)">&#8230;</small>
+        </template>
+      </lemon-imui>
+
+      <div class="action">
+        <lemon-button @click="currentAppendMessage"
+          >在当前窗口发送消息</lemon-button
+        >
+        <lemon-button @click="appendMessage">指定联系人发送消息</lemon-button>
+        <lemon-button @click="updateContact">修改联系人信息</lemon-button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+const getTime = () => {
+  return new Date().getTime();
+};
+const generateRandId = () => {
+  return Number(
+    Math.random()
+      .toString()
+      .substr(3, length) + Date.now()
+  ).toString(36);
+};
+const generateRandWord = () => {
+  return Math.random()
+    .toString(36)
+    .substr(2);
+};
+const generateMessage = () => {
+  return {
+    id: generateRandId(),
+    status: "succeed",
+    type: "text",
+    sendTime: getTime(),
+    content: "随机回复：" + generateRandWord(),
+    toContactId: "123",
+    //fileSize: 1231,
+    //fileName: "asdasd.doc",
+    fromUser: {
+      id: "222",
+      displayName: "系统测试",
+      avatar:
+        "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1820523987,3798556096&fm=26&gp=0.jpg"
+    }
+  };
+};
+
 export default {
   name: "app",
   data() {
@@ -56,7 +99,7 @@ export default {
     };
     const contactData2 = {
       id: "2",
-      displayName: "马林",
+      displayName: "狗蛋Li。",
       avatar: "https://img.ivsky.com/img/tupian/li/201902/27/yanjing_meinv.jpg",
       type: "single",
       index: "B",
@@ -72,12 +115,14 @@ export default {
     };
     const contactData3 = {
       id: "3",
-      displayName: "范君",
+      displayName: "铁牛",
       avatar:
         "https://img.ivsky.com/img/tupian/li/201903/21/huahuan_xiaonvhai.jpg",
       type: "many",
       index: "C",
-      lastSendTime: 3
+      unread: 32,
+      lastSendTime: 3,
+      lastContent: "你好123"
     };
 
     const { IMUI } = this.$refs;
@@ -117,6 +162,25 @@ export default {
     ];
 
     IMUI.initContacts(data);
+    IMUI.initMenus([
+      {
+        name: "lastMessages"
+      },
+      {
+        name: "contacts"
+      },
+      {
+        title: "自定义按钮",
+        unread: 0,
+        click: () => {
+          alert("点击了自定义按钮");
+        },
+        render: menu => {
+          return <span>T</span>;
+        },
+        isBottom: true
+      }
+    ]);
     IMUI.initEmoji([
       {
         label: "表情",
@@ -403,23 +467,53 @@ export default {
         ]
       }
     ]);
-
-    setTimeout(() => {
-      IMUI.updateContact("3", {
-        unread: 100,
-        //displayName: "123",
-        lastSendTime: 3,
-        lastContent: "你好123"
-      });
-    }, 2000);
   },
   methods: {
+    _addUnread(id, message) {
+      const { IMUI } = this.$refs;
+      IMUI.updateContact(id, {
+        unread: "+1",
+        lastSendTime: getTime(),
+        lastContent: IMUI.lastContentRender(message)
+      });
+    },
+    appendMessage() {
+      const id = "3";
+      const { IMUI } = this.$refs;
+      const message = generateMessage();
+
+      IMUI.appendMessage(message, id);
+      this._addUnread(id, message);
+    },
+    currentAppendMessage() {
+      const { IMUI } = this.$refs;
+      const message = generateMessage();
+
+      IMUI.appendMessage(message);
+      this._addUnread(IMUI.currentContact.id, message);
+    },
+    updateContact() {
+      this.$refs.IMUI.updateContact("3", {
+        unread: 10,
+        displayName: generateRandWord(),
+        lastSendTime: getTime(),
+        lastContent: "修改昵称为随机字母"
+      });
+    },
     changeDrawer(contact) {
       this.$refs.IMUI.changeDrawer(() => {
-        return [<h2>自定义抽屉</h2>, contact.displayName];
+        return (
+          <div class="drawer-content">
+            <p>
+              <b>自定义抽屉</b>
+            </p>
+            <p>{contact.displayName}</p>
+          </div>
+        );
       });
     },
     handleChangeContact(contact) {
+      console.log("Event:change-contact");
       this.$refs.IMUI.updateContact(contact.id, {
         //displayName: "123",
         unread: 0
@@ -427,11 +521,13 @@ export default {
       this.$refs.IMUI.closeDrawer();
     },
     handleSend(message, next, file) {
+      console.log("Event:send");
       setTimeout(() => {
         next();
       }, 1000);
     },
     handlePullMessages(contact, next) {
+      console.log("Event:pull-messages");
       const messages = [
         {
           id: "8ad7e98e-5225-4892-8131-4b2ee7797599",
@@ -520,7 +616,9 @@ export default {
       ];
       next(messages);
     },
-    handleChangeMenu() {},
+    handleChangeMenu() {
+      console.log("Event:change-menu");
+    },
     openCustomContainer() {}
   }
 };
@@ -528,12 +626,18 @@ export default {
 
 <style lang="stylus">
 body
-  background #384558 !important
+  background #3d495c !important
+.action
+  margin-top 30px
+  button
+    margin-right 10px
 .imui-center
   position absolute
   top 50%
   left 50%
   transform translate(-50%,-50%)
+.drawer-content
+  padding 15px
 .more
   font-size 32px
   line-height 18px

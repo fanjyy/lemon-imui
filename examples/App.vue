@@ -28,10 +28,7 @@
       </lemon-imui>
 
       <div class="action">
-        <lemon-button @click="currentAppendMessage"
-          >在当前窗口发送消息</lemon-button
-        >
-        <lemon-button @click="appendMessage">指定联系人发送消息</lemon-button>
+        <lemon-button @click="appendMessage">发送消息</lemon-button>
         <lemon-button @click="updateContact">修改联系人信息</lemon-button>
       </div>
     </div>
@@ -60,15 +57,14 @@ const generateMessage = () => {
     status: "succeed",
     type: "text",
     sendTime: getTime(),
-    content: "随机回复：" + generateRandWord(),
+    content: generateRandWord(),
     toContactId: "123",
     //fileSize: 1231,
     //fileName: "asdasd.doc",
     fromUser: {
       id: "222",
       displayName: "系统测试",
-      avatar:
-        "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1820523987,3798556096&fm=26&gp=0.jpg"
+      avatar: "http://upload.qqbodys.com/allimg/1710/1035512943-0.jpg"
     }
   };
 };
@@ -81,7 +77,7 @@ export default {
         id: "superadmin",
         displayName: "IMUI super",
         avatar:
-          "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4085009425,1005454674&fm=26&gp=0.jpg"
+          "http://upload.qqbodys.com/img/weixin/20170804/ji5qxg1am5ztm.jpg"
       }
     };
   },
@@ -89,8 +85,7 @@ export default {
     const contactData1 = {
       id: "1",
       displayName: "工作协作群",
-      avatar:
-        "https://img.ivsky.com/img/tupian/li/201903/24/richu_riluo-015.jpg",
+      avatar: "http://upload.qqbodys.com/img/weixin/20170804/ji5qxg1am5ztm.jpg",
       type: "single",
       index: "A",
       unread: 0,
@@ -100,7 +95,7 @@ export default {
     const contactData2 = {
       id: "2",
       displayName: "狗蛋Li。",
-      avatar: "https://img.ivsky.com/img/tupian/li/201902/27/yanjing_meinv.jpg",
+      avatar: "http://upload.qqbodys.com/img/weixin/20170807/jibfvfd00npin.jpg",
       type: "single",
       index: "B",
       click(next) {
@@ -116,8 +111,7 @@ export default {
     const contactData3 = {
       id: "3",
       displayName: "铁牛",
-      avatar:
-        "https://img.ivsky.com/img/tupian/li/201903/21/huahuan_xiaonvhai.jpg",
+      avatar: "http://upload.qqbodys.com/img/weixin/20170803/jiq4nzrkrnd0e.jpg",
       type: "many",
       index: "C",
       unread: 32,
@@ -469,28 +463,20 @@ export default {
     ]);
   },
   methods: {
-    _addUnread(id, message) {
+    appendMessage() {
       const { IMUI } = this.$refs;
-      IMUI.updateContact(id, {
+      const contact = IMUI.currentContact;
+      const message = generateMessage();
+      message.fromUser = {
+        ...message.fromUser,
+        ...this.user
+      };
+      IMUI.appendMessage(message);
+      IMUI.updateContact(contact.id, {
         unread: "+1",
         lastSendTime: getTime(),
         lastContent: IMUI.lastContentRender(message)
       });
-    },
-    appendMessage() {
-      const id = "3";
-      const { IMUI } = this.$refs;
-      const message = generateMessage();
-
-      IMUI.appendMessage(message, id);
-      this._addUnread(id, message);
-    },
-    currentAppendMessage() {
-      const { IMUI } = this.$refs;
-      const message = generateMessage();
-
-      IMUI.appendMessage(message);
-      this._addUnread(IMUI.currentContact.id, message);
     },
     updateContact() {
       this.$refs.IMUI.updateContact("3", {

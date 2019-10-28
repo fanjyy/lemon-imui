@@ -541,7 +541,7 @@ export default {
       });
     },
     updateContact() {
-      this.$refs.IMUI.updateContact("3", {
+      this.$refs.IMUI.updateContact("contact-3", {
         unread: 10,
         displayName: generateRandWord(),
         lastSendTime: getTime(),

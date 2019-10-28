@@ -235,7 +235,7 @@ export default {
             <lemon-avatar
               v-show={!this.hideMenuAvatar}
               on-click={e => {
-                console.log("menu avatar click");
+                this.$emit("menu-avatar-click", e);
               }}
               class="lemon-menu__avatar"
               src={this.user.avatar}
@@ -557,7 +557,7 @@ export default {
           messages[contactId][index],
           data
         );
-        console.log('--------',messages[contactId][index]);
+        console.log("--------", messages[contactId][index]);
         this.forceUpdateMessage(messageId);
       }
     },
@@ -590,8 +590,8 @@ export default {
     changeMenu(name) {
       this.$emit("change-menu", name);
       this.activeSidebar = name;
-      const { renderContainer } = this.currentMenu;
-      this._customContainerReady(renderContainer, CacheMenuContainer, name);
+      // const { renderContainer } = this.currentMenu;
+      // this._customContainerReady(renderContainer, CacheMenuContainer, name);
     },
     /**
      * 初始化编辑框的 Emoji 表情列表，是 Lemon-editor.initEmoji 的代理方法
@@ -648,11 +648,21 @@ export default {
               ...{ renderContainer: null }
             };
           }
+
+          if (item.renderContainer) {
+            this._customContainerReady(
+              item.renderContainer,
+              CacheMenuContainer,
+              item.name
+            );
+          }
+
           return item;
         });
       } else {
         menus = defaultMenus;
       }
+
       this.menus = menus;
     },
     /**

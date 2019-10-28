@@ -10,6 +10,7 @@
         @change-contact="handleChangeContact"
         @pull-messages="handlePullMessages"
         @message-click="handleMessageClick"
+        @menu-avatar-click="handleMenuAvatarClick"
         @send="handleSend"
       >
         <template #cover>
@@ -499,6 +500,9 @@ export default {
     ]);
   },
   methods: {
+    handleMenuAvatarClick() {
+      console.log("Event:menu-avatar-click");
+    },
     handleMessageClick(e, key, message) {
       const { IMUI } = this.$refs;
 

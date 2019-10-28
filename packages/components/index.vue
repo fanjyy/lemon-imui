@@ -14,11 +14,6 @@ const CacheContactContainer = new MemoryCache();
 const CacheMenuContainer = new MemoryCache();
 const CacheMessageLoaded = new MemoryCache();
 
-import {
-  //constraintContactMessages,
-  constraintContact
-  //constraintMessage
-} from "utils/constraint";
 const messages = {};
 const emojiMap = {};
 let renderDrawerContent = () => {};
@@ -458,7 +453,6 @@ export default {
         0: "unshift",
         1: "push"
       }[t];
-      constraintContact(data);
       //this.contacts[type](cloneDeep(data));
       this.contacts[type](data);
     },

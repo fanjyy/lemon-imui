@@ -1,6 +1,7 @@
 <script>
 export default {
   name: "lemonMessageBasic",
+  inject: ["IMUI"],
   props: {
     message: {
       type: Object,
@@ -35,16 +36,16 @@ export default {
             size={36}
             shape="square"
             src={fromUser.avatar}
-            on-click={() => {
-              console.log("message avatar click");
+            on-click={e => {
+              this._emitClick(e, "avatar");
             }}
           />
         </div>
         <div class="lemon-message__inner">
           <div class="lemon-message__title">
             <span
-              on-click={() => {
-                console.log("message displayname click");
+              on-click={e => {
+                this._emitClick(e, "displayName");
               }}
             >
               {fromUser.displayName}
@@ -53,13 +54,20 @@ export default {
           </div>
           <div
             class="lemon-message__content"
-            on-click={() => {
-              console.log("message content click");
+            on-click={e => {
+              this._emitClick(e, "content");
             }}
           >
             {this.useScopedSlots("content", this.message)}
           </div>
-          <div class="lemon-message__status">{this._renderStatue(status)}</div>
+          <div
+            class="lemon-message__status"
+            on-click={e => {
+              this._emitClick(e, "status");
+            }}
+          >
+            {this._renderStatue(status)}
+          </div>
         </div>
       </div>
     );
@@ -69,6 +77,9 @@ export default {
   computed: {},
   watch: {},
   methods: {
+    _emitClick(e, key) {
+      this.IMUI.$emit("message-click", e, key, this.message);
+    },
     _renderStatue(status) {
       if (status == "going") {
         return <i class="lemon-icon-loading lemonani-spin" />;

@@ -4,13 +4,19 @@
       <lemon-imui
         :user="user"
         ref="IMUI"
+        :hide-menu="hideMenu"
+        :hide-menu-avatar="hideMenuAvatar"
         @change-menu="handleChangeMenu"
         @change-contact="handleChangeContact"
         @pull-messages="handlePullMessages"
+        @message-click="handleMessageClick"
         @send="handleSend"
       >
         <template #cover>
-          <h1 style="text-indent:20px">自定义封面内容</h1>
+          <div class="cover">
+            <i class="lemon-icon-message"></i>
+            <p><b>Lemon</b> IMUI</p>
+          </div>
         </template>
         <!-- <template #contact-info="contact">
         <span style="color:blue">contact-info {{ contact }}</span>
@@ -25,11 +31,24 @@
           <span>{{ contact.displayName }}</span>
           <small class="more" @click="changeDrawer(contact)">&#8230;</small>
         </template>
+        <template #contact-info="contact">
+          自定义联系人信息 {{ contact.displayName }}
+        </template>
+        <template #message-sidebar>
+          <div class="bar">自定义消息顶部</div>
+        </template>
+        <template #contact-sidebar>
+          <div class="bar">自定义联系人顶部</div>
+        </template>
       </lemon-imui>
 
       <div class="action">
         <lemon-button @click="appendMessage">发送消息</lemon-button>
         <lemon-button @click="updateContact">修改联系人信息</lemon-button>
+        <lemon-button @click="changeMenuVisible">切换导航显示</lemon-button>
+        <lemon-button @click="changeMenuAvatarVisible"
+          >切换头像显示</lemon-button
+        >
       </div>
     </div>
   </div>
@@ -40,32 +59,33 @@ const getTime = () => {
   return new Date().getTime();
 };
 const generateRandId = () => {
-  return Number(
-    Math.random()
-      .toString()
-      .substr(3, length) + Date.now()
-  ).toString(36);
+  return Math.random()
+    .toString(36)
+    .substr(-8);
 };
 const generateRandWord = () => {
   return Math.random()
     .toString(36)
     .substr(2);
 };
-const generateMessage = () => {
+const generateMessage = (toContactId = "", fromUser) => {
+  if (!fromUser) {
+    fromUser = {
+      id: "system",
+      displayName: "系统测试",
+      avatar: "http://upload.qqbodys.com/allimg/1710/1035512943-0.jpg"
+    };
+  }
   return {
     id: generateRandId(),
     status: "succeed",
     type: "text",
     sendTime: getTime(),
     content: generateRandWord(),
-    toContactId: "123",
     //fileSize: 1231,
     //fileName: "asdasd.doc",
-    fromUser: {
-      id: "222",
-      displayName: "系统测试",
-      avatar: "http://upload.qqbodys.com/allimg/1710/1035512943-0.jpg"
-    }
+    toContactId,
+    fromUser
   };
 };
 
@@ -73,17 +93,19 @@ export default {
   name: "app",
   data() {
     return {
+      hideMenuAvatar: false,
+      hideMenu: false,
       user: {
         id: "superadmin",
-        displayName: "IMUI super",
+        displayName: "June",
         avatar:
-          "http://upload.qqbodys.com/img/weixin/20170804/ji5qxg1am5ztm.jpg"
+          "https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/w%3D268%3Bg%3D0/sign=69e1a1a4b78f8c54e3d3c22902124ac8/060828381f30e9247e29fb7b4f086e061c95f7ef.jpg"
       }
     };
   },
   mounted() {
     const contactData1 = {
-      id: "1",
+      id: "contact-1",
       displayName: "工作协作群",
       avatar: "http://upload.qqbodys.com/img/weixin/20170804/ji5qxg1am5ztm.jpg",
       type: "single",
@@ -93,11 +115,11 @@ export default {
       lastContent: "2"
     };
     const contactData2 = {
-      id: "2",
-      displayName: "狗蛋Li。",
+      id: "contact-2",
+      displayName: "自定义内容",
       avatar: "http://upload.qqbodys.com/img/weixin/20170807/jibfvfd00npin.jpg",
       type: "single",
-      index: "B",
+      //index: "Z",
       click(next) {
         next();
       },
@@ -109,7 +131,7 @@ export default {
       unread: 2
     };
     const contactData3 = {
-      id: "3",
+      id: "contact-3",
       displayName: "铁牛",
       avatar: "http://upload.qqbodys.com/img/weixin/20170803/jiq4nzrkrnd0e.jpg",
       type: "many",
@@ -121,33 +143,6 @@ export default {
 
     const { IMUI } = this.$refs;
 
-    setTimeout(() => {
-      //IMUI.openDrawer();
-      // IMUI.openDrawer(() => {
-      //   return [
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>,
-      //     <h1>123</h1>
-      //   ];
-      // });
-      // setTimeout(() => {
-      //   IMUI.openDrawer(() => {
-      //     return <h1>124563</h1>;
-      //   });
-      // }, 2000);
-    }, 2000);
-    //[contactData1, contactData2, contactData3]
     let data = [
       { ...contactData1 },
       { ...contactData2 },
@@ -164,13 +159,54 @@ export default {
         name: "contacts"
       },
       {
-        title: "自定义按钮",
+        name: "custom1",
+        title: "自定义按钮1",
+        unread: 0,
+        render: menu => {
+          return <i class="lemon-icon-attah" />;
+        },
+        renderContainer: () => {
+          return (
+            <div class="article">
+              <ul>
+                <li class="article-item">
+                  <h2>人民日报谈网红带货：产品真的值得买吗？</h2>
+                </li>
+                <li class="article-item">
+                  甘肃夏河县发生5.7级地震 暂未接到人员伤亡报告
+                </li>
+                <li class="article-item">
+                  北方多地风力仍强沙尘相伴,东北内蒙古等地迎雨雪
+                </li>
+                <li class="article-item">
+                  英货车案：越南警方采集疑死者家属DNA作比对
+                </li>
+                <li class="article-item">
+                  知名连锁咖啡店的蛋糕吃出活虫 曝光内幕太震惊
+                </li>
+              </ul>
+              <lemon-contact
+                props={{ contact: contactData1 }}
+                style="margin:20px"
+              />
+              <lemon-contact
+                props={{ contact: contactData3 }}
+                style="margin:20px"
+              />
+            </div>
+          );
+        },
+        isBottom: true
+      },
+      {
+        name: "custom2",
+        title: "自定义按钮2",
         unread: 0,
         click: () => {
-          alert("点击了自定义按钮");
+          alert("拦截导航点击事件");
         },
         render: menu => {
-          return <span>T</span>;
+          return <i class="lemon-icon-group" />;
         },
         isBottom: true
       }
@@ -463,6 +499,28 @@ export default {
     ]);
   },
   methods: {
+    handleMessageClick(e, key, message) {
+      const { IMUI } = this.$refs;
+
+      if (key == "status") {
+        IMUI.updateMessage(message.id, message.toContactId, {
+          status: "going",
+          content: "正在重新发送消息..."
+        });
+        setTimeout(() => {
+          IMUI.updateMessage(message.id, message.toContactId, {
+            status: "succeed",
+            content: "发送成功"
+          });
+        }, 2000);
+      }
+    },
+    changeMenuAvatarVisible() {
+      this.hideMenuAvatar = !this.hideMenuAvatar;
+    },
+    changeMenuVisible() {
+      this.hideMenu = !this.hideMenu;
+    },
     appendMessage() {
       const { IMUI } = this.$refs;
       const contact = IMUI.currentContact;
@@ -513,94 +571,33 @@ export default {
       }, 1000);
     },
     handlePullMessages(contact, next) {
+      const { IMUI } = this.$refs;
+      const otheruser = {
+        id: "hehe",
+        displayName: "I KNOEW",
+        avatar:
+          "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4085009425,1005454674&fm=26&gp=0.jpg"
+      };
       console.log("Event:pull-messages");
       const messages = [
+        generateMessage(IMUI.currentContactId, this.user),
+        generateMessage(IMUI.currentContactId, otheruser),
+        generateMessage(IMUI.currentContactId, this.user),
+        generateMessage(IMUI.currentContactId, otheruser),
+        generateMessage(IMUI.currentContactId, this.user),
+        generateMessage(IMUI.currentContactId, this.user),
+        generateMessage(IMUI.currentContactId, otheruser),
         {
-          id: "8ad7e98e-5225-4892-8131-4b2ee7797599",
-          type: "text",
-          status: "succeed",
-          sendTime: 1564926674646,
-          fromContactId: "superadmin",
-          fromUser: {
-            id: "hehe",
-            displayName: "I KNOEW",
-            avatar:
-              "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4085009425,1005454674&fm=26&gp=0.jpg"
-          },
-          content: "测试消息哦..."
-        },
-        {
-          id: "8ad7e98e-5225-4892-8131-4b2ee7797599",
-          type: "text",
-          status: "succeed",
-          sendTime: 1564926674646,
-          fromContactId: "superadmin",
-          fromUser: {
-            id: "superadmin",
-            displayName: "超级飞机",
-            avatar:
-              "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4085009425,1005454674&fm=26&gp=0.jpg"
-          },
-          content: "测试消息哦..."
-        },
-        {
-          id: "8ad7e98e-5225-4892-8131-4b2ee7797599",
-          type: "text",
-          status: "succeed",
-          sendTime: 1564926674646,
-          fromContactId: "superadmin",
-          fromUser: {
-            id: "hehe",
-            displayName: "I KNOEW",
-            avatar:
-              "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4085009425,1005454674&fm=26&gp=0.jpg"
-          },
-          content: "测试消息哦..."
-        },
-        {
-          id: "8ad7e98e-5225-4892-8131-4b2ee7797599",
-          type: "text",
-          status: "succeed",
-          sendTime: 1564926674646,
-          fromContactId: "superadmin",
-          fromUser: {
-            id: "superadmin",
-            displayName: "超级飞机",
-            avatar:
-              "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4085009425,1005454674&fm=26&gp=0.jpg"
-          },
-          content: "测试消息哦..."
-        },
-        {
-          id: "8ad7e98e-5225-4892-8131-4b2ee7797599",
-          type: "text",
-          status: "succeed",
-          sendTime: 1564926674646,
-          fromContactId: "superadmin",
-          fromUser: {
-            id: "hehe",
-            displayName: "I KNOEW",
-            avatar:
-              "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4085009425,1005454674&fm=26&gp=0.jpg"
-          },
-          content: "测试消息哦..."
-        },
-        {
-          id: "8ad7e98e-5225-4892-8131-4b2ee7797599",
-          type: "text",
-          status: "succeed",
-          sendTime: 1564926674646,
-          fromContactId: "superadmin",
-          fromUser: {
-            id: "superadmin",
-            displayName: "超级飞机",
-            avatar:
-              "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4085009425,1005454674&fm=26&gp=0.jpg"
-          },
-          content: "测试消息哦..."
+          ...generateMessage(IMUI.currentContactId, this.user),
+          ...{ status: "failed" }
         }
       ];
-      next(messages);
+
+      console.log(messages);
+      let isEnd = false;
+      if (IMUI.getMessages(IMUI.currentContactId).length > 20) isEnd = true;
+
+      next(messages, isEnd);
     },
     handleChangeMenu() {
       console.log("Event:change-menu");
@@ -636,4 +633,32 @@ body
   color #999
   &:active
     color #000
+.bar
+  text-align center
+  line-height 30px
+  background #fff
+  margin 15px
+  color #666
+  user-select none
+  font-size 12px
+.cover
+  text-align center
+  user-select none
+  position absolute
+  top 50%
+  left 50%
+  transform translate(-50%,-50%)
+  i
+    font-size 84px
+    color #e6e6e6
+  p
+    font-size 18px
+    color #ddd
+    line-height 50px
+.article-item
+  line-height 34px
+  cursor pointer
+  &:hover
+    text-decoration underline
+    color #318efd
 </style>

@@ -22,8 +22,8 @@ export default {
   },
   data() {
     return {
-      loading: false,
-      loadend: false
+      _loading: false,
+      _loadend: false
     };
   },
   render() {
@@ -32,10 +32,10 @@ export default {
         <div
           class={[
             "lemon-messages__load",
-            `lemon-messages__load--${this.loadend ? "end" : "ing"}`
+            `lemon-messages__load--${this._loadend ? "end" : "ing"}`
           ]}
         >
-          {this.loadend ? this._renderLoadEnd() : this._renderLoading()}
+          {this._loadend ? this._renderLoadEnd() : this._renderLoading()}
         </div>
         {this.messages.map((message, index) => {
           const node = [];
@@ -86,35 +86,40 @@ export default {
       return <i class="lemon-icon-loading lemonani-spin" />;
     },
     _renderLoadEnd() {
-      return <span>暂无消息</span>;
+      return <span>暂无更多消息</span>;
+    },
+    loaded() {
+      this._loadend = true;
     },
     resetLoadState() {
-      this.loading = false;
-      this.loadend = false;
+      this._loading = false;
+      this._loadend = false;
     },
     async _handleScroll(e) {
       const { target } = e;
       if (
         target.scrollTop == 0 &&
-        this.loading == false &&
-        this.loadend == false
+        this._loading == false &&
+        this._loadend == false
       ) {
-        this.loading = true;
+        this._loading = true;
         await this.$nextTick();
         const hst = target.scrollHeight;
 
         this.$emit("reach-top", async isEnd => {
           await this.$nextTick();
           target.scrollTop = target.scrollHeight - hst;
-          this.loading = false;
-          this.loadend = !!isEnd;
+          this._loading = false;
+          this._loadend = !!isEnd;
         });
       }
     },
     async scrollToBottom() {
       await this.$nextTick();
       const { wrap } = this.$refs;
-      if (wrap) wrap.scrollTop = wrap.scrollHeight;
+      if (wrap) {
+        wrap.scrollTop = wrap.scrollHeight;
+      }
     }
   },
   created() {},
@@ -133,6 +138,7 @@ export default {
     text-align center
     font-size 12px
   +e(load)
+    user-select none
     font-size 12px
     text-align center
     color #999

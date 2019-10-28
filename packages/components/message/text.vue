@@ -1,9 +1,8 @@
 <script>
-import IMUIProxy from "mixins/IMUIProxy";
 export default {
   name: "lemonMessageText",
   inheritAttrs: false,
-  mixins: [IMUIProxy],
+  inject: ["IMUI"],
   render() {
     return (
       <lemon-message-basic

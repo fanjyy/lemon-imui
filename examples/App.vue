@@ -32,9 +32,9 @@
           <span>{{ contact.displayName }}</span>
           <small class="more" @click="changeDrawer(contact)">&#8230;</small>
         </template>
-        <template #contact-info="contact">
+        <!-- <template #contact-info="contact">
           自定义联系人信息 {{ contact.displayName }}
-        </template>
+        </template> -->
         <template #message-sidebar>
           <div class="bar">自定义消息顶部</div>
         </template>

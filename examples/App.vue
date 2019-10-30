@@ -45,6 +45,11 @@
           >切换头像显示</lemon-button
         >
       </div>
+
+      <div class="link">
+        <a target="_blank" href="https://github.com/fanjyy/lemon-imui">Github</a>
+        <a target="_blank" href="https://gitee.com/june000/lemon-im">Gitee</a>
+      </div>
     </div>
   </div>
 </template>
@@ -615,6 +620,17 @@ export default {
 <style lang="stylus">
 body
   background #3d495c !important
+.link
+  padding 15px 0
+  a
+    display inline-block
+    font-size 16px
+    color #ccd3dc
+    text-decoration none
+    border-radius 5px
+    margin-right 15px
+    &:hover
+      color #85acda
 .action
   margin-top 30px
   button

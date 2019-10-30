@@ -1,6 +1,3 @@
-import "./plugins";
-//import "./element-ui";
-
 import LemonTabs from "./components/tabs";
 import LemonPopover from "./components/popover";
 import LemonButton from "./components/button";
@@ -32,7 +29,7 @@ const components = [
   LemonMessageText,
   lemonMessageImage,
   lemonMessageFile,
-  lemonMessageEvent,
+  lemonMessageEvent
 ];
 const install = (Vue, opts = {}) => {
   components.forEach(component => {

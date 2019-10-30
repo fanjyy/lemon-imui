@@ -123,22 +123,7 @@ export default {
         },
         ...message
       };
-      // const message = {
-      //   id: "123",
-      //   status: "succeed",
-      //   type: "image",
-      //   sendTime: 12312312312,
-      //   content: "asdas",
-      //   fromContactId: "123",
-      //   fromUser: { id: "123", displayName: "123", avatar: "123",}
-      // }
     },
-    // _setDefMessages(id) {
-    //   //this.messages[id] = this.messages[id] || [];
-    //   if (!messages[id]) {
-    //     this.$set(messages, id, []);
-    //   }
-    // },
     appendMessage(message, contactId = this.currentContactId) {
       this._addMessage(message, contactId, 1);
       this.messageViewToBottom();
@@ -584,8 +569,6 @@ export default {
     changeMenu(name) {
       this.$emit("change-menu", name);
       this.activeSidebar = name;
-      // const { renderContainer } = this.currentMenu;
-      // this._customContainerReady(renderContainer, CacheMenuContainer, name);
     },
     /**
      * 初始化编辑框的 Emoji 表情列表，是 Lemon-editor.initEmoji 的代理方法

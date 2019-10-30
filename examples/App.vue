@@ -22,12 +22,6 @@
         <!-- <template #contact-info="contact">
         <span style="color:blue">contact-info {{ contact }}</span>
       </template> -->
-        <!--
-      <template #drawer="contact">
-        <h1>自定义抽屉内容</h1>
-        <p>{{ contact }}</p>
-      </template>
-      -->
         <template #contact-title="contact">
           <span>{{ contact.displayName }}</span>
           <small class="more" @click="changeDrawer(contact)">&#8230;</small>
@@ -489,11 +483,17 @@ export default {
         ]
       },
       {
-        label: "武器",
+        label: "收藏",
         children: [
           {
-            name: "wx",
-            src: "http://"
+            name: "1f62c",
+            title: "微笑",
+            src: "https://twemoji.maxcdn.com/2/72x72/1f62c.png"
+          },
+          {
+            name: "1f621",
+            title: "微笑",
+            src: "https://twemoji.maxcdn.com/2/72x72/1f621.png"
           }
         ]
       }
@@ -569,7 +569,8 @@ export default {
       this.$refs.IMUI.closeDrawer();
     },
     handleSend(message, next, file) {
-      console.log("Event:send");
+      //console.log("Event:send");
+      console.log(message,next,file)
       setTimeout(() => {
         next();
       }, 1000);

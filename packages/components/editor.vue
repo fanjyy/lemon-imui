@@ -116,7 +116,6 @@ export default {
           return (
             <div slot="tab-pane" index={index} tab={item.label}>
               {renderImageGrid(item.children)}
-              {renderImageGrid(item.children)}
             </div>
           );
         });
@@ -191,28 +190,6 @@ export default {
     initEmoji(data) {
       emojiData = data;
       this.$forceUpdate();
-      // this.emoji = [
-      //   {
-      //     label: "表情",
-      //     name: "face",
-      //     data: [
-      //       {
-      //         name: "wx",
-      //         src: "微笑"
-      //       }
-      //     ]
-      //   },
-      //   {
-      //     label: "武器",
-      //     name: "wa",
-      //     data: [
-      //       {
-      //         name: "wx",
-      //         src: "微笑"
-      //       }
-      //     ]
-      //   }
-      // ];
     }
   }
 };

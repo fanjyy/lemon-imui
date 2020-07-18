@@ -1,6 +1,6 @@
 {
   "name": "lemon-imui",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "dist/index.umd.min.js",
   "description": "基于 VUE2.0 的 IM 聊天组件",
   "homepage": "https://github.com/fanjyy/lemon-imui",

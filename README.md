@@ -18,6 +18,7 @@
 
 ```javascript
 import LemonIMUI from 'lemon-imui'
+import "lemon-imui/dist/index.css";
 Vue.use(LemonIMUI)
 ```
 

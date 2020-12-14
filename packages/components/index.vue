@@ -57,6 +57,7 @@ export default {
     return {
       drawerVisible: !this.hideDrawer,
       currentContactId: "",
+      currentMessagesId: "",
       activeSidebar: DEFAULT_MENU_LASTMESSAGES,
       contacts: [],
       menus: []
@@ -80,7 +81,7 @@ export default {
   },
   computed: {
     currentMessages() {
-      return messages[this.currentContactId] || [];
+      return messages[this.currentMessagesId] || [];
     },
     currentContact() {
       return this.contacts.find(item => item.id == this.currentContactId) || {};
@@ -187,6 +188,7 @@ export default {
           this._addMessage(messages, this.currentContactId, 0);
           CacheMessageLoaded.set(this.currentContactId, isEnd);
           if (isEnd == true) this.$refs.messages.loaded();
+          this.currentMessagesId = this.currentContactId;
           next(isEnd);
         }
       );
@@ -449,7 +451,6 @@ export default {
       if (!Array.isArray(data)) data = [data];
       messages[contactId] = messages[contactId] || [];
       messages[contactId][type](...data);
-      //console.log(messages[contactId]);
       this.forceUpdateMessage();
     },
     /**
@@ -536,7 +537,6 @@ export default {
           messages[contactId][index],
           data
         );
-        console.log("--------", messages[contactId][index]);
         this.forceUpdateMessage(messageId);
       }
     },

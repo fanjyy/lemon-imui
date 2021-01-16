@@ -267,8 +267,24 @@
           <td width="150">initMenus</td>
           <td width="350">初始化导航</td>
           <td width="150">Function([Object])</td>
-          <td width="100">-</td>
-          <td></td>
+          <td width="100">[      {
+        name: "lastMessages"
+      },
+      {
+        name: "contacts"
+      }]</td>
+          <td>      {
+        name: "custom2",
+        title: "自定义按钮2",
+        unread: 0,
+        click: () => {
+          alert("拦截导航点击事件");
+        },
+        render: menu => {
+          return '...';
+        },
+        isBottom: true
+      }</td>
         </tr>
         <tr>
           <td>initContacts</td>
@@ -276,7 +292,26 @@
           <td>Function([Contact])</td>
           <td>-</td>
           <td>
+
           </td>
+        </tr>
+        
+        <tr>
+          <td>initEditorTools</td>
+          <td>初始化工具栏</td>
+          <td>Function([Object])</td>
+          <td>[{name:'emoji'},{name:'uploadFile'},{name:'uploadImage'}]</td>
+          <td>[{
+        name:"test2",
+        isRight:true,
+        title:'上传 Excel',
+        click:()=>{
+          alert('点击')
+        },
+        render:()=>{
+          return  '...'
+        }
+      }]</td>
         </tr>
         <tr>
           <td>initEmoji</td>

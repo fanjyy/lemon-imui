@@ -6,24 +6,54 @@ const exec = (val, command = "insertHTML") => {
 const selection = window.getSelection();
 let lastSelectionRange;
 let emojiData = [];
+let isInitTool = false;
 export default {
   name: "LemonEditor",
   components: {},
-  props: {},
+  props: {
+    tools:{
+      type:Array,
+      default:()=>[],
+    }
+  },
   data() {
     return {
       submitDisabled: true,
+      proxyTools:[],
       accept: ""
     };
   },
-  created() {},
-  mounted() {
-    //this.$refs.fileInput.addEventListener("change", this._handleChangeFile);
+  created() {
+    if(this.tools && this.tools.length > 0){
+      this.initTools(this.tools);
+    }else{
+      this.initTools([{name:'emoji'},{name:'uploadFile'},{name:'uploadImage'}]);
+    }
   },
-  computed: {},
-  watch: {},
   render() {
-    //<a-popover trigger="click" overlay-class-name="lemon-editor__emoji">
+    const toolLeft = [];
+    const toolRight = [];
+    this.proxyTools.forEach(({name, title, render, click,isRight})=>{
+      click = click ||  new Function();
+      const classes = ['lemon-editor__tool-item',{'lemon-editor__tool-item--right':isRight}];
+      let node;
+      if(name=='emoji'){
+        node = emojiData.length == 0 ? '' : <lemon-popover class="lemon-editor__emoji">
+          <template slot="content">{this._renderEmojiTabs()}</template>
+          <div class={classes} title={title}>
+            {render()}
+          </div>
+        </lemon-popover>
+      }else{
+        node = <div class={classes} on-click={click} title={title}>{render()}</div>
+      }
+      if(isRight){
+        toolRight.push(node);
+      }else{
+        toolLeft.push(node);
+      }
+    })
+    
     return (
       <div class="lemon-editor">
         <input
@@ -35,26 +65,8 @@ export default {
           onChange={this._handleChangeFile}
         />
         <div class="lemon-editor__tool">
-          {emojiData.length > 0 && (
-            <lemon-popover class="lemon-editor__emoji">
-              <template slot="content">{this._renderEmojiTabs()}</template>
-              <div class="lemon-editor__tool-item">
-                <i class="lemon-icon-emoji" />
-              </div>
-            </lemon-popover>
-          )}
-          <div
-            class="lemon-editor__tool-item"
-            on-click={() => this._handleSelectFile("*")}
-          >
-            <i class="lemon-icon-folder" />
-          </div>
-          <div
-            class="lemon-editor__tool-item"
-            on-click={() => this._handleSelectFile("image/*")}
-          >
-            <i class="lemon-icon-image" />
-          </div>
+          <div class="lemon-editor__tool-left">{toolLeft}</div>
+          <div class="lemon-editor__tool-right">{toolRight}</div>
         </div>
         <div class="lemon-editor__inner">
           <div
@@ -84,6 +96,60 @@ export default {
     );
   },
   methods: {
+    /**
+     * 初始化工具栏
+     */
+    initTools(data){
+      if(!data) return;
+      console.log('initTools',data);
+      const defaultTools = [
+        {
+          name: 'emoji',
+          title: "表情",
+          click: null,
+          render: menu => {
+            return <i class="lemon-icon-emoji" />;
+          },
+        },
+        {
+          name: 'uploadFile',
+          title: "文件上传",
+          click: () => this.selectFile("*"),
+          render: menu => {
+            return <i class="lemon-icon-folder" />;
+          },
+        },
+        {
+          name: 'uploadImage',
+          title: "图片上传",
+          click: ()=>this.selectFile("image/*"),
+          render: menu => {
+            return <i class="lemon-icon-image" />;
+          },
+        }
+      ];
+      let tools = [];
+      if (Array.isArray(data)) {
+        const indexMap = {
+          emoji: 0,
+          uploadFile: 1,
+          uploadImage:2,
+        };
+        const indexKeys = Object.keys(indexMap);
+        tools = data.map(item => {
+          if (indexKeys.includes(item.name)) {
+            return {
+              ...defaultTools[indexMap[item.name]],
+              ...item,
+            };
+          }
+          return item;
+        });
+      } else {
+        tools = defaultTools;
+      }
+      this.proxyTools = tools;
+    },
     _saveLastRange() {
       lastSelectionRange = selection.getRangeAt(0);
     },
@@ -133,7 +199,7 @@ export default {
       exec(`<img emoji-name="${item.name}" src="${item.src}"></img>`);
       this._saveLastRange();
     },
-    async _handleSelectFile(accept) {
+    async selectFile(accept) {
       this.accept = accept;
       await this.$nextTick();
       this.$refs.fileInput.click();
@@ -153,11 +219,9 @@ export default {
       //this._checkSubmitDisabled();
     },
     _handleKeydown(e) {
-      const { keyCode } = e;
-      if (keyCode == 13) {
-        // e.preventDefault();
-        // document.execCommand("defaultParagraphSeparator", false, false);
-        // exec("<br>");
+      const { keyCode,ctrlKey } = e;
+      if (keyCode == 13 && ctrlKey === true) {
+        this._handleSend();
       }
     },
     getFormatValue() {
@@ -204,18 +268,30 @@ gap = 10px;
     display flex
     height 40px
     align-items center
-    padding-left 5px
+    justify-content space-between
+    padding 0 5px
+  +e(tool-left){
+    display flex
+  }
+  +e(tool-right){
+    display flex
+  }
   +e(tool-item)
     cursor pointer
     padding 4px gap
     height 28px
+    line-height 24px;
     color #999
     transition all ease .3s
+    font-size 12px
     [class^='lemon-icon-']
       line-height 26px
       font-size 22px
     &:hover
       color #333
+    +m(right){
+      margin-left:auto;
+    }
   +e(inner)
     flex 1
     overflow-x hidden

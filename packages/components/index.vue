@@ -56,11 +56,12 @@ export default {
   data() {
     return {
       drawerVisible: !this.hideDrawer,
-      currentContactId: "",
-      currentMessagesId: "",
+      currentContactId:null,
+      currentMessagesId:null,
       activeSidebar: DEFAULT_MENU_LASTMESSAGES,
       contacts: [],
-      menus: []
+      menus: [],
+      editorTools:[],
     };
   },
 
@@ -125,9 +126,19 @@ export default {
         ...message
       };
     },
-    appendMessage(message, contactId = this.currentContactId) {
-      this._addMessage(message, contactId, 1);
-      this.messageViewToBottom();
+    /**
+     * 在当前聊天窗口新增一条消息
+     */
+    appendMessage(message,scrollToBottom = false) {
+      if(!this.currentContactId) return false;
+      this._addMessage(message, this.currentContactId, 1);
+      if(scrollToBottom == true){
+        this.messageViewToBottom();
+      }
+      this.updateContact(this.currentContactId, {
+        lastContent: this.lastContentRender(message),
+        lastSendTime: message.sendTime
+      });
     },
     _emitSend(message, next, file) {
       this.$emit(
@@ -143,7 +154,7 @@ export default {
     },
     _handleSend(text) {
       const message = this._createMessage({ content: text });
-      this.appendMessage(message);
+      this.appendMessage(message,true);
       this._emitSend(message, () => {
         this.updateContact(message.toContactId, {
           lastContent: this.lastContentRender(message),
@@ -168,7 +179,7 @@ export default {
         };
       }
       const message = this._createMessage(joinMessage);
-      this.appendMessage(message);
+      this.appendMessage(message,true);
       this._emitSend(
         message,
         () => {
@@ -323,7 +334,9 @@ export default {
                   contact: contact,
                   simple: true
                 },
-                () => this.changeContact(contact.id)
+                () => {
+                  this.changeContact(contact.id)
+                }
               )
             ];
             prevIndex = contact.index;
@@ -401,6 +414,7 @@ export default {
           />
           <lemon-editor
             ref="editor"
+            tools={this.editorTools}
             onSend={this._handleSend}
             onUpload={this._handleUpload}
           />
@@ -496,21 +510,21 @@ export default {
         this.changeMenu(menuName);
       }
       this.currentContactId = contactId;
+
       this.$emit("change-contact", this.currentContact);
       if (isFunction(this.currentContact.renderContainer)) {
         return;
       }
-      if (this._menuIsMessages()) {
-        if (!CacheMessageLoaded.has(contactId)) {
-          this.$refs.messages.resetLoadState();
-        }
-        if (!messages[contactId]) {
-          this._emitPullMessages(isEnd => this.messageViewToBottom());
-        } else {
-          setTimeout(() => {
-            this.messageViewToBottom();
-          }, 0);
-        }
+      if (!CacheMessageLoaded.has(contactId)) {
+        this.$refs.messages.resetLoadState();
+      }
+      if (!messages[contactId]) {
+        this._emitPullMessages(isEnd => this.messageViewToBottom());
+      } else {
+        setTimeout(() => {
+          this.currentMessagesId = this.currentContactId;
+          this.messageViewToBottom();
+        }, 0);
       }
     },
     /**
@@ -582,6 +596,14 @@ export default {
         data = data.flatMap(item => item.children);
       }
       data.forEach(({ name, src }) => (emojiMap[name] = src));
+    },
+    initEditorTools(data){
+      this.editorTools = data;
+      this.$refs.editor.initTools(data);
+      // if(this.editorTools){
+      //   this.$refs.editor.initTools(data);
+      // }
+      //this.$refs.editor.$forceUpdate();
     },
     /**
      * 初始化左侧按钮
@@ -715,23 +737,6 @@ export default {
     getMessages(contactId) {
       return (contactId ? messages[contactId] : messages) || [];
     },
-    // appendContact(data) {
-    //   this._addContact(data, 0);
-    // },
-    // prependContact(data) {
-    //   this._addContact(data, 1);
-    // },
-    // addContactMessage(data) {
-    //   this._addContact(data, 0);
-    // },
-    // prependContactMessage(data) {
-    //   this._addContact(data, 1);
-    // },
-    // appendMessage(data) {},
-    // prependMessage(data) {},
-    // removeContact(contactId) {},
-    // removeContactMessage(contactId) {},
-    // removeContactAll(contactId) {},
     /**
      * 将自定义的HTML显示在主窗口内
      */
@@ -819,6 +824,7 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
     color #666
     font-size 12px
     margin 0
+    text-align left
   +b(lemon-contact--active)
     background #d9d9d9
 +b(lemon-container)

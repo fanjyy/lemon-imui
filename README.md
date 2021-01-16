@@ -1,6 +1,5 @@
 # Lemon IMUI
 
-[中文文档](docs/APIs_zh.md).  
 基于 VUE 2.0 的 IM 聊天组件
 
 #### 特性
@@ -17,15 +16,15 @@
 #### 使用
 
 ```javascript
-import LemonIMUI from 'lemon-imui'
-import "lemon-imui/dist/index.css";
-Vue.use(LemonIMUI)
+import LemonIMUI from 'lemon-imui';
+import 'lemon-imui/dist/index.css';
+Vue.use(LemonIMUI);
 ```
 
 ```html
 <lemon-imui ref="IMUI" />
 ```
 
-#### 示例
+#### 示例 · 文档
 
-[lemon-imui-examples](http://june000.gitee.io/lemon-im).
+[lemon-imui](http://june000.gitee.io/lemon-im).

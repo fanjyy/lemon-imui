@@ -4,6 +4,7 @@ export default {
   name: "LemonMessages",
   components: {},
   props: {
+    hideName:Boolean,
     reverseUserId: String,
     timeRange: {
       type: Number,
@@ -66,7 +67,7 @@ export default {
                 timeFormat: this.msecRange > 0 ? () => {} : this.timeFormat,
                 message: message,
                 reverse: this.reverseUserId == message.fromUser.id,
-                hiddenTitle: false
+                hideName: this.hideName
               }}
             />
           );

@@ -46,6 +46,10 @@ export default {
      */
     hideMenuAvatar: Boolean,
     hideMenu: Boolean,
+    /**
+     * 隐藏消息列表内的联系人名字
+     */
+    hideMessageName:Boolean,
     user: {
       type: Object,
       default: () => {
@@ -407,6 +411,7 @@ export default {
           </div>
           <lemon-messages
             ref="messages"
+            hide-name={this.hideMessageName}
             time-format={this.messageTimeFormat}
             reverse-user-id={this.user.id}
             on-reach-top={this._emitPullMessages}

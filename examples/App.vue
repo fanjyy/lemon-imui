@@ -5,14 +5,13 @@
       <div class="logo-sub">{{this.packageData.description}}</div>
       <div class="link"><span>源码下载&nbsp;&nbsp;</span><a target="_blank" href="https://github.com/fanjyy/lemon-imui">Github</a><a target="_blank" href="https://gitee.com/june000/lemon-im">Gitee</a></div>
     </div>
-
-
     <div class="imui-center">
       <lemon-imui
         :user="user"
         ref="IMUI"
         :hide-menu="hideMenu"
         :hide-menu-avatar="hideMenuAvatar"
+        :hide-message-name="hideMessageName"
         @change-menu="handleChangeMenu"
         @change-contact="handleChangeContact"
         @pull-messages="handlePullMessages"
@@ -48,11 +47,15 @@
 
       <div class="action">
         <lemon-button @click="appendMessage">发送消息</lemon-button>
+        <lemon-button @click="appendCustomMessage">发送一条自定义消息</lemon-button>
+        <a href="#help">如何创建自定义消息？</a>
+        <br/>
         <lemon-button @click="updateContact">修改联系人信息</lemon-button>
         <lemon-button @click="changeMenuVisible">切换导航显示</lemon-button>
         <lemon-button @click="changeMenuAvatarVisible"
           >切换头像显示</lemon-button
         >
+        <lemon-button @click="changeMessageNameVisible">切换聊天窗口内联系人名字显示</lemon-button>
       </div>
 
     </div>
@@ -248,6 +251,13 @@
         <tr>
           <td>hideMenu</td>
           <td>是否隐藏左侧导航</td>
+          <td>Boolean</td>
+          <td>false</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>hideMessageName</td>
+          <td>是否隐藏聊天窗口内的联系人名字</td>
           <td>Boolean</td>
           <td>false</td>
           <td></td>
@@ -517,11 +527,84 @@
         </tr>
       </table>
 
+      <div class="title" id="help">如何创建自定义消息？</div>
+      <div>
+        <p>Lemon-IMUI 目前内置了file、image、text三种消息类型，在实际应用当中肯定是不够的哦，咋办？没事的，我们继续往下see。<br/>要创建自定义消息首先要确定新消息的 Message 的结构。</p>
+        <pre>
+{
+  //值为 voice，用于解析的组件 name 必须为 lemonMessageVoice
+  type: "voice",
+  content: '语音消息',
+  //自定义参数
+  params1:'参数1',
+  params2:'参数2',
+  //必传参数
+  id: "message-id",
+  //必传参数
+  fromUser:{
+    avatar: ""
+    displayName: "June"
+    id: "1"
+  },
+  //必传参数
+  sendTime: 1610872045162
+  //必传参数
+  status: "succeed"
+  //必传参数
+  toContactId: "contact-id"
+}
+        </pre>
+        <p>创建用于解析该消息的组件。</p>
+        <pre>{{tip}}</pre>
+        <p>最后一步，注册组件，必须使用全局注册的方式。</p>
+<pre>
+import Vue from 'vue';
+import LemonMessageVoice from './lemon-message-voice';
+Vue.component(LemonMessageVoice.name,LemonMessageVoice);
+</pre>
+      <p>如果还有不明白的，可以到 examples/App.vue 查看实例代码</p>
+      </div>
   </div>
 </template>
 
 <script>
+import Vue from 'vue';
+import LemonMessageVoice from './lemon-message-voice';
 import packageData from '../package.json';
+Vue.component(LemonMessageVoice.name,LemonMessageVoice);
+
+const tip = `export default {
+  //组件的name必须以lemonMessage开头，后面跟上 Message.type
+  name: "lemonMessageVoice",
+  inheritAttrs: false,
+  //如果需要使用父组件的方法，可以使用注入。
+  inject: ["IMUI"],
+  render() {
+    //lemon-message-basic 组件对气泡框、头像、事件等信息进行了公共的处理。
+    return (
+      <lemon-message-basic
+        class="lemon-message-voice"
+        props={{ ...this.$attrs }}
+        scopedSlots={{
+          content: props => {
+            //返回HTML结构
+            return <span>{props.content}&nbsp;🔈</span>
+          }
+        }}
+      />
+    );
+  }
+};
+<style lang="stylus">
+.lemon-message.lemon-message-voice
+  user-select none
+  .lemon-message__content
+    border 2px solid #000
+    font-size 12px
+    cursor pointer
+    &::before
+      display none
+</style>`;
 const getTime = () => {
   return new Date().getTime();
 };
@@ -560,14 +643,15 @@ export default {
   name: "app",
   data() {
     return {
+      tip:tip,
       packageData,
       hideMenuAvatar: false,
       hideMenu: false,
+      hideMessageName:false,
       user: {
-        id: "superadmin",
+        id: "1",
         displayName: "June",
-        avatar:
-          "https://gss2.bdstatic.com/-fo3dSag_xI4khGkpoWK1HF6hhy/baike/w%3D268%3Bg%3D0/sign=69e1a1a4b78f8c54e3d3c22902124ac8/060828381f30e9247e29fb7b4f086e061c95f7ef.jpg"
+        avatar:""
       }
     };
   },
@@ -1024,6 +1108,7 @@ export default {
       console.log("Event:menu-avatar-click");
     },
     handleMessageClick(e, key, message) {
+      console.log('点击了消息',e, key, message);
       const { IMUI } = this.$refs;
 
       if (key == "status") {
@@ -1044,6 +1129,24 @@ export default {
     },
     changeMenuVisible() {
       this.hideMenu = !this.hideMenu;
+    },
+    changeMessageNameVisible(){
+      this.hideMessageName = !this.hideMessageName 
+    },
+    appendCustomMessage(){
+      const { IMUI } = this.$refs;
+      const message ={
+        id: generateRandId(),
+        status: "succeed",
+        type: "voice",
+        sendTime: getTime(),
+        content: '语音消息',
+        params1:'1',
+        params2:'2',
+        toContactId:IMUI.currentContactId,
+        fromUser:this.user
+      };
+      IMUI.appendMessage(message,true);
     },
     appendMessage() {
       const { IMUI } = this.$refs;
@@ -1115,9 +1218,6 @@ export default {
           ...{ status: "failed" }
         }
       ];
-
-      //const VoiceMessage
-      console.log(messages);
       let isEnd = false;
       if (IMUI.getMessages(IMUI.currentContactId).length > 20) isEnd = true;
 
@@ -1139,10 +1239,15 @@ body
   width 90%
   margin 0 auto
   padding-bottom 100px
+a
+  color #0c5ed9
+  text-decoration none
+  font-size 12px
 .action
   margin-top 20px
   .lemon-button
     margin-right 10px
+    margin-bottom 10px
 .link
   font-size 14px
   margin-top 15px
@@ -1249,4 +1354,8 @@ body
   &:hover
     text-decoration underline
     color #318efd
+pre
+  background #fff
+  border-radius 8px
+  padding 15px
 </style>

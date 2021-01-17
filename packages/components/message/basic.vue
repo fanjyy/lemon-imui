@@ -14,7 +14,7 @@ export default {
       default: () => ""
     },
     reverse: Boolean,
-    hiddenTitle: Boolean
+    hideName: Boolean
   },
   data() {
     return {};
@@ -27,7 +27,7 @@ export default {
           "lemon-message",
           {
             "lemon-message--reverse": this.reverse,
-            "lemon-message--hidden-title": this.hiddenTitle
+            "lemon-message--hide-name": this.hideName
           }
         ]}
       >
@@ -178,9 +178,9 @@ arrow()
     +e(avatar)
       padding-right 0
       padding-left 10px
-  +m(hidden-title)
+  +m(hide-name)
     +e(status)
-      top 7px
+      top 3px
     +e(title)
       display none
     +e(content)

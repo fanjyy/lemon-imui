@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <div class="scroll-top" @click="scrollToTop">🚀</div>
     <div class="logo">
       <div class="logo-text"><b>Lemon</b> IMUI<span class="logo-badge">{{this.packageData.version}}</span></div>
       <div class="logo-sub">{{this.packageData.description}}</div>
@@ -570,6 +571,8 @@ Vue.component(LemonMessageVoice.name,LemonMessageVoice);
 </pre>
       <p>如果还有不明白的，可以到 examples/App.vue 查看示例代码</p>
       </div>
+
+    
   </div>
 </template>
 
@@ -1114,6 +1117,9 @@ export default {
     })
   },
   methods: {
+    scrollToTop(){
+      document.body.scrollIntoView();
+    },
     handleMenuAvatarClick() {
       console.log("Event:menu-avatar-click");
     },
@@ -1249,6 +1255,24 @@ body
   width 90%
   margin 0 auto
   padding-bottom 100px
+  .scroll-top
+    cursor pointer
+    position fixed
+    bottom 40px
+    left 50%
+    border-radius 50%
+    background #fff
+    font-size 18px
+    overflow hidden
+    width 40px
+    height 40px
+    line-height 40px
+    user-select none
+    text-align center
+    transform rotate(-45deg) translateX(-50%)
+    box-shadow 0 0 30px rgba(0,0,0,0.1);
+    &:hover
+      font-size 22px
 a
   color #0c5ed9
   text-decoration none

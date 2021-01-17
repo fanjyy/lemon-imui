@@ -151,7 +151,7 @@
         <tr>
         <tr>          
           <td>type</td>
-          <td>消息类型：voice | file | video | image | text</td>
+          <td>消息类型：file | image | text</td>
           <td>String</td>
           <td>-</td>
           <td></td>
@@ -1116,6 +1116,7 @@ export default {
         }
       ];
 
+      //const VoiceMessage
       console.log(messages);
       let isEnd = false;
       if (IMUI.getMessages(IMUI.currentContactId).length > 20) isEnd = true;

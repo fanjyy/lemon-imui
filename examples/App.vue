@@ -556,6 +556,12 @@
         </pre>
         <p>创建用于解析该消息的组件。</p>
         <pre>{{tip}}</pre>
+        <p>IMUI初始化的时候，设置左侧联系人最新消息的渲染内容</p>
+<pre>
+IMUI.setLastContentRender('voice', message => {
+  return &lt;span&gt;[语音]&lt;/span&gt;
+})
+</pre>
         <p>最后一步，注册组件，必须使用全局注册的方式。</p>
 <pre>
 import Vue from 'vue';
@@ -1102,6 +1108,10 @@ export default {
         ]
       }
     ]);
+
+    IMUI.setLastContentRender('voice', message => {
+      return <span>[语音]</span>
+    })
   },
   methods: {
     handleMenuAvatarClick() {

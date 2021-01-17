@@ -529,7 +529,7 @@
 
       <div class="title" id="help">如何创建自定义消息？</div>
       <div>
-        <p>Lemon-IMUI 目前内置了file、image、text三种消息类型，在实际应用当中肯定是不够的哦，咋办？没事的，我们继续往下see。<br/>要创建自定义消息首先要确定新消息的 Message 的结构。</p>
+        <p>Lemon-IMUI 目前内置了file、image、text三种消息类型，在实际应用当中肯定是不够的哦，咋办？没事的，我们继续往下see。<br/>要创建自定义消息首先要确定新消息的 Message 结构。</p>
         <pre>
 {
   //值为 voice，用于解析的组件 name 必须为 lemonMessageVoice
@@ -562,7 +562,7 @@ import Vue from 'vue';
 import LemonMessageVoice from './lemon-message-voice';
 Vue.component(LemonMessageVoice.name,LemonMessageVoice);
 </pre>
-      <p>如果还有不明白的，可以到 examples/App.vue 查看实例代码</p>
+      <p>如果还有不明白的，可以到 examples/App.vue 查看示例代码</p>
       </div>
   </div>
 </template>

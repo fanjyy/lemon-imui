@@ -26,6 +26,22 @@ export default {
     };
   },
   props: {
+    width:{
+      type:String,
+      default:"850px",
+    },
+    height:{
+      type:String,
+      default:"580px",
+    },
+    theme:{
+      type:String,
+      default:'default',
+    },
+    simple:{
+      type:Boolean,
+      default:false,
+    },
     /**
      * 消息时间格式化规则
      */
@@ -70,13 +86,17 @@ export default {
   },
 
   render() {
-    return this._renderWrapper([
-      this._renderMenu(),
-      this._renderSidebarMessage(),
-      this._renderSidebarContact(),
-      this._renderContainer(),
-      this._renderDrawer()
-    ]);
+    const nodes = []
+    if(this.simple == false){
+      nodes.push(...[
+        this._renderMenu(),
+        this._renderSidebarMessage(),
+        this._renderSidebarContact(),
+      ])
+    }
+    nodes.push(this._renderContainer())
+    nodes.push(this._renderDrawer())
+    return this._renderWrapper(nodes);
   },
   created() {
     this.initMenus();
@@ -215,8 +235,13 @@ export default {
     _renderWrapper(children) {
       return (
         <div
+          style={{
+            width:this.width,
+            height:this.height
+          }}
           class={[
             "lemon-wrapper",
+            `lemon-wrapper--theme-${this.theme}`,
             this.drawerVisible && "lemon-wrapper--drawer-show"
           ]}
         >
@@ -764,14 +789,11 @@ export default {
 };
 </script>
 <style lang="stylus">
-wrapper-width = 850px
 drawer-width = 200px
 bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 @import '~styles/utils/index'
 
 +b(lemon-wrapper)
-  width wrapper-width
-  height 580px
   display flex
   font-size 14px
   //mask-image radial-gradient(circle, white 100%, black 100%)
@@ -872,4 +894,33 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
     font-weight normal
     margin 10px 0 20px 0
     user-select none
+.lemon-wrapper--theme-blue
+  .lemon-message__content
+    background #f3f3f3
+    &::before
+      border-right-color #f3f3f3
+  .lemon-message--reverse .lemon-message__content
+    background #e6eeff
+    &::before
+      border-left-color #e6eeff
+  .lemon-container
+    background #fff
+  .lemon-sidebar
+    background #f9f9f9
+    .lemon-contact
+      background #f9f9f9
+      &:hover:not(.lemon-contact--active)
+        background #f1f1f1
+      &--active
+        background #e9e9e9
+  .lemon-menu
+    background #096bff
+  .lemon-menu__item
+    color rgba(255,255,255,0.4)
+    &:hover:not(.lemon-menu__item--active)
+      color rgba(255,255,255,0.6)
+    &--active
+      color #fff
+      text-shadow 0 0 10px rgba(2,48,118,0.4)
+
 </style>

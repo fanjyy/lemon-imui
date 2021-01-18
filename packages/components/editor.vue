@@ -220,7 +220,7 @@ export default {
     },
     _handleKeydown(e) {
       const { keyCode,ctrlKey } = e;
-      if (keyCode == 13 && ctrlKey === true) {
+      if (keyCode == 13 && ctrlKey === true && this.submitDisabled == false) {
         this._handleSend();
       }
     },

@@ -10,6 +10,7 @@
       <lemon-imui
         :user="user"
         ref="IMUI"
+        :theme="theme"
         :hide-menu="hideMenu"
         :hide-menu-avatar="hideMenuAvatar"
         :hide-message-name="hideMessageName"
@@ -57,6 +58,8 @@
           >切换头像显示</lemon-button
         >
         <lemon-button @click="changeMessageNameVisible">切换聊天窗口内联系人名字显示</lemon-button>
+        <br/>
+        <lemon-button @click="changeTheme">切换主题，当前主题：{{this.theme}}</lemon-button>
       </div>
 
     </div>
@@ -219,6 +222,34 @@
           <td width="150">Object</td>
           <td width="100">-</td>
           <td>{id: "1",displayName: "测试",avatar: "url"};</td>
+        </tr>
+        <tr>
+          <td width="150">width</td>
+          <td width="350">宽度</td>
+          <td width="150">String</td>
+          <td width="100">850px</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">height</td>
+          <td width="350">高度</td>
+          <td width="150">String</td>
+          <td width="100">580px</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">theme</td>
+          <td width="350">主题</td>
+          <td width="150">default | blue</td>
+          <td width="100">default</td>
+          <td>主题颜色</td>
+        </tr>
+        <tr>
+          <td width="150">simple</td>
+          <td width="350">精简模式</td>
+          <td width="150">Boolean</td>
+          <td width="100">false</td>
+          <td>精简模式下左侧的导航和联系人列表会隐藏，初始化时需要手动调用 changeContact 切换到聊天视图。</td>
         </tr>
         <tr>
           <td>messageTimeFormat</td>
@@ -652,6 +683,7 @@ export default {
   name: "app",
   data() {
     return {
+      theme:'default',
       tip:tip,
       packageData,
       hideMenuAvatar: false,
@@ -705,6 +737,9 @@ export default {
 
     const { IMUI } = this.$refs;
 
+    // setTimeout(()=>{
+    //   IMUI.changeContact('contact-1');
+    // },2000);
     
     let data = [
       { ...contactData1 },
@@ -1117,6 +1152,9 @@ export default {
     })
   },
   methods: {
+    changeTheme(){
+      this.theme = this.theme == 'default' ? 'blue' : 'default';
+    },
     scrollToTop(){
       document.body.scrollIntoView();
     },

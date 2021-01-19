@@ -44,9 +44,7 @@
           <div class="bar">自定义联系人顶部</div>
         </template>
       </lemon-imui>
-
-
-
+      <a target="_blank" style="font-size:14px" href="https://codesandbox.io/s/sweet-chaplygin-s24mb?fontsize=14&hidenavigation=1&theme=dark">在线编辑代码</a>
       <div class="action">
         <lemon-button @click="appendMessage">发送消息</lemon-button>
         <lemon-button @click="appendCustomMessage">发送一条自定义消息</lemon-button>
@@ -57,9 +55,10 @@
         <lemon-button @click="changeMenuAvatarVisible"
           >切换头像显示</lemon-button
         >
+        <lemon-button @click="appendMessage">发送消息</lemon-button>
         <lemon-button @click="changeMessageNameVisible">切换聊天窗口内联系人名字显示</lemon-button>
-        <br/>
         <lemon-button @click="changeTheme">切换主题，当前主题：{{this.theme}}</lemon-button>
+        <lemon-button @click="openSimple">精简模式</lemon-button>
       </div>
 
     </div>
@@ -737,9 +736,9 @@ export default {
 
     const { IMUI } = this.$refs;
 
-    // setTimeout(()=>{
-    //   IMUI.changeContact('contact-1');
-    // },2000);
+    setTimeout(()=>{
+      IMUI.changeContact('contact-1');
+    },2000);
     
     let data = [
       { ...contactData1 },
@@ -1150,8 +1149,12 @@ export default {
     IMUI.setLastContentRender('voice', message => {
       return <span>[语音]</span>
     })
+
   },
   methods: {
+    openSimple(){
+      window.open('https://codesandbox.io/s/lemon-imui-jingjianmoshi-forked-1lvoh?fontsize=14&hidenavigation=1&theme=dark')
+    },
     changeTheme(){
       this.theme = this.theme == 'default' ? 'blue' : 'default';
     },

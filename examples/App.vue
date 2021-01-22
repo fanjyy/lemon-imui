@@ -735,10 +735,6 @@ export default {
     };
 
     const { IMUI } = this.$refs;
-
-    setTimeout(()=>{
-      IMUI.changeContact('contact-1');
-    },2000);
     
     let data = [
       { ...contactData1 },

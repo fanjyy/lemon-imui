@@ -101,7 +101,6 @@ export default {
      */
     initTools(data){
       if(!data) return;
-      console.log('initTools',data);
       const defaultTools = [
         {
           name: 'emoji',

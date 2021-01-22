@@ -1262,23 +1262,25 @@ export default {
         avatar:contact.avatar
       };
       console.log("Event:pull-messages");
-      const messages = [
-        generateMessage(IMUI.currentContactId, this.user),
-        generateMessage(IMUI.currentContactId, otheruser),
-        generateMessage(IMUI.currentContactId, this.user),
-        generateMessage(IMUI.currentContactId, otheruser),
-        generateMessage(IMUI.currentContactId, this.user),
-        generateMessage(IMUI.currentContactId, this.user),
-        generateMessage(IMUI.currentContactId, otheruser),
-        {
-          ...generateMessage(IMUI.currentContactId, this.user),
-          ...{ status: "failed" }
-        }
-      ];
-      let isEnd = false;
-      if (IMUI.getMessages(IMUI.currentContactId).length > 20) isEnd = true;
+      setTimeout(()=>{
 
-      next(messages, isEnd);
+        const messages = [
+          generateMessage(IMUI.currentContactId, this.user),
+          generateMessage(IMUI.currentContactId, otheruser),
+          generateMessage(IMUI.currentContactId, this.user),
+          generateMessage(IMUI.currentContactId, otheruser),
+          generateMessage(IMUI.currentContactId, this.user),
+          generateMessage(IMUI.currentContactId, this.user),
+          generateMessage(IMUI.currentContactId, otheruser),
+          {
+            ...generateMessage(IMUI.currentContactId, this.user),
+            ...{ status: "failed" }
+          }
+        ];
+        let isEnd = false;
+        if (IMUI.getMessages(IMUI.currentContactId).length + messages.length > 11) isEnd = true;
+        next(messages, isEnd); 
+      },500)
     },
     handleChangeMenu() {
       console.log("Event:change-menu");

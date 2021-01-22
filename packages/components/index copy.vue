@@ -77,7 +77,7 @@ export default {
     return {
       drawerVisible: !this.hideDrawer,
       currentContactId:null,
-      currentMessages:[],
+      currentMessagesId:null,
       activeSidebar: DEFAULT_MENU_LASTMESSAGES,
       contacts: [],
       menus: [],
@@ -105,6 +105,9 @@ export default {
     await this.$nextTick();
   },
   computed: {
+    currentMessages() {
+      return messages[this.currentMessagesId] || [];
+    },
     currentContact() {
       return this.contacts.find(item => item.id == this.currentContactId) || {};
     },
@@ -213,7 +216,6 @@ export default {
       );
     },
     _emitPullMessages(next) {
-      this._changeContactLock = true;
       this.$emit(
         "pull-messages",
         this.currentContact,
@@ -221,8 +223,7 @@ export default {
           this._addMessage(messages, this.currentContactId, 0);
           CacheMessageLoaded.set(this.currentContactId, isEnd);
           if (isEnd == true) this.$refs.messages.loaded();
-          this.updateCurrentMessages();
-          this._changeContactLock = false;
+          this.currentMessagesId = this.currentContactId;
           next(isEnd);
         }
       );
@@ -520,10 +521,6 @@ export default {
           : `[!${match}]`;
       });
     },
-    updateCurrentMessages(){
-      if(!messages[this.currentContactId]) messages[this.currentContactId] = []
-      this.currentMessages = messages[this.currentContactId];
-    },
     /**
      * 将当前聊天窗口滚动到底部
      */
@@ -534,30 +531,28 @@ export default {
      * 改变聊天对象
      * @param contactId 联系人 id
      */
-    async changeContact(contactId, menuName) {
-      if(this._changeContactLock || this.currentContactId == contactId) return false;
+    changeContact(contactId, menuName) {
+      if (this.currentContactId == contactId) {
+        this.currentContactId = undefined;
+      }
 
       if (menuName) {
         this.changeMenu(menuName);
       }
-
       this.currentContactId = contactId;
+
       this.$emit("change-contact", this.currentContact);
       if (isFunction(this.currentContact.renderContainer)) {
         return;
       }
-      if (CacheMessageLoaded.has(contactId)) {
-        this.$refs.messages.loaded();
-      }else{
+      if (!CacheMessageLoaded.has(contactId)) {
         this.$refs.messages.resetLoadState();
       }
-
       if (!messages[contactId]) {
-        this.updateCurrentMessages();
         this._emitPullMessages(isEnd => this.messageViewToBottom());
       } else {
         setTimeout(() => {
-          this.updateCurrentMessages();
+          this.currentMessagesId = this.currentContactId;
           this.messageViewToBottom();
         }, 0);
       }

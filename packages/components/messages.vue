@@ -89,9 +89,6 @@ export default {
     _renderLoadEnd() {
       return <span>暂无更多消息</span>;
     },
-    isLoading(){
-      return this._loadend == false;
-    },
     loaded() {
       this._loadend = true;
       this.$forceUpdate();

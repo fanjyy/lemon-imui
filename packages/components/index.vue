@@ -535,10 +535,10 @@ export default {
      * @param contactId 联系人 id
      */
     async changeContact(contactId, menuName) {
-      if(this._changeContactLock || this.currentContactId == contactId) return false;
-
-      if (menuName) {
+      if(menuName){
         this.changeMenu(menuName);
+      }else{
+       if(this._changeContactLock || this.currentContactId == contactId) return false; 
       }
 
       this.currentContactId = contactId;
@@ -616,6 +616,7 @@ export default {
      * @param {String} name 按钮 name
      */
     changeMenu(name) {
+      if(this._changeContactLock) return false;
       this.$emit("change-menu", name);
       this.activeSidebar = name;
     },

@@ -53,7 +53,7 @@ export function timeFormat(t, format) {
   return format;
 }
 
-export function fastDone(event, callback) {
+export function funCall(event, callback) {
   if (isFunction(event)) {
     event(() => {
       callback();

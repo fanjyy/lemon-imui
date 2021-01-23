@@ -1,6 +1,6 @@
 <script>
 import { isString, isToday } from "utils/validate";
-import { timeFormat } from "utils";
+import { timeFormat,useScopedSlot } from "utils";
 export default {
   name: "LemonContact",
   components: {},
@@ -18,12 +18,24 @@ export default {
     }
   },
   render() {
-    const { contact } = this;
     return (
       <div
         class={["lemon-contact", { "lemon-contact--name-center": this.simple }]}
-        on-click={e => this._handleClick(e, contact)}
+        on-click={e => this._handleClick(e, this.contact)}
       >
+        {useScopedSlot(this.$scopedSlots.default,this._renderInner(),this.contact)}
+      </div>
+    );
+  },
+  created() {},
+  mounted() {
+  },
+  computed: {},
+  watch: {},
+  methods: {
+    _renderInner(){
+      const { contact } = this;
+      return [
         <lemon-badge
           count={!this.simple ? contact.unread : 0}
           class="lemon-contact__avatar"
@@ -34,7 +46,7 @@ export default {
             native-on-click={e => this._handleAvatarClick(e, contact)}
             src={contact.avatar}
           />
-        </lemon-badge>
+        </lemon-badge>,
         <div class="lemon-contact__inner">
           <p class="lemon-contact__label">
             <span class="lemon-contact__name">{contact.displayName}</span>
@@ -54,14 +66,8 @@ export default {
             </p>
           )}
         </div>
-      </div>
-    );
-  },
-  created() {},
-  mounted() {},
-  computed: {},
-  watch: {},
-  methods: {
+      ];
+    },
     _handleClick(e, data) {
       this.$emit("click", data);
     },

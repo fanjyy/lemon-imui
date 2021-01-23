@@ -4,7 +4,10 @@ export default {
   name: "LemonMessages",
   components: {},
   props: {
+    //是否隐藏消息发送人昵称
     hideName:Boolean,
+    //是否隐藏显示消息时间
+    hideTime:Boolean,
     reverseUserId: String,
     timeRange: {
       type: Number,
@@ -53,7 +56,7 @@ export default {
                   message: {
                     id: "__time__",
                     type: "event",
-                    content: this.timeFormat(message.sendTime)
+                    content: hoursTimeFormat(message.sendTime)
                   }
                 }}
               />
@@ -64,9 +67,10 @@ export default {
               ref="message"
               refInFor={true}
               attrs={{
-                timeFormat: this.msecRange > 0 ? () => {} : this.timeFormat,
+                timeFormat: this.timeFormat,
                 message: message,
                 reverse: this.reverseUserId == message.fromUser.id,
+                hideTime:this.hideTime,
                 hideName: this.hideName
               }}
             />

@@ -14,6 +14,7 @@
         :hide-menu="hideMenu"
         :hide-menu-avatar="hideMenuAvatar"
         :hide-message-name="hideMessageName"
+        :hide-message-time="hideMessageTime"
         @change-menu="handleChangeMenu"
         @change-contact="handleChangeContact"
         @pull-messages="handlePullMessages"
@@ -21,28 +22,6 @@
         @menu-avatar-click="handleMenuAvatarClick"
         @send="handleSend"
       >
-        <template #cover>
-          <div class="cover">
-            <i class="lemon-icon-message"></i>
-            <p><b>自定义封面 Lemon</b> IMUI</p>
-          </div>
-        </template>
-        <!-- <template #contact-info="contact">
-        <span style="color:blue">contact-info {{ contact }}</span>
-      </template> -->
-        <template #contact-title="contact">
-          <span>{{ contact.displayName }}</span>
-          <small class="more" @click="changeDrawer(contact)">&#8230;</small>
-        </template>
-        <!-- <template #contact-info="contact">
-          自定义联系人信息 {{ contact.displayName }}
-        </template> -->
-        <template #message-sidebar>
-          <div class="bar">自定义消息顶部</div>
-        </template>
-        <template #contact-sidebar>
-          <div class="bar">自定义联系人顶部</div>
-        </template>
       </lemon-imui>
       <a target="_blank" style="font-size:14px" href="https://codesandbox.io/s/sweet-chaplygin-s24mb?fontsize=14&hidenavigation=1&theme=dark">在线编辑代码</a>
       <div class="action">
@@ -56,11 +35,74 @@
           >切换头像显示</lemon-button
         >
         <lemon-button @click="appendMessage">发送消息</lemon-button>
-        <lemon-button @click="changeMessageNameVisible">切换聊天窗口内联系人名字显示</lemon-button>
+        <lemon-button @click="changeMessageNameVisible">切换聊天窗口内名字显示</lemon-button>
+        <lemon-button @click="changeMessageTimeVisible">切换聊天窗口内时间显示</lemon-button>
         <lemon-button @click="changeTheme">切换主题，当前主题：{{this.theme}}</lemon-button>
-        <lemon-button @click="openSimple">精简模式</lemon-button>
       </div>
 
+    </div>
+
+    <div style="display:flex;">
+    <div>
+    <div class="title">精简模式</div>
+    <div class="imui-center">
+      <lemon-imui
+        :user="user"
+        ref="SimpleIMUI"
+        width="340px"
+        simple
+        @pull-messages="handlePullMessages"
+        @message-click="handleMessageClick"
+        @send="handleSend"
+      ></lemon-imui>
+      <a target="_blank" style="font-size:14px" href="https://codesandbox.io/s/lemon-imui-jingjianmoshi-forked-1lvoh?fontsize=14&hidenavigation=1&theme=dark">在线编辑代码</a>
+    </div>
+    </div>
+
+    <div style="margin:0 55px;">
+    <div class="title">插槽演示</div>
+    <div class="imui-center">
+      <lemon-imui
+        :user="user"
+        ref="SlotIMUI"
+        @pull-messages="handlePullMessages"
+        @message-click="handleMessageClick"
+        @change-contact="handleChangeContact"
+        @send="handleSend"
+      >
+        <template #cover>
+          <div class="cover">
+            <i class="lemon-icon-message"></i>
+            <p><b>自定义封面 Lemon</b> IMUI</p>
+          </div>
+        </template>
+        <template #message-title="contact">
+          <span>{{ contact.displayName }}</span>
+          <small class="more" @click="changeDrawer(contact)">{{($refs.SlotIMUI ? $refs.SlotIMUI.drawerVisible : false) ? '关闭' : '打开'}}抽屉</small>
+        </template>
+        <template #contact-info="contact">
+          自定义联系人信息 {{ contact.displayName }}
+        </template>
+        <template #sidebar-message="contact">
+          <lemon-badge :count="contact.unread" style="width:100%">
+          <div>
+            <p><span>{{ contact.displayName }}</span></p>
+            <p class="lemon-contact__content" style="height:18px;font-size:12px;color:#aaa;">最新消息：<span v-html="contact.lastContent"></span></p>
+          </div>
+          </lemon-badge>
+        </template>
+        <template #sidebar-contact="contact">
+          <span>{{ contact.displayName }}</span>
+        </template>
+        <template #sidebar-message-top>
+          <div class="bar">自定义消息顶部</div>
+        </template>
+        <template #sidebar-contact-top>
+          <div class="bar">自定义联系人顶部</div>
+        </template>
+      </lemon-imui>
+    </div>
+    </div>
     </div>
 
       <div class="title">联系人 Contact</div>
@@ -103,7 +145,7 @@
         </tr>
         <tr>
           <td>index</td>
-          <td>通讯录索引，传入字母或数字进行排序，索引可以显示自定义文字“[A]最近联系人”</td>
+          <td>通讯录索引，传入字母或数字进行排序，索引可以显示自定义文字“[1]群组”</td>
           <td>String</td>
           <td>-</td>
           <td></td>
@@ -117,7 +159,7 @@
         </tr>
         <tr>
           <td>lastSendTime</td>
-          <td>最近一条消息的时间戳</td>
+          <td>最近一条消息的时间戳，13位毫秒</td>
           <td>timestamp</td>
           <td>0</td>
           <td></td>
@@ -164,7 +206,7 @@
         </tr>
         <tr>
           <td>sendTime</td>
-          <td>消息发送时间</td>
+          <td>消息发送时间，13位毫秒</td>
           <td>timestamp</td>
           <td>-</td>
           <td></td>
@@ -293,6 +335,13 @@
           <td>false</td>
           <td></td>
         </tr>
+        <tr>
+          <td>hideMessageTime</td>
+          <td>是否隐藏聊天窗口内的消息发送时间</td>
+          <td>Boolean</td>
+          <td>false</td>
+          <td></td>
+        </tr>
       </table>
 
       <div class="title">组件方法</div>
@@ -309,7 +358,7 @@
           <td width="350">初始化导航</td>
           <td width="150">Function([Object])</td>
           <td width="100">[      {
-        name: "lastMessages"
+        name: "messages"
       },
       {
         name: "contacts"
@@ -454,7 +503,7 @@
         <tr>
           <td>changeContact</td>
           <td>切换聊天窗口</td>
-          <td>Function(Contact.id)</td>
+          <td>Function(Contact.id,instance)</td>
           <td>-</td>
           <td></td>
         </tr>
@@ -498,17 +547,27 @@
           <td width="150">-</td>
         </tr>
         <tr>
-          <td width="150">contact-title</td>
-          <td width="350">联系人标题</td>
+          <td width="150">message-title</td>
+          <td width="350">消息列表的标题</td>
           <td width="150">Contact</td>
         </tr>
         <tr>
-          <td width="150">message-sidebar</td>
-          <td width="350">左侧消息列表的顶部</td>
+          <td width="150">sidebar-message</td>
+          <td width="350">左侧最新消息列表插槽</td>
+          <td width="150">Contact</td>
+        </tr>
+        <tr>
+          <td width="150">sidebar-contact</td>
+          <td width="350">左侧联系人列表插槽</td>
+          <td width="150">Contact</td>
+        </tr>
+        <tr>
+          <td width="150">sidebar-message-top</td>
+          <td width="350">左侧最新消息列表的顶部</td>
           <td width="150">-</td>
         </tr>
         <tr>
-          <td width="150">contact-sidebar</td>
+          <td width="150">sidebar-contact-top</td>
           <td width="350">左侧联系人列表的顶部</td>
           <td width="150">-</td>
         </tr>
@@ -544,12 +603,12 @@
         <tr>
           <td width="150">pull-messages</td>
           <td width="350">当切换聊天对象或者聊天窗口滚动到顶部时会触发该事件，调用next方法结束loading状态，如果设置了isEnd=true，下次聊天窗口滚动到顶部将不会再触发该事件</td>
-          <td width="150">Contact,next([Message],isEnd)</td>
+          <td width="150">Contact,next([Message],isEnd),instance</td>
         </tr>
         <tr>
           <td width="150">message-click</td>
           <td width="350">点击聊天窗口中的消息时会触发该事件</td>
-          <td width="150">event,key,Message</td>
+          <td width="150">event,key,Message,instance</td>
         </tr>
         <tr>
           <td width="150">send</td>
@@ -688,6 +747,7 @@ export default {
       hideMenuAvatar: false,
       hideMenu: false,
       hideMessageName:false,
+      hideMessageTime:true,
       user: {
         id: "1",
         displayName: "June",
@@ -701,8 +761,7 @@ export default {
       id: "contact-1",
       displayName: "工作协作群",
       avatar: "http://upload.qqbodys.com/img/weixin/20170804/ji5qxg1am5ztm.jpg",
-      type: "single",
-      index: "A",
+      index: "[1]群组",
       unread: 0,
       lastSendTime: 1566047865417,
       lastContent: "2"
@@ -711,7 +770,6 @@ export default {
       id: "contact-2",
       displayName: "自定义内容",
       avatar: "http://upload.qqbodys.com/img/weixin/20170807/jibfvfd00npin.jpg",
-      type: "single",
       //index: "Z",
       click(next) {
         next();
@@ -727,26 +785,34 @@ export default {
       id: "contact-3",
       displayName: "铁牛",
       avatar: "http://upload.qqbodys.com/img/weixin/20170803/jiq4nzrkrnd0e.jpg",
-      type: "many",
-      index: "C",
+      index: "T",
       unread: 32,
       lastSendTime: 3,
       lastContent: "你好123"
     };
+    const contactData4 = {
+      id: "contact-4",
+      displayName: "如花",
+      avatar: "https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=4275424924,2201401076&fm=111&gp=0.jpg",
+      index: "R",
+      unread: 1,
+      lastSendTime: 3,
+      lastContent: "吃饭了嘛"
+    };
 
     const { IMUI } = this.$refs;
     
-    let data = [
+    let contactList = [
       { ...contactData1 },
       { ...contactData2 },
       { ...contactData3 }
       //...Array(100).fill(contactData1)
     ];
 
-    IMUI.initContacts(data);
+    IMUI.initContacts(contactList);
     IMUI.initMenus([
       {
-        name: "lastMessages"
+        name: "messages"
       },
       {
         name: "contacts"
@@ -848,8 +914,7 @@ export default {
         }
       },
     ]);
-
-    IMUI.initEmoji([
+    let emojiData = [
       {
         label: "表情",
         children: [
@@ -1140,17 +1205,27 @@ export default {
           }
         ]
       }
-    ]);
+    ];
+    IMUI.initEmoji(emojiData);
 
     IMUI.setLastContentRender('voice', message => {
       return <span>[语音]</span>
     })
 
+
+
+    const { SimpleIMUI } = this.$refs;
+    contactData1.id = '11';
+    SimpleIMUI.initContacts([contactData1]);
+    SimpleIMUI.initEmoji(emojiData);
+    SimpleIMUI.changeContact(contactData1.id);
+
+    const {SlotIMUI} = this.$refs;
+    contactData3.id = '333';
+    SlotIMUI.initContacts([contactData4,contactData3]);
+    SlotIMUI.initEmoji(emojiData);
   },
   methods: {
-    openSimple(){
-      window.open('https://codesandbox.io/s/lemon-imui-jingjianmoshi-forked-1lvoh?fontsize=14&hidenavigation=1&theme=dark')
-    },
     changeTheme(){
       this.theme = this.theme == 'default' ? 'blue' : 'default';
     },
@@ -1160,17 +1235,16 @@ export default {
     handleMenuAvatarClick() {
       console.log("Event:menu-avatar-click");
     },
-    handleMessageClick(e, key, message) {
+    handleMessageClick(e, key, message,instance) {
       console.log('点击了消息',e, key, message);
-      const { IMUI } = this.$refs;
 
       if (key == "status") {
-        IMUI.updateMessage(message.id, message.toContactId, {
+        instance.updateMessage(message.id, message.toContactId, {
           status: "going",
           content: "正在重新发送消息..."
         });
         setTimeout(() => {
-          IMUI.updateMessage(message.id, message.toContactId, {
+          instance.updateMessage(message.id, message.toContactId, {
             status: "succeed",
             content: "发送成功"
           });
@@ -1184,7 +1258,10 @@ export default {
       this.hideMenu = !this.hideMenu;
     },
     changeMessageNameVisible(){
-      this.hideMessageName = !this.hideMessageName 
+      this.hideMessageName = !this.hideMessageName;
+    },
+    changeMessageTimeVisible(){
+      this.hideMessageTime = !this.hideMessageTime;
     },
     appendCustomMessage(){
       const { IMUI } = this.$refs;
@@ -1225,7 +1302,7 @@ export default {
       });
     },
     changeDrawer(contact) {
-      this.$refs.IMUI.changeDrawer(() => {
+      this.$refs.SlotIMUI.changeDrawer(() => {
         return (
           <div class="drawer-content">
             <p>
@@ -1236,13 +1313,13 @@ export default {
         );
       });
     },
-    handleChangeContact(contact) {
+    handleChangeContact(contact,instance) {
       console.log("Event:change-contact");
-      this.$refs.IMUI.updateContact(contact.id, {
+      instance.updateContact(contact.id, {
         //displayName: "123",
         unread: 0
       });
-      this.$refs.IMUI.closeDrawer();
+      instance.closeDrawer();
     },
     handleSend(message, next, file) {
       console.log(message,next,file)
@@ -1250,32 +1327,30 @@ export default {
         next();
       }, 1000);
     },
-    handlePullMessages(contact, next) {
-      const { IMUI } = this.$refs;
+    handlePullMessages(contact, next,instance) {
       const otheruser = {
         id: contact.id,
         displayName: contact.displayName,
         avatar:contact.avatar
       };
-      console.log("Event:pull-messages");
       setTimeout(()=>{
 
         const messages = [
-          generateMessage(IMUI.currentContactId, this.user),
-          generateMessage(IMUI.currentContactId, otheruser),
-          generateMessage(IMUI.currentContactId, this.user),
-          generateMessage(IMUI.currentContactId, otheruser),
-          generateMessage(IMUI.currentContactId, this.user),
-          generateMessage(IMUI.currentContactId, this.user),
-          generateMessage(IMUI.currentContactId, otheruser),
+          generateMessage(instance.currentContactId, this.user),
+          generateMessage(instance.currentContactId, otheruser),
+          generateMessage(instance.currentContactId, this.user),
+          generateMessage(instance.currentContactId, otheruser),
+          generateMessage(instance.currentContactId, this.user),
+          generateMessage(instance.currentContactId, this.user),
+          generateMessage(instance.currentContactId, otheruser),
           {
-            ...generateMessage(IMUI.currentContactId, this.user),
+            ...generateMessage(instance.currentContactId, this.user),
             ...{ status: "failed" }
           }
         ];
         let isEnd = false;
-        if (IMUI.getMessages(IMUI.currentContactId).length + messages.length > 11) isEnd = true;
-        next(messages, isEnd); 
+        if (instance.getMessages(instance.currentContactId).length + messages.length > 11) isEnd = true;
+        next(messages, isEnd);
       },500)
     },
     handleChangeMenu() {
@@ -1388,17 +1463,21 @@ a
 .drawer-content
   padding 15px
 .more
-  font-size 32px
-  line-height 18px
-  height 32px
+  font-size 12px
+  line-height 24px
+  height 24px
   position absolute
-  top 6px
+  top 14px
   right 14px
   cursor pointer
   user-select none
-  color #999
+  color #f1f1f1
+  display inline-block
+  border-radius 4px
+  background #111
+  padding 0 8px
   &:active
-    color #000
+    background #999
 .bar
   text-align center
   line-height 30px

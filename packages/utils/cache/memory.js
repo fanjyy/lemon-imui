@@ -22,18 +22,3 @@ export default class MemoryCache {
     return !!this.table[key];
   }
 }
-// export default {
-//   data: {},
-//   get(name) {
-//     console.log(this.data);
-//   }
-// };
-// class MemoryCache {
-//   constructor() {
-//     super();
-//   }
-//   get($name) {
-//     console.log(1);
-//   }
-// }
-// export default MemoryCache;

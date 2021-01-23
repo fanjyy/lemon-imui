@@ -1,5 +1,5 @@
 <script>
-import { useScopedSlot, fastDone, generateUUID } from "utils";
+import { useScopedSlot, funCall, generateUUID,cloneDeep } from "utils";
 import { isFunction, isString, isEmpty } from "utils/validate";
 import {
   DEFAULT_MENUS,
@@ -9,10 +9,6 @@ import {
 import lastContentRender from "../lastContentRender";
 
 import MemoryCache from "utils/cache/memory";
-
-const CacheContactContainer = new MemoryCache();
-const CacheMenuContainer = new MemoryCache();
-const CacheMessageLoaded = new MemoryCache();
 
 const messages = {};
 const emojiMap = {};
@@ -58,14 +54,18 @@ export default {
       default: true
     },
     /**
-     * 初始化时是否隐藏导航按钮上的头像
+     * 是否隐藏导航按钮上的头像
      */
     hideMenuAvatar: Boolean,
     hideMenu: Boolean,
     /**
-     * 隐藏消息列表内的联系人名字
+     * 是否隐藏消息列表内的联系人名字
      */
     hideMessageName:Boolean,
+    /**
+     * 是否隐藏消息列表内的发送时间
+     */
+    hideMessageTime:Boolean,
     user: {
       type: Object,
       default: () => {
@@ -74,6 +74,9 @@ export default {
     }
   },
   data() {
+    this.CacheContactContainer = new MemoryCache();
+    this.CacheMenuContainer = new MemoryCache();
+    this.CacheMessageLoaded = new MemoryCache();
     return {
       drawerVisible: !this.hideDrawer,
       currentContactId:null,
@@ -219,17 +222,18 @@ export default {
         this.currentContact,
         (messages, isEnd = false) => {
           this._addMessage(messages, this.currentContactId, 0);
-          CacheMessageLoaded.set(this.currentContactId, isEnd);
+          this.CacheMessageLoaded.set(this.currentContactId, isEnd);
           if (isEnd == true) this.$refs.messages.loaded();
           this.updateCurrentMessages();
           this._changeContactLock = false;
           next(isEnd);
-        }
+        },
+        this,
       );
     },
     clearCacheContainer(name) {
-      CacheContactContainer.remove(name);
-      CacheMenuContainer.remove(name);
+      this.CacheContactContainer.remove(name);
+      this.CacheMenuContainer.remove(name);
     },
     _renderWrapper(children) {
       return (
@@ -286,7 +290,7 @@ export default {
               { "lemon-menu__item--active": this.activeSidebar == name }
             ]}
             on-click={() => {
-              fastDone(click, () => {
+              funCall(click, () => {
                 if (name) this.changeMenu(name);
               });
             }}
@@ -305,36 +309,38 @@ export default {
     _renderSidebarMessage() {
       return this._renderSidebar(
         [
-          useScopedSlot(this.$scopedSlots["message-sidebar"]),
+          useScopedSlot(this.$scopedSlots["sidebar-message-top"]),
           this.lastMessages.map(contact => {
             return this._renderContact(
               {
                 contact,
                 timeFormat: this.contactTimeFormat
               },
-              () => this.changeContact(contact.id)
+              () => this.changeContact(contact.id),
+              this.$scopedSlots["sidebar-message"],
             );
           })
         ],
         DEFAULT_MENU_LASTMESSAGES
       );
     },
-    _renderContact(props, onClick) {
+    _renderContact(props, onClick,slot) {
       const {
         click: customClick,
         renderContainer,
         id: contactId
       } = props.contact;
       const click = () => {
-        fastDone(customClick, () => {
+        funCall(customClick, () => {
           onClick();
           this._customContainerReady(
             renderContainer,
-            CacheContactContainer,
+            this.CacheContactContainer,
             contactId
           );
         });
       };
+
       return (
         <lemon-contact
           class={{
@@ -342,14 +348,15 @@ export default {
           }}
           props={props}
           on-click={click}
-        />
+          scopedSlots={{default:slot}}
+        ></lemon-contact>
       );
     },
     _renderSidebarContact() {
       let prevIndex;
       return this._renderSidebar(
         [
-          useScopedSlot(this.$scopedSlots["contact-sidebar"]),
+          useScopedSlot(this.$scopedSlots["sidebar-contact-top"]),
           this.contacts.map(contact => {
             if (!contact.index) return;
             contact.index = contact.index.replace(/\[[0-9]*\]/, "");
@@ -364,7 +371,8 @@ export default {
                 },
                 () => {
                   this.changeContact(contact.id)
-                }
+                },
+                this.$scopedSlots["sidebar-contact"],
               )
             ];
             prevIndex = contact.index;
@@ -399,22 +407,22 @@ export default {
       const cls = "lemon-container";
       const curact = this.currentContact;
       let defIsShow = true;
-      for (const name in CacheContactContainer.get()) {
+      for (const name in this.CacheContactContainer.get()) {
         const show = curact.id == name && this.currentIsDefSidebar;
         defIsShow = !show;
         nodes.push(
           <div class={cls} v-show={show}>
-            {CacheContactContainer.get(name)}
+            {this.CacheContactContainer.get(name)}
           </div>
         );
       }
-      for (const name in CacheMenuContainer.get()) {
+      for (const name in this.CacheMenuContainer.get()) {
         nodes.push(
           <div
             class={cls}
             v-show={this.activeSidebar == name && !this.currentIsDefSidebar}
           >
-            {CacheMenuContainer.get(name)}
+            {this.CacheMenuContainer.get(name)}
           </div>
         );
       }
@@ -427,7 +435,7 @@ export default {
           <div class="lemon-container__title">
             <div class="lemon-container__displayname">
               {useScopedSlot(
-                this.$scopedSlots["contact-title"],
+                this.$scopedSlots["message-title"],
                 curact.displayName,
                 curact
               )}
@@ -435,6 +443,7 @@ export default {
           </div>
           <lemon-messages
             ref="messages"
+            hide-time={this.hideMessageTime}
             hide-name={this.hideMessageName}
             time-format={this.messageTimeFormat}
             reverse-user-id={this.user.id}
@@ -542,11 +551,12 @@ export default {
       }
 
       this.currentContactId = contactId;
-      this.$emit("change-contact", this.currentContact);
+      this.$emit("change-contact", this.currentContact,this);
       if (isFunction(this.currentContact.renderContainer)) {
         return;
       }
-      if (CacheMessageLoaded.has(contactId)) {
+      
+      if (this.CacheMessageLoaded.has(contactId)) {
         this.$refs.messages.loaded();
       }else{
         this.$refs.messages.resetLoadState();
@@ -671,7 +681,7 @@ export default {
       let menus = [];
       if (Array.isArray(data)) {
         const indexMap = {
-          lastMessages: 0,
+          messages: 0,
           contacts: 1
         };
         const indexKeys = Object.keys(indexMap);
@@ -687,7 +697,7 @@ export default {
           if (item.renderContainer) {
             this._customContainerReady(
               item.renderContainer,
-              CacheMenuContainer,
+              this.CacheMenuContainer,
               item.name
             );
           }

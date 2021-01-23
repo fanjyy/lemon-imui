@@ -1,4 +1,5 @@
 <script>
+import { useScopedSlot} from "utils";
 export default {
   name: "lemonMessageBasic",
   inject: ["IMUI"],
@@ -14,7 +15,8 @@ export default {
       default: () => ""
     },
     reverse: Boolean,
-    hideName: Boolean
+    hideName: Boolean,
+    hideTime:Boolean,
   },
   data() {
     return {};
@@ -27,7 +29,7 @@ export default {
           "lemon-message",
           {
             "lemon-message--reverse": this.reverse,
-            "lemon-message--hide-name": this.hideName
+            "lemon-message--hide-name": this.hideName,
           }
         ]}
       >
@@ -50,7 +52,7 @@ export default {
             >
               {fromUser.displayName}
             </span>
-            <span class="lemon-message__time">{this.timeFormat(sendTime)}</span>
+            {this.hideTime == true && <span class="lemon-message__time">{this.timeFormat(sendTime)}</span>}
           </div>
           <div
             class="lemon-message__content"
@@ -58,7 +60,7 @@ export default {
               this._emitClick(e, "content");
             }}
           >
-            {this.useScopedSlots("content", this.message)}
+            {useScopedSlot(this.$scopedSlots['content'],null,this.message)}
           </div>
           <div
             class="lemon-message__status"
@@ -78,7 +80,7 @@ export default {
   watch: {},
   methods: {
     _emitClick(e, key) {
-      this.IMUI.$emit("message-click", e, key, this.message);
+      this.IMUI.$emit("message-click", e, key, this.message,this.IMUI);
     },
     _renderStatue(status) {
       if (status == "going") {
@@ -97,11 +99,6 @@ export default {
       }
       return;
     },
-    useScopedSlots(name, params, defVnode = "", context = this) {
-      return context.$scopedSlots[name]
-        ? context.$scopedSlots[name](params)
-        : defVnode;
-    }
   }
 };
 </script>
@@ -118,8 +115,8 @@ arrow()
   display flex
   padding 10px 0
   +e(time)
-    color #bbb
-    padding 0 4px
+    color #b9b9b9
+    padding 0 5px
   +e(inner)
     position relative
   +e(avatar)
@@ -133,7 +130,7 @@ arrow()
     line-height 14px
     padding-bottom 6px
     user-select none
-    color #999
+    color #666
   +e(content)
     font-size 14px
     line-height 20px

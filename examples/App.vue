@@ -22,6 +22,10 @@
         @menu-avatar-click="handleMenuAvatarClick"
         @send="handleSend"
       >
+        <template #message-title="contact">
+          <span>{{ contact.displayName }}</span>
+          <small class="more" @click="changeDrawer(contact,$refs.IMUI)">{{($refs.IMUI ? $refs.IMUI.drawerVisible : false) ? '关闭' : '打开'}}抽屉</small>
+        </template>
       </lemon-imui>
       <a target="_blank" style="font-size:14px" href="https://codesandbox.io/s/sweet-chaplygin-s24mb?fontsize=14&hidenavigation=1&theme=dark">在线编辑代码</a>
       <div class="action">
@@ -48,6 +52,7 @@
     <div class="imui-center">
       <lemon-imui
         :user="user"
+        class="lemon-slot"
         ref="SlotIMUI"
         @pull-messages="handlePullMessages"
         @message-click="handleMessageClick"
@@ -62,7 +67,7 @@
         </template>
         <template #message-title="contact">
           <span>{{ contact.displayName }}</span>
-          <small class="more" @click="changeDrawer(contact)">{{($refs.SlotIMUI ? $refs.SlotIMUI.drawerVisible : false) ? '关闭' : '打开'}}抽屉</small>
+          <small class="more" @click="changeDrawer(contact,$refs.SlotIMUI)">{{($refs.SlotIMUI ? $refs.SlotIMUI.drawerVisible : false) ? '关闭' : '打开'}}抽屉</small>
         </template>
         <template #contact-info="contact">
           自定义联系人信息 {{ contact.displayName }}
@@ -93,6 +98,7 @@
     <div class="title">精简模式</div>
     <div class="imui-center">
       <lemon-imui
+        class="lemon-simple"
         :user="user"
         ref="SimpleIMUI"
         width="340px"
@@ -1295,8 +1301,8 @@ export default {
         lastContent: "修改昵称为随机字母"
       });
     },
-    changeDrawer(contact) {
-      this.$refs.SlotIMUI.changeDrawer(() => {
+    changeDrawer(contact,instance) {
+      instance.changeDrawer(() => {
         return (
           <div class="drawer-content">
             <p>
@@ -1504,4 +1510,7 @@ pre
   background #fff
   border-radius 8px
   padding 15px
+.lemon-simple .lemon-container{
+  z-index:5
+}
 </style>

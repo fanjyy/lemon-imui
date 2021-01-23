@@ -876,7 +876,7 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   background #f4f4f4
   word-break()
   position relative
-  z-index 2
+  z-index 10
   +e(title)
     padding 15px 15px
   +e(displayname)
@@ -891,7 +891,7 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   overflow hidden
   background #f4f4f4
   transition width .4s bezier
-  z-index 1
+  z-index 9
   width drawer-width
   height 100%
   box-sizing border-box

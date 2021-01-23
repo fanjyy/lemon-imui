@@ -1513,4 +1513,7 @@ pre
 .lemon-simple .lemon-container{
   z-index:5
 }
+.lemon-simple .lemon-drawer{
+  z-index:4
+}
 </style>

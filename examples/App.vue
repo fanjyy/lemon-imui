@@ -432,7 +432,7 @@
         </tr>
         <tr>
           <td>appendMessage</td>
-          <td>在当前聊天窗口插入一条新消息, scrollToBottom=true 添加之后滚动到消息窗口底部</td>
+          <td>新增一条新消息, 如果当前焦点在该联系人的聊天窗口，设置 scrollToBottom=true 添加之后自动定位到消息窗口底部</td>
           <td>Function(Message,scrollToBottom=false)</td>
           <td>-</td>
           <td></td>
@@ -1273,7 +1273,7 @@ export default {
         content: '语音消息',
         params1:'1',
         params2:'2',
-        toContactId:IMUI.currentContactId,
+        toContactId:'contact-1',
         fromUser:this.user
       };
       IMUI.appendMessage(message,true);
@@ -1281,17 +1281,12 @@ export default {
     appendMessage() {
       const { IMUI } = this.$refs;
       const contact = IMUI.currentContact;
-      const message = generateMessage();
+      const message = generateMessage('contact-3');
       message.fromUser = {
         ...message.fromUser,
         ...this.user
       };
       IMUI.appendMessage(message,true);
-      IMUI.updateContact(contact.id, {
-        unread: "+1",
-        lastSendTime: getTime(),
-        lastContent: IMUI.lastContentRender(message)
-      });
     },
     updateContact() {
       this.$refs.IMUI.updateContact("contact-3", {

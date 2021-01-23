@@ -2828,6 +2828,52 @@ module.exports = function (TO_STRING) {
 
 /***/ }),
 
+/***/ "7333":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+// 19.1.2.1 Object.assign(target, source, ...)
+var DESCRIPTORS = __webpack_require__("9e1e");
+var getKeys = __webpack_require__("0d58");
+var gOPS = __webpack_require__("2621");
+var pIE = __webpack_require__("52a7");
+var toObject = __webpack_require__("4bf8");
+var IObject = __webpack_require__("626a");
+var $assign = Object.assign;
+
+// should work with symbols and should have deterministic property order (V8 bug)
+module.exports = !$assign || __webpack_require__("79e5")(function () {
+  var A = {};
+  var B = {};
+  // eslint-disable-next-line no-undef
+  var S = Symbol();
+  var K = 'abcdefghijklmnopqrst';
+  A[S] = 7;
+  K.split('').forEach(function (k) { B[k] = k; });
+  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
+}) ? function assign(target, source) { // eslint-disable-line no-unused-vars
+  var T = toObject(target);
+  var aLen = arguments.length;
+  var index = 1;
+  var getSymbols = gOPS.f;
+  var isEnum = pIE.f;
+  while (aLen > index) {
+    var S = IObject(arguments[index++]);
+    var keys = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S);
+    var length = keys.length;
+    var j = 0;
+    var key;
+    while (length > j) {
+      key = keys[j++];
+      if (!DESCRIPTORS || isEnum.call(S, key)) T[key] = S[key];
+    }
+  } return T;
+} : $assign;
+
+
+/***/ }),
+
 /***/ "7514":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5288,6 +5334,17 @@ $export($export.P + $export.F * __webpack_require__("5147")(STARTS_WITH), 'Strin
 
 /***/ }),
 
+/***/ "f751":
+/***/ (function(module, exports, __webpack_require__) {
+
+// 19.1.3.1 Object.assign(target, source)
+var $export = __webpack_require__("5ca1");
+
+$export($export.S + $export.F, 'Object', { assign: __webpack_require__("7333") });
+
+
+/***/ }),
+
 /***/ "f772":
 /***/ (function(module, exports) {
 
@@ -7350,6 +7407,9 @@ function _toConsumableArray(arr) {
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.string.starts-with.js
 var es6_string_starts_with = __webpack_require__("f559");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es6.object.assign.js
+var es6_object_assign = __webpack_require__("f751");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.array.sort.js
 var es6_array_sort = __webpack_require__("55dd");
 
@@ -7456,6 +7516,8 @@ function () {
 
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./packages/components/index.vue?vue&type=script&lang=js&
+
+
 
 
 
@@ -7655,22 +7717,35 @@ var renderDrawerContent = function renderDrawerContent() {};
     },
 
     /**
-     * 在当前聊天窗口新增一条消息
+     * 新增一条消息
      */
     appendMessage: function appendMessage(message) {
       var scrollToBottom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (!this.currentContactId) return false;
 
-      this._addMessage(message, this.currentContactId, 1);
+      if (componentsvue_type_script_lang_js_messages[message.toContactId] === undefined) {
+        this.updateContact(message.toContactId, {
+          unread: "+1",
+          lastSendTime: message.sendTime,
+          lastContent: this.lastContentRender(message)
+        });
+      } else {
+        this._addMessage(message, message.toContactId, 1);
 
-      if (scrollToBottom == true) {
-        this.messageViewToBottom();
+        var updateContact = {
+          lastContent: this.lastContentRender(message),
+          lastSendTime: message.sendTime
+        };
+
+        if (message.toContactId == this.currentContactId) {
+          if (scrollToBottom == true) {
+            this.messageViewToBottom();
+          }
+        } else {
+          updateContact.unread = '+1';
+        }
+
+        this.updateContact(message.toContactId, updateContact);
       }
-
-      this.updateContact(this.currentContactId, {
-        lastContent: this.lastContentRender(message),
-        lastSendTime: message.sendTime
-      });
     },
     _emitSend: function _emitSend(message, next, file) {
       var _this3 = this;

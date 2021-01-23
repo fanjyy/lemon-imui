@@ -151,18 +151,30 @@ export default {
       };
     },
     /**
-     * 在当前聊天窗口新增一条消息
+     * 新增一条消息
      */
     appendMessage(message,scrollToBottom = false) {
-      if(!this.currentContactId) return false;
-      this._addMessage(message, this.currentContactId, 1);
-      if(scrollToBottom == true){
-        this.messageViewToBottom();
+      if(messages[message.toContactId] === undefined){
+        this.updateContact(message.toContactId, {
+          unread: "+1",
+          lastSendTime: message.sendTime,
+          lastContent: this.lastContentRender(message)
+        });
+      }else{
+        this._addMessage(message,message.toContactId, 1);
+        const updateContact = {
+          lastContent: this.lastContentRender(message),
+          lastSendTime: message.sendTime
+        }
+        if(message.toContactId == this.currentContactId){
+          if(scrollToBottom == true){
+            this.messageViewToBottom();
+          }
+        }else{
+          updateContact.unread = '+1';
+        }
+        this.updateContact(message.toContactId,updateContact);
       }
-      this.updateContact(this.currentContactId, {
-        lastContent: this.lastContentRender(message),
-        lastSendTime: message.sendTime
-      });
     },
     _emitSend(message, next, file) {
       this.$emit(

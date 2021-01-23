@@ -44,22 +44,6 @@
 
     <div style="display:flex;">
     <div>
-    <div class="title">精简模式</div>
-    <div class="imui-center">
-      <lemon-imui
-        :user="user"
-        ref="SimpleIMUI"
-        width="340px"
-        simple
-        @pull-messages="handlePullMessages"
-        @message-click="handleMessageClick"
-        @send="handleSend"
-      ></lemon-imui>
-      <a target="_blank" style="font-size:14px" href="https://codesandbox.io/s/lemon-imui-jingjianmoshi-forked-1lvoh?fontsize=14&hidenavigation=1&theme=dark">在线编辑代码</a>
-    </div>
-    </div>
-
-    <div style="margin:0 55px;">
     <div class="title">插槽演示</div>
     <div class="imui-center">
       <lemon-imui
@@ -101,6 +85,23 @@
           <div class="bar">自定义联系人顶部</div>
         </template>
       </lemon-imui>
+    </div>
+   
+    </div>
+
+    <div style="margin:0 55px;">
+    <div class="title">精简模式</div>
+    <div class="imui-center">
+      <lemon-imui
+        :user="user"
+        ref="SimpleIMUI"
+        width="340px"
+        simple
+        @pull-messages="handlePullMessages"
+        @message-click="handleMessageClick"
+        @send="handleSend"
+      ></lemon-imui>
+      <a target="_blank" style="font-size:14px" href="https://codesandbox.io/s/lemon-imui-jingjianmoshi-forked-1lvoh?fontsize=14&hidenavigation=1&theme=dark">在线编辑代码</a>
     </div>
     </div>
     </div>

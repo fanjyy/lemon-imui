@@ -137,13 +137,6 @@
           <td></td>
         </tr>
         <tr>
-          <td>type</td>
-          <td>会话类型：单聊：single | 群聊：many</td>
-          <td>String</td>
-          <td>-</td>
-          <td></td>
-        </tr>
-        <tr>
           <td>index</td>
           <td>通讯录索引，传入字母或数字进行排序，索引可以显示自定义文字“[1]群组”</td>
           <td>String</td>

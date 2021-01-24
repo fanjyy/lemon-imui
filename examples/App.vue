@@ -1297,15 +1297,19 @@ export default {
     updateMessage(){
       const {IMUI} = this.$refs;
       const messages = IMUI.getCurrentMessages();
-      const id = messages[messages.length - 1].id;
+      const message = messages[messages.length - 1];
       if(messages.length > 0){
-        IMUI.updateMessage({
-          id,
+        const update = {
+          id:message.id,
           status:'succeed',
           type:'file',
           fileName:'被修改成文件了.txt',
           fileSize:'4200000',
-        });
+        };
+        if(message.type == 'event'){
+          update.fromUser = this.user
+        }
+        IMUI.updateMessage(update);
         IMUI.messageViewToBottom();
       }
     },

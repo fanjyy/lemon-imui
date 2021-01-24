@@ -62,17 +62,24 @@ export default {
               />
             );
           }
+
+          let attrs;
+          if(message.type == 'event'){
+            attrs = {message: message};
+          }else{
+            attrs = {
+              timeFormat: this.timeFormat,
+              message: message,
+              reverse: this.reverseUserId == message.fromUser.id,
+              hideTime:this.hideTime,
+              hideName: this.hideName
+            }
+          }
           node.push(
             <tagName
               ref="message"
               refInFor={true}
-              attrs={{
-                timeFormat: this.timeFormat,
-                message: message,
-                reverse: this.reverseUserId == message.fromUser.id,
-                hideTime:this.hideTime,
-                hideName: this.hideName
-              }}
+              attrs={attrs}
             />
           );
           return node;

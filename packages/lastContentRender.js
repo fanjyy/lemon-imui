@@ -7,5 +7,8 @@ export default {
   },
   text(message) {
     return this.replaceEmojiName(message.content);
-  }
+  },
+  event(message){
+    return '[通知]';
+  },
 };

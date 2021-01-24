@@ -521,6 +521,10 @@ export default {
       lastContentRender[messageType] = render;
     },
     lastContentRender(message) {
+      if(!isFunction(lastContentRender[message.type])){
+        console.error(`not found '${message.type}' of the latest message renderer,try to use ‘setLastContentRender()’`);
+        return '';
+      };
       return lastContentRender[message.type].call(this, message);
     },
     /**

@@ -30,6 +30,7 @@
       <a target="_blank" style="font-size:14px" href="https://codesandbox.io/s/sweet-chaplygin-s24mb?fontsize=14&hidenavigation=1&theme=dark">在线编辑代码</a>
       <div class="action">
         <lemon-button @click="appendMessage">发送消息</lemon-button>
+        <lemon-button @click="appendEventMessage">发送 event 消息</lemon-button>
         <lemon-button @click="removeMessage">删除最近一条消息</lemon-button>
         <lemon-button @click="updateMessage">修改消息</lemon-button>
         <lemon-button @click="appendCustomMessage">发送自定义消息</lemon-button>
@@ -200,8 +201,8 @@
         <tr>
         <tr>          
           <td>type</td>
-          <td>消息类型：file | image | text</td>
-          <td>String</td>
+          <td>消息类型：file | image | text | event</td>
+          <td>String | Vnode</td>
           <td>-</td>
           <td></td>
         </tr>
@@ -634,7 +635,7 @@
 
       <div class="title" id="help">如何创建自定义消息？</div>
       <div>
-        <p>Lemon-IMUI 目前内置了file、image、text三种消息类型，在实际应用当中肯定是不够的哦，咋办？没事的，我们继续往下see。<br/>要创建自定义消息首先要确定新消息的 Message 结构。</p>
+        <p>Lemon-IMUI 目前内置了file、image、text、event四种消息类型，在实际应用当中肯定是不够的哦，咋办？没事的，我们继续往下see。<br/>要创建自定义消息首先要确定新消息的 Message 结构。</p>
         <pre>
 {
   //值为 voice，用于解析的组件 name 必须为 lemonMessageVoice
@@ -816,6 +817,11 @@ export default {
     };
 
     const { IMUI } = this.$refs;
+
+
+    IMUI.setLastContentRender('event',(message)=>{
+      return '[有人邀请你加入群组]';
+    });
 
     let contactList = [
       { ...contactData1 },
@@ -1323,6 +1329,17 @@ export default {
       message.fromUser = {
         ...message.fromUser,
         ...this.user
+      };
+      IMUI.appendMessage(message,true);
+    },
+    appendEventMessage(){
+      const { IMUI } = this.$refs;
+      const message = {
+        id:generateRandId(),
+        type:'event',
+        content:<span>邀请你加入群聊 <b style="color:#333;cursor:pointer" on-click={()=>alert('OK')}>接受</b></span>,
+        toContactId:'contact-3',
+        sendTime:getTime(),
       };
       IMUI.appendMessage(message,true);
     },

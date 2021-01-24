@@ -6829,17 +6829,27 @@ var editor_component = normalizeComponent(
         }])));
       }
 
-      node.push(h(tagName, helper_default()([{
-        "ref": "message",
-        "refInFor": true
-      }, {
-        "attrs": {
+      var attrs;
+
+      if (message.type == 'event') {
+        attrs = {
+          message: message
+        };
+      } else {
+        attrs = {
           timeFormat: _this.timeFormat,
           message: message,
           reverse: _this.reverseUserId == message.fromUser.id,
           hideTime: _this.hideTime,
           hideName: _this.hideName
-        }
+        };
+      }
+
+      node.push(h(tagName, helper_default()([{
+        "ref": "message",
+        "refInFor": true
+      }, {
+        "attrs": attrs
       }])));
       return node;
     })]);
@@ -7334,14 +7344,27 @@ var file_component = normalizeComponent(
 /* harmony default export */ var eventvue_type_script_lang_js_ = ({
   name: "lemonMessageEvent",
   inheritAttrs: false,
+  inject: ["IMUI"],
   render: function render() {
+    var _this = this;
+
     var h = arguments[0];
     var content = this.$attrs.message.content;
     return h("div", {
       "class": "lemon-message lemon-message-event"
     }, [h("span", {
-      "class": "lemon-message-event__content"
+      "class": "lemon-message-event__content",
+      "on": {
+        "click": function click(e) {
+          return _this._emitClick(e, "content");
+        }
+      }
     }, [content])]);
+  },
+  methods: {
+    _emitClick: function _emitClick(e, key) {
+      this.IMUI.$emit("message-click", e, key, this.$attrs.message, this.IMUI);
+    }
   }
 });
 // CONCATENATED MODULE: ./packages/components/message/event.vue?vue&type=script&lang=js&
@@ -7451,6 +7474,9 @@ var CONTACT_TYPE = ["many", "single"];
   },
   text: function text(message) {
     return this.replaceEmojiName(message.content);
+  },
+  event: function event(message) {
+    return '[通知]';
   }
 });
 // CONCATENATED MODULE: ./node_modules/@babel/runtime-corejs2/helpers/esm/classCallCheck.js
@@ -8120,6 +8146,12 @@ var renderDrawerContent = function renderDrawerContent() {};
       packages_lastContentRender[messageType] = render;
     },
     lastContentRender: function lastContentRender(message) {
+      if (!isFunction(packages_lastContentRender[message.type])) {
+        console.error("not found '".concat(message.type, "' of the latest message renderer,try to use \u2018setLastContentRender()\u2019"));
+        return '';
+      }
+
+      ;
       return packages_lastContentRender[message.type].call(this, message);
     },
 

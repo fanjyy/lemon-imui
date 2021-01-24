@@ -1260,12 +1260,14 @@ export default {
       console.log('点击了消息',e, key, message);
 
       if (key == "status") {
-        instance.updateMessage(message.id, message.toContactId, {
+        instance.updateMessage({
+          id:message.id,
           status: "going",
           content: "正在重新发送消息..."
         });
         setTimeout(() => {
-          instance.updateMessage(message.id, message.toContactId, {
+          instance.updateMessage({
+            id:message.id,
             status: "succeed",
             content: "发送成功"
           });

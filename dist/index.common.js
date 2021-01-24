@@ -7535,6 +7535,7 @@ function () {
 
 
 
+
 function componentsvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { componentsvue_type_script_lang_js_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { componentsvue_type_script_lang_js_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -7544,7 +7545,7 @@ function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1
 
 
 
-var componentsvue_type_script_lang_js_messages = {};
+var allMessages = {};
 var emojiMap = {};
 
 var renderDrawerContent = function renderDrawerContent() {};
@@ -7629,15 +7630,7 @@ var renderDrawerContent = function renderDrawerContent() {};
     };
   },
   render: function render() {
-    var nodes = [];
-
-    if (this.simple == false) {
-      nodes.push.apply(nodes, [this._renderMenu(), this._renderSidebarMessage(), this._renderSidebarContact()]);
-    }
-
-    nodes.push(this._renderContainer());
-    nodes.push(this._renderDrawer());
-    return this._renderWrapper(nodes);
+    return this._renderWrapper([this._renderMenu(), this._renderSidebarMessage(), this._renderSidebarContact(), this._renderContainer(), this._renderDrawer()]);
   },
   created: function created() {
     this.initMenus();
@@ -7722,7 +7715,7 @@ var renderDrawerContent = function renderDrawerContent() {};
     appendMessage: function appendMessage(message) {
       var scrollToBottom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
-      if (componentsvue_type_script_lang_js_messages[message.toContactId] === undefined) {
+      if (allMessages[message.toContactId] === undefined) {
         this.updateContact(message.toContactId, {
           unread: "+1",
           lastSendTime: message.sendTime,
@@ -7755,9 +7748,8 @@ var renderDrawerContent = function renderDrawerContent() {};
           status: "succeed"
         };
         next();
-        message = Object.assign(message, replaceMessage);
 
-        _this3.forceUpdateMessage(message.id);
+        _this3.updateMessage(Object.assign(message, replaceMessage));
       }, file);
     },
     _handleSend: function _handleSend(text) {
@@ -7837,7 +7829,9 @@ var renderDrawerContent = function renderDrawerContent() {};
           width: this.width,
           height: this.height
         },
-        "class": ["lemon-wrapper", "lemon-wrapper--theme-".concat(this.theme), this.drawerVisible && "lemon-wrapper--drawer-show"]
+        "class": ["lemon-wrapper", "lemon-wrapper--theme-".concat(this.theme), {
+          'lemon-wrapper--simple': this.simple
+        }, this.drawerVisible && "lemon-wrapper--drawer-show"]
       }, [children]);
     },
     _renderMenu: function _renderMenu() {
@@ -8096,18 +8090,16 @@ var renderDrawerContent = function renderDrawerContent() {};
       this.contacts[type](data);
     },
     _addMessage: function _addMessage(data, contactId, t) {
-      var _messages$contactId;
+      var _allMessages$contactI;
 
       var type = {
         0: "unshift",
         1: "push"
       }[t];
       if (!Array.isArray(data)) data = [data];
-      componentsvue_type_script_lang_js_messages[contactId] = componentsvue_type_script_lang_js_messages[contactId] || [];
+      allMessages[contactId] = allMessages[contactId] || [];
 
-      (_messages$contactId = componentsvue_type_script_lang_js_messages[contactId])[type].apply(_messages$contactId, _toConsumableArray(data));
-
-      this.forceUpdateMessage();
+      (_allMessages$contactI = allMessages[contactId])[type].apply(_allMessages$contactI, _toConsumableArray(data));
     },
 
     /**
@@ -8134,8 +8126,8 @@ var renderDrawerContent = function renderDrawerContent() {};
       });
     },
     updateCurrentMessages: function updateCurrentMessages() {
-      if (!componentsvue_type_script_lang_js_messages[this.currentContactId]) componentsvue_type_script_lang_js_messages[this.currentContactId] = [];
-      this.currentMessages = componentsvue_type_script_lang_js_messages[this.currentContactId];
+      if (!allMessages[this.currentContactId]) allMessages[this.currentContactId] = [];
+      this.currentMessages = allMessages[this.currentContactId];
     },
 
     /**
@@ -8194,7 +8186,7 @@ var renderDrawerContent = function renderDrawerContent() {};
                   this.$refs.messages.resetLoadState();
                 }
 
-                if (!componentsvue_type_script_lang_js_messages[contactId]) {
+                if (!allMessages[contactId]) {
                   this.updateCurrentMessages();
 
                   this._emitPullMessages(function (isEnd) {
@@ -8228,13 +8220,15 @@ var renderDrawerContent = function renderDrawerContent() {};
      * @param messageId 消息 id
      * @param contactId 联系人 id
      */
-    removeMessage: function removeMessage(messageId, contactId) {
-      var index = this.findMessageIndexById(messageId, contactId);
-
-      if (index !== -1) {
-        componentsvue_type_script_lang_js_messages[contactId].splice(index, 1);
-        this.forceUpdateMessage();
-      }
+    removeMessage: function removeMessage(messageId) {
+      var message = this.findMessage(messageId);
+      if (!message) return false;
+      var index = allMessages[message.toContactId].findIndex(function (_ref) {
+        var id = _ref.id;
+        return id == messageId;
+      });
+      allMessages[message.toContactId].splice(index, 1);
+      return true;
     },
 
     /**
@@ -8242,13 +8236,13 @@ var renderDrawerContent = function renderDrawerContent() {};
      * @param {Message} data 根据 data.id 查找聊天消息并覆盖传入的值
      * @param contactId 联系人 id
      */
-    updateMessage: function updateMessage(messageId, contactId, data) {
-      var index = this.findMessageIndexById(messageId, contactId);
-
-      if (index !== -1) {
-        componentsvue_type_script_lang_js_messages[contactId][index] = Object.assign(componentsvue_type_script_lang_js_messages[contactId][index], data);
-        this.forceUpdateMessage(messageId);
-      }
+    updateMessage: function updateMessage(message) {
+      if (!message.id) return false;
+      delete message.toContactId;
+      var historyMessage = this.findMessage(message.id);
+      if (!historyMessage) return false;
+      historyMessage = Object.assign(historyMessage, message);
+      return true;
     },
 
     /**
@@ -8300,18 +8294,15 @@ var renderDrawerContent = function renderDrawerContent() {};
         });
       }
 
-      data.forEach(function (_ref) {
-        var name = _ref.name,
-            src = _ref.src;
+      data.forEach(function (_ref2) {
+        var name = _ref2.name,
+            src = _ref2.src;
         return emojiMap[name] = src;
       });
     },
     initEditorTools: function initEditorTools(data) {
       this.editorTools = data;
-      this.$refs.editor.initTools(data); // if(this.editorTools){
-      //   this.$refs.editor.initTools(data);
-      // }
-      //this.$refs.editor.$forceUpdate();
+      this.$refs.editor.initTools(data);
     },
 
     /**
@@ -8427,21 +8418,23 @@ var renderDrawerContent = function renderDrawerContent() {};
         return item.id == contactId;
       });
     },
-    findMessageIndexById: function findMessageIndexById(messageId, contactId) {
-      var msg = componentsvue_type_script_lang_js_messages[contactId];
-
-      if (isEmpty(msg)) {
-        return -1;
-      }
-
-      return msg.findIndex(function (item) {
-        return item.id == messageId;
+    findMessage: function findMessage(messageId) {
+      return Object.values(allMessages).flat().find(function (_ref3) {
+        var id = _ref3.id;
+        return id == messageId;
       });
     },
-    findMessageById: function findMessageById(messageId, contactId) {
-      var index = this.findMessageIndexById(messageId, contactId);
-      if (index !== -1) return componentsvue_type_script_lang_js_messages[contactId][index];
-    },
+    // findMessageIndexById(messageId, contactId) {
+    //   const msg = messages[contactId];
+    //   if (isEmpty(msg)) {
+    //     return -1;
+    //   }
+    //   return msg.findIndex(item => item.id == messageId);
+    // },
+    // findMessageById(messageId, contactId) {
+    //   const index = this.findMessageIndexById(messageId, contactId);
+    //   if (index !== -1) return messages[contactId][index];
+    // },
 
     /**
      * 返回所有联系人
@@ -8450,20 +8443,20 @@ var renderDrawerContent = function renderDrawerContent() {};
     getContacts: function getContacts() {
       return this.contacts;
     },
+    //返回当前聊天窗口联系人信息
+    getCurrentContact: function getCurrentContact() {
+      return this.currentContact;
+    },
+    getCurrentMessages: function getCurrentMessages() {
+      return this.currentMessages;
+    },
 
     /**
      * 返回所有消息
      * @return {Object<Contact.id,Message>}
      */
     getMessages: function getMessages(contactId) {
-      return (contactId ? componentsvue_type_script_lang_js_messages[contactId] : componentsvue_type_script_lang_js_messages) || [];
-    },
-
-    /**
-     * 将自定义的HTML显示在主窗口内
-     */
-    openrenderContainer: function openrenderContainer(vnode) {//renderContainerQueue[this.activeSidebar] = vnode;
-      //this.$slots._renderContainer = vnode;
+      return (contactId ? allMessages[contactId] : allMessages) || [];
     },
     changeDrawer: function changeDrawer(render) {
       this.drawerVisible = !this.drawerVisible;

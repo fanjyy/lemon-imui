@@ -30,7 +30,9 @@
       <a target="_blank" style="font-size:14px" href="https://codesandbox.io/s/sweet-chaplygin-s24mb?fontsize=14&hidenavigation=1&theme=dark">在线编辑代码</a>
       <div class="action">
         <lemon-button @click="appendMessage">发送消息</lemon-button>
-        <lemon-button @click="appendCustomMessage">发送一条自定义消息</lemon-button>
+        <lemon-button @click="removeMessage">删除最近一条消息</lemon-button>
+        <lemon-button @click="updateMessage">修改消息</lemon-button>
+        <lemon-button @click="appendCustomMessage">发送自定义消息</lemon-button>
         <a href="#help">如何创建自定义消息？</a>
         <br/>
         <lemon-button @click="updateContact">修改联系人信息</lemon-button>
@@ -38,7 +40,6 @@
         <lemon-button @click="changeMenuAvatarVisible"
           >切换头像显示</lemon-button
         >
-        <lemon-button @click="appendMessage">发送消息</lemon-button>
         <lemon-button @click="changeMessageNameVisible">切换聊天窗口内名字显示</lemon-button>
         <lemon-button @click="changeMessageTimeVisible">切换聊天窗口内时间显示</lemon-button>
         <lemon-button @click="changeTheme">切换主题，当前主题：{{this.theme}}</lemon-button>
@@ -440,21 +441,21 @@
         <tr>
           <td>removeMessage</td>
           <td>删除聊天消息</td>
-          <td>Function(Message.id,Contact.id)</td>
+          <td>Function(Message.id)</td>
           <td>-</td>
           <td></td>
         </tr>
         <tr>
           <td>updateMessage</td>
-          <td>修改一条消息</td>
-          <td>Function(Message.id,Contact.id,Message)</td>
+          <td>修改消息，根据 Message.id 查找聊天消息并覆盖传入的值（toContactId会被忽略）</td>
+          <td>Function(Message)</td>
           <td>-</td>
           <td></td>
         </tr>
         <tr>
-          <td>updateMessage</td>
-          <td>修改联系人</td>
-          <td>Function(Contact.id,Contact)</td>
+          <td>updateContact</td>
+          <td>修改联系人，根据 Contact.id 查找联系人并覆盖传入的值</td>
+          <td>Function(Contact)</td>
           <td>-</td>
           <td></td>
         </tr>
@@ -462,6 +463,20 @@
           <td>getMessages</td>
           <td>返回所有本地消息，传入 Contact.id 则只返回与该联系人的消息</td>
           <td>Function(Contact.id)=>[Message]</td>
+          <td>-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>getCurrentContact</td>
+          <td>返回当前聊天窗口的联系人信息</td>
+          <td>Function()=>[Message]</td>
+          <td>-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>getCurrentMessages</td>
+          <td>返回当前聊天窗口的所有消息</td>
+          <td>Function()=>[Message]</td>
           <td>-</td>
           <td></td>
         </tr>
@@ -612,7 +627,7 @@
         </tr>
         <tr>
           <td width="150">send</td>
-          <td width="350">当发送一条新消息时会触发该事件</td>
+          <td width="350">当发送新消息时会触发该事件</td>
           <td width="150">Message,Function(Message)：调用该函数完成消息发送，可以传入Message来改变消息内容，file：上传时的文件</td>
         </tr>
       </table>
@@ -801,7 +816,7 @@ export default {
     };
 
     const { IMUI } = this.$refs;
-    
+
     let contactList = [
       { ...contactData1 },
       { ...contactData2 },
@@ -1263,6 +1278,29 @@ export default {
     changeMessageTimeVisible(){
       this.hideMessageTime = !this.hideMessageTime;
     },
+    removeMessage(){
+      const {IMUI} = this.$refs;
+      const messages = IMUI.getCurrentMessages();
+      const id = messages[messages.length - 1].id;
+      if(messages.length > 0){
+        IMUI.removeMessage(id);
+      }
+    },
+    updateMessage(){
+      const {IMUI} = this.$refs;
+      const messages = IMUI.getCurrentMessages();
+      const id = messages[messages.length - 1].id;
+      if(messages.length > 0){
+        IMUI.updateMessage({
+          id,
+          status:'succeed',
+          type:'file',
+          fileName:'被修改成文件了.txt',
+          fileSize:'4200000',
+        });
+        IMUI.messageViewToBottom();
+      }
+    },
     appendCustomMessage(){
       const { IMUI } = this.$refs;
       const message ={
@@ -1346,6 +1384,7 @@ export default {
         let isEnd = false;
         if (instance.getMessages(instance.currentContactId).length + messages.length > 11) isEnd = true;
         next(messages, isEnd);
+
       },500)
     },
     handleChangeMenu() {

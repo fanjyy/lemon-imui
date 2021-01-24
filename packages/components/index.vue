@@ -10,7 +10,7 @@ import lastContentRender from "../lastContentRender";
 
 import MemoryCache from "utils/cache/memory";
 
-const messages = {};
+const allMessages = {};
 const emojiMap = {};
 let renderDrawerContent = () => {};
 
@@ -89,17 +89,13 @@ export default {
   },
 
   render() {
-    const nodes = []
-    if(this.simple == false){
-      nodes.push(...[
-        this._renderMenu(),
-        this._renderSidebarMessage(),
-        this._renderSidebarContact(),
-      ])
-    }
-    nodes.push(this._renderContainer())
-    nodes.push(this._renderDrawer())
-    return this._renderWrapper(nodes);
+    return this._renderWrapper([
+      this._renderMenu(),
+      this._renderSidebarMessage(),
+      this._renderSidebarContact(),
+      this._renderContainer(),
+      this._renderDrawer()
+    ]);
   },
   created() {
     this.initMenus();
@@ -154,7 +150,7 @@ export default {
      * 新增一条消息
      */
     appendMessage(message,scrollToBottom = false) {
-      if(messages[message.toContactId] === undefined){
+      if(allMessages[message.toContactId] === undefined){
         this.updateContact(message.toContactId, {
           unread: "+1",
           lastSendTime: message.sendTime,
@@ -182,8 +178,7 @@ export default {
         message,
         (replaceMessage = { status: "succeed" }) => {
           next();
-          message = Object.assign(message, replaceMessage);
-          this.forceUpdateMessage(message.id);
+          this.updateMessage(Object.assign(message, replaceMessage));
         },
         file
       );
@@ -257,7 +252,8 @@ export default {
           class={[
             "lemon-wrapper",
             `lemon-wrapper--theme-${this.theme}`,
-            this.drawerVisible && "lemon-wrapper--drawer-show"
+            {'lemon-wrapper--simple':this.simple},
+            this.drawerVisible && "lemon-wrapper--drawer-show",
           ]}
         >
           {children}
@@ -513,9 +509,8 @@ export default {
         1: "push"
       }[t];
       if (!Array.isArray(data)) data = [data];
-      messages[contactId] = messages[contactId] || [];
-      messages[contactId][type](...data);
-      this.forceUpdateMessage();
+      allMessages[contactId] = allMessages[contactId] || [];
+      allMessages[contactId][type](...data);
     },
     /**
      * 设置最新消息DOM
@@ -542,8 +537,8 @@ export default {
       });
     },
     updateCurrentMessages(){
-      if(!messages[this.currentContactId]) messages[this.currentContactId] = []
-      this.currentMessages = messages[this.currentContactId];
+      if(!allMessages[this.currentContactId]) allMessages[this.currentContactId] = []
+      this.currentMessages = allMessages[this.currentContactId];
     },
     /**
      * 将当前聊天窗口滚动到底部
@@ -574,7 +569,7 @@ export default {
         this.$refs.messages.resetLoadState();
       }
 
-      if (!messages[contactId]) {
+      if (!allMessages[contactId]) {
         this.updateCurrentMessages();
         this._emitPullMessages(isEnd => this.messageViewToBottom());
       } else {
@@ -589,27 +584,28 @@ export default {
      * @param messageId 消息 id
      * @param contactId 联系人 id
      */
-    removeMessage(messageId, contactId) {
-      const index = this.findMessageIndexById(messageId, contactId);
-      if (index !== -1) {
-        messages[contactId].splice(index, 1);
-        this.forceUpdateMessage();
-      }
+    removeMessage(messageId) {
+      const message = this.findMessage(messageId);
+      if(!message) return false;
+      const index = allMessages[message.toContactId].findIndex(({id}) => id == messageId);
+      allMessages[message.toContactId].splice(index, 1);
+      return true;
     },
     /**
      * 修改聊天一条聊天消息
      * @param {Message} data 根据 data.id 查找聊天消息并覆盖传入的值
      * @param contactId 联系人 id
      */
-    updateMessage(messageId, contactId, data) {
-      const index = this.findMessageIndexById(messageId, contactId);
-      if (index !== -1) {
-        messages[contactId][index] = Object.assign(
-          messages[contactId][index],
-          data
-        );
-        this.forceUpdateMessage(messageId);
-      }
+    updateMessage(message) {
+      if(!message.id) return false;
+      delete message.toContactId;
+      let historyMessage = this.findMessage(message.id);
+      if(!historyMessage) return false;
+      historyMessage = Object.assign(
+        historyMessage,
+        message
+      );
+      return true;
     },
     /**
      * 手动更新对话消息
@@ -658,10 +654,6 @@ export default {
     initEditorTools(data){
       this.editorTools = data;
       this.$refs.editor.initTools(data);
-      // if(this.editorTools){
-      //   this.$refs.editor.initTools(data);
-      // }
-      //this.$refs.editor.$forceUpdate();
     },
     /**
      * 初始化左侧按钮
@@ -770,17 +762,20 @@ export default {
     findContactIndexById(contactId) {
       return this.contacts.findIndex(item => item.id == contactId);
     },
-    findMessageIndexById(messageId, contactId) {
-      const msg = messages[contactId];
-      if (isEmpty(msg)) {
-        return -1;
-      }
-      return msg.findIndex(item => item.id == messageId);
+    findMessage(messageId){
+      return Object.values(allMessages).flat().find(({id})=>id == messageId);
     },
-    findMessageById(messageId, contactId) {
-      const index = this.findMessageIndexById(messageId, contactId);
-      if (index !== -1) return messages[contactId][index];
-    },
+    // findMessageIndexById(messageId, contactId) {
+    //   const msg = messages[contactId];
+    //   if (isEmpty(msg)) {
+    //     return -1;
+    //   }
+    //   return msg.findIndex(item => item.id == messageId);
+    // },
+    // findMessageById(messageId, contactId) {
+    //   const index = this.findMessageIndexById(messageId, contactId);
+    //   if (index !== -1) return messages[contactId][index];
+    // },
     /**
      * 返回所有联系人
      * @return {Array<Contact>}
@@ -788,19 +783,19 @@ export default {
     getContacts() {
       return this.contacts;
     },
+    //返回当前聊天窗口联系人信息
+    getCurrentContact(){
+      return this.currentContact;
+    },
+    getCurrentMessages() {
+      return this.currentMessages;
+    },
     /**
      * 返回所有消息
      * @return {Object<Contact.id,Message>}
      */
     getMessages(contactId) {
-      return (contactId ? messages[contactId] : messages) || [];
-    },
-    /**
-     * 将自定义的HTML显示在主窗口内
-     */
-    openrenderContainer(vnode) {
-      //renderContainerQueue[this.activeSidebar] = vnode;
-      //this.$slots._renderContainer = vnode;
+      return (contactId ? allMessages[contactId] : allMessages) || [];
     },
     changeDrawer(render) {
       this.drawerVisible = !this.drawerVisible;
@@ -950,5 +945,8 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
     &--active
       color #fff
       text-shadow 0 0 10px rgba(2,48,118,0.4)
-
+.lemon-wrapper--simple
+  .lemon-menu
+  .lemon-sidebar
+    display none
 </style>

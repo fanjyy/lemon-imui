@@ -906,7 +906,6 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   width drawer-width
   height 100%
   box-sizing border-box
-  //border-left 1px solid #e9e9e9
 +b(lemon-wrapper)
   +m(drawer-show)
     +b(lemon-drawer)

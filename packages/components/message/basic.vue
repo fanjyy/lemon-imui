@@ -2,7 +2,14 @@
 import { useScopedSlot} from "utils";
 export default {
   name: "lemonMessageBasic",
-  inject: ["IMUI"],
+  inject: {
+    IMUI: {
+      from:'IMUI',
+      default (){
+        return this;
+      }
+    }
+  },
   props: {
     message: {
       type: Object,
@@ -27,6 +34,7 @@ export default {
       <div
         class={[
           "lemon-message",
+          `lemon-message--status-${status}`,
           {
             "lemon-message--reverse": this.reverse,
             "lemon-message--hide-name": this.hideName,
@@ -52,23 +60,41 @@ export default {
             >
               {fromUser.displayName}
             </span>
-            {this.hideTime == true && <span class="lemon-message__time">{this.timeFormat(sendTime)}</span>}
+            {this.hideTime == true && <span class="lemon-message__time" on-click={e => {
+              this._emitClick(e, "sendTime");
+            }}>{this.timeFormat(sendTime)}</span>}
           </div>
-          <div
-            class="lemon-message__content"
-            on-click={e => {
-              this._emitClick(e, "content");
-            }}
-          >
-            {useScopedSlot(this.$scopedSlots['content'],null,this.message)}
-          </div>
-          <div
-            class="lemon-message__status"
-            on-click={e => {
-              this._emitClick(e, "status");
-            }}
-          >
-            {this._renderStatue(status)}
+          <div class="lemon-message__content-flex">
+            <div
+              class="lemon-message__content"
+              on-click={e => {
+                this._emitClick(e, "content");
+              }}
+            >
+              {useScopedSlot(this.$scopedSlots['content'],null,this.message)}
+            </div>
+            <div
+              class="lemon-message__content-after"
+            >
+              {useScopedSlot(this.IMUI.$scopedSlots['message-after'],null,this.message)}
+            </div>
+            <div
+              class="lemon-message__status"
+              on-click={e => {
+                this._emitClick(e, "status");
+              }}
+            >
+              <i class="lemon-icon-loading lemonani-spin" />
+              <i
+                class="lemon-icon-prompt"
+                title="重发消息"
+                style={{
+                  color: "#ff2525",
+                  cursor: "pointer"
+                }}
+              />
+              {this._renderStatue(status)}
+            </div>
           </div>
         </div>
       </div>
@@ -83,21 +109,21 @@ export default {
       this.IMUI.$emit("message-click", e, key, this.message,this.IMUI);
     },
     _renderStatue(status) {
-      if (status == "going") {
-        return <i class="lemon-icon-loading lemonani-spin" />;
-      } else if (status == "failed") {
-        return (
-          <i
-            class="lemon-icon-prompt"
-            title="重发消息"
-            style={{
-              color: "#ff2525",
-              cursor: "pointer"
-            }}
-          />
-        );
-      }
-      return;
+      // if (status == "going") {
+      //   return <i class="lemon-icon-loading lemonani-spin" />;
+      // } else if (status == "failed") {
+      //   return (
+      //     <i
+      //       class="lemon-icon-prompt"
+      //       title="重发消息"
+      //       style={{
+      //         color: "#ff2525",
+      //         cursor: "pointer"
+      //       }}
+      //     />
+      //   );
+      // }
+      // return;
     },
   }
 };
@@ -131,6 +157,8 @@ arrow()
     padding-bottom 6px
     user-select none
     color #666
+  +e(content-flex)
+    display flex
   +e(content)
     font-size 14px
     line-height 20px
@@ -138,7 +166,7 @@ arrow()
     background #fff
     border-radius 4px
     position relative
-    margin 0 46px 0 0
+    margin 0
     img
     video
       background #e9e9e9
@@ -148,22 +176,49 @@ arrow()
       left -4px
       border-left none
       border-right-color #fff
+  +e(content-after)
+    display block
+    width 48px
+    height 36px
+    padding-left 6px
+    flex none
+    font-size 12px
+    color #aaa
+    overflow hidden
+    visibility hidden
   +e(status)
     position absolute
     top 23px
     right 20px
     color #aaa
     font-size 20px
+    .lemon-icon-loading
+    .lemon-icon-prompt
+      display none
+  +m(status-going)
+    .lemon-icon-loading
+      display inline-block
+  +m(status-failed)
+    .lemon-icon-prompt
+      display inline-block
+  +m(status-succeed)
+    +e(content-after)
+      visibility visible
   +m(reverse)
     flex-direction row-reverse
+    +e(content-flex)
+      flex-direction row-reverse
+    +e(content-after)
+      padding-right 6px
+      padding-left 0
+      text-align right
     +e(title)
       flex-direction row-reverse
     +e(status)
-      left 20px
+      left 26px
       right auto
     +e(content)
       background #35d863
-      margin 0 0 0 46px
       &:before
         arrow()
         left auto

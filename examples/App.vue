@@ -71,6 +71,10 @@
           <span>{{ contact.displayName }}</span>
           <small class="more" @click="changeDrawer(contact,$refs.SlotIMUI)">{{($refs.SlotIMUI ? $refs.SlotIMUI.drawerVisible : false) ? '关闭' : '打开'}}抽屉</small>
         </template>
+        <template #message-after="message">
+          <span>未读</span>
+        </template>
+
         <template #contact-info="contact">
           自定义联系人信息 {{ contact.displayName }}
         </template>
@@ -566,6 +570,11 @@
           <td width="150">message-title</td>
           <td width="350">消息列表的标题</td>
           <td width="150">Contact</td>
+        </tr>
+        <tr>
+          <td width="150">message-after</td>
+          <td width="350">每条消息的尾部</td>
+          <td width="150">Message</td>
         </tr>
         <tr>
           <td width="150">sidebar-message</td>

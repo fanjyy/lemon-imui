@@ -735,6 +735,29 @@ export default {
         return a.index.localeCompare(b.index);
       });
     },
+    appendContact(contact){
+      if(isEmpty(contact.id) || isEmpty(contact.displayName)){
+        console.error('id | displayName cant be empty');
+        return false;
+      }
+      if(this.hasContact(contact.id)) return true;
+      this.contacts.push(Object.assign({
+        id:'',
+        displayName:'',
+        avatar:'',
+        index:'',
+        unread:0,
+        lastSendTime:'',
+        lastSendTime:'',
+      },contact));
+      return true;
+    },
+    removeContact(id){
+      const index = this.findContactIndexById(id);
+      if(index === -1) return false;
+      this.contacts.splice(index,1);
+      return true;
+    },
     /**
      * 修改联系人数据
      * @param {Contact} data 修改的数据，根据 data.id 查找联系人并覆盖传入的值
@@ -765,6 +788,14 @@ export default {
      */
     findContactIndexById(contactId) {
       return this.contacts.findIndex(item => item.id == contactId);
+    },
+    /**
+     * 根据 id 查找判断是否存在联系人
+     * @param contactId 联系人 id
+     * @return {Boolean}
+     */
+    hasContact(contactId){
+      return this.findContactIndexById(contactId) !== -1;
     },
     findMessage(messageId){
       return Object.values(allMessages).flat().find(({id})=>id == messageId);

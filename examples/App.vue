@@ -4,7 +4,12 @@
     <div class="logo">
       <div class="logo-text"><b>Lemon</b> IMUI<span class="logo-badge">{{this.packageData.version}}</span></div>
       <div class="logo-sub">{{this.packageData.description}}</div>
-      <div class="link"><span>源码下载&nbsp;&nbsp;</span><a target="_blank" href="https://github.com/fanjyy/lemon-imui">Github</a><a target="_blank" href="https://gitee.com/june000/lemon-im">Gitee</a></div>
+      <div class="link">
+        <span>源码下载&nbsp;&nbsp;</span>
+        <a target="_blank" href="https://github.com/fanjyy/lemon-imui">Github</a>
+        <a target="_blank" href="https://gitee.com/june000/lemon-im">Gitee</a>
+        <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=xzUa9CPYQ5KCNQ86h7ep4Z3TtkqJxRZE&jump_from=webapi">QQ交流群：1081773406</a>
+      </div>
     </div>
     <div class="imui-center">
       <lemon-imui
@@ -438,7 +443,7 @@
         </tr>
         <tr>
           <td>appendMessage</td>
-          <td>新增一条新消息, 如果当前焦点在该联系人的聊天窗口，设置 scrollToBottom=true 添加之后自动定位到消息窗口底部</td>
+          <td>新增一条消息, 如果当前焦点在该联系人的聊天窗口，设置 scrollToBottom=true 添加之后自动定位到消息窗口底部</td>
           <td>Function(Message,scrollToBottom=false)</td>
           <td>-</td>
           <td></td>
@@ -454,6 +459,20 @@
           <td>updateMessage</td>
           <td>修改消息，根据 Message.id 查找聊天消息并覆盖传入的值（toContactId会被忽略）</td>
           <td>Function(Message)</td>
+          <td>-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>appendContact</td>
+          <td>添加联系人</td>
+          <td>Function(Contact)</td>
+          <td>-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>removeContact</td>
+          <td>删除联系人</td>
+          <td>Function(Contact.id)</td>
           <td>-</td>
           <td></td>
         </tr>
@@ -474,7 +493,7 @@
         <tr>
           <td>getCurrentContact</td>
           <td>返回当前聊天窗口的联系人信息</td>
-          <td>Function()=>[Message]</td>
+          <td>Function()=>Contact</td>
           <td>-</td>
           <td></td>
         </tr>
@@ -819,7 +838,7 @@ export default {
       id: "contact-4",
       displayName: "如花",
       avatar: "https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=4275424924,2201401076&fm=111&gp=0.jpg",
-      index: "R",
+      index: "",
       unread: 1,
       lastSendTime: 3,
       lastContent: "吃饭了嘛"
@@ -827,6 +846,9 @@ export default {
 
     const { IMUI } = this.$refs;
 
+    setTimeout(()=>{
+      console.log(IMUI.hasContact('cont1act-3'));
+    },2000);
 
     IMUI.setLastContentRender('event',(message)=>{
       return '[有人邀请你加入群组]';
@@ -1487,7 +1509,7 @@ a
 .logo-badge
   position absolute
   top -10px
-  right -40px
+  left 230px
   background #000
   border-radius 16px
   color #f9f9f9

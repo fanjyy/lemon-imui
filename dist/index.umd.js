@@ -8385,6 +8385,29 @@ var renderDrawerContent = function renderDrawerContent() {};
         return a.index.localeCompare(b.index);
       });
     },
+    appendContact: function appendContact(contact) {
+      if (isEmpty(contact.id) || isEmpty(contact.displayName)) {
+        console.error('id | displayName cant be empty');
+        return false;
+      }
+
+      if (this.hasContact(contact.id)) return true;
+      this.contacts.push(Object.assign(_defineProperty({
+        id: '',
+        displayName: '',
+        avatar: '',
+        index: '',
+        unread: 0,
+        lastSendTime: ''
+      }, "lastSendTime", ''), contact));
+      return true;
+    },
+    removeContact: function removeContact(id) {
+      var index = this.findContactIndexById(id);
+      if (index === -1) return false;
+      this.contacts.splice(index, 1);
+      return true;
+    },
 
     /**
      * 修改联系人数据
@@ -8417,6 +8440,15 @@ var renderDrawerContent = function renderDrawerContent() {};
       return this.contacts.findIndex(function (item) {
         return item.id == contactId;
       });
+    },
+
+    /**
+     * 根据 id 查找判断是否存在联系人
+     * @param contactId 联系人 id
+     * @return {Boolean}
+     */
+    hasContact: function hasContact(contactId) {
+      return this.findContactIndexById(contactId) !== -1;
     },
     findMessage: function findMessage(messageId) {
       return Object.values(allMessages).flat().find(function (_ref3) {

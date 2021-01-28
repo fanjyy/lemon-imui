@@ -10,6 +10,9 @@
         <a target="_blank" href="https://gitee.com/june000/lemon-im">Gitee</a>
         <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=xzUa9CPYQ5KCNQ86h7ep4Z3TtkqJxRZE&jump_from=webapi">QQ交流群：1081773406</a>
       </div>
+      <br/>
+      <div><a style="font-size:14px;" href="#help1">1.如何创建自定义消息？</a></div>
+      <div><a style="font-size:14px;" href="#help2">2.如何对接后端接口？</a></div>
     </div>
     <div class="imui-center">
       <lemon-imui
@@ -39,7 +42,6 @@
         <lemon-button @click="removeMessage">删除最近一条消息</lemon-button>
         <lemon-button @click="updateMessage">修改消息</lemon-button>
         <lemon-button @click="appendCustomMessage">发送自定义消息</lemon-button>
-        <a href="#help">如何创建自定义消息？</a>
         <br/>
         <lemon-button @click="updateContact">修改联系人信息</lemon-button>
         <lemon-button @click="changeMenuVisible">切换导航显示</lemon-button>
@@ -685,7 +687,7 @@
         </tr>
       </table>
 
-      <div class="title" id="help">如何创建自定义消息？</div>
+      <div class="title" id="help1">如何创建自定义消息？</div>
       <div>
         <p>Lemon-IMUI 目前内置了file、image、text、event四种消息类型，在实际应用当中肯定是不够的哦，咋办？没事的，我们继续往下see。<br/>要创建自定义消息首先要确定新消息的 Message 结构。</p>
         <pre>
@@ -729,7 +731,86 @@ Vue.component(LemonMessageVoice.name,LemonMessageVoice);
       <p>如果还有不明白的，可以到 examples/App.vue 查看示例代码</p>
       </div>
 
-    
+      <div class="title" id="help2">如何对接后端接口？</div>
+      <p>1.初始化用户的信息</p>
+      <pre v-text="`data(){
+  return {
+    user:{id:1:displayName:'June',avatar:''}
+  }
+}`"></pre>
+      <pre v-text="`<lemon-imui :user='this.user' ref='IMUI'></lemon-imui>`"></pre>
+      <p>2.初始化联系人数据</p>
+      <pre v-text="`mounted(){
+  const { IMUI } = this.$refs;
+  //初始化表情包。
+  IMUI.initEmoji(...);
+  //从后端请求联系人数据，包装成下面的样子
+  const contacts = [{
+    id: 2,
+    displayName: '丽安娜',
+    avatar:'',
+    index: 'L',
+    unread: 0,
+    //最近一条消息的内容，如果值为空，不会出现在“聊天”列表里面。
+    //lastContentRender 函数会将 file 消息转换为 '[文件]', image 消息转换为 '[图片]'，对 text 会将文字里的表情标识替换为img标签,
+    lastContent: IMUI.lastContentRender({type:'text',content:'你在干嘛呢？'})
+    //最近一条消息的发送时间
+    lastSendTime: 1566047865417,
+  }];
+  IMUI.initContacts(contacts);
+}`"></pre>
+    <p>3.拉取消息列表</p>
+    <p>现在刷新页面应该能够看到联系人了，但是点击联系人的话右边会一直处于加载中，这时需要监听 pull-messages 事件。</p>
+    <pre v-text="`<lemon-imui :user='this.user' ref='IMUI' @pull-messages='handlePullMessages'></lemon-imui>`"></pre>
+      <pre v-text="`methods:{
+  handlePullMessages(contact, next) {
+    //从后端请求消息数据，包装成下面的样子
+    const messages = [{
+      id: '唯一消息ID',
+      status: 'succeed',
+      type: 'text',
+      sendTime: 1566047865417,
+      content: '你什么才能对接完？',
+      toContactId: contact.id,
+      fromUser:this.user
+    }]
+    //将第二个参数设为true，表示已到末尾，聊天窗口顶部会显示“暂无更多消息”，不然会一直转圈。
+    next(messages,true);
+  },
+}`"></pre>
+    <p>4.发送消息</p>
+    <p>现在在消息框发送新消息会一直转圈，这时需要监听 send 事件。</p>
+<pre v-text="`methods:{
+  handleSend(message, next, file) {
+    ... 调用你的消息发送业务接口
+
+    //执行到next消息会停止转圈，如果接口调用失败，可以修改消息的状态 next({status:'failed'});
+    next();
+  },
+}`"></pre>
+    <p>5.接收消息</p>
+<pre v-text="`mounted(){
+
+WebSocket.onmessage = function(event) {
+  //将接收到的数据包装成下面的样子
+  const data = {
+    id: '唯一消息ID',
+    status: 'succeed',
+    type: 'text',
+    sendTime: 1566047865417,
+    content: '马上就对接完了！',
+    toContactId: 2,
+    fromUser:{
+      //如果 id == this.user.id消息会显示在右侧，否则在左侧
+      id:2,
+      displayName:'丽安娜',
+      avatar:'',
+    }
+  };
+  IMUI.appendMessage(data);
+};
+  
+}`"></pre>
   </div>
 </template>
 

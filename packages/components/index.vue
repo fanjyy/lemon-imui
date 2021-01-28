@@ -66,6 +66,8 @@ export default {
      * 是否隐藏消息列表内的发送时间
      */
     hideMessageTime:Boolean,
+    sendKey:Function,
+    sendText:String,
     user: {
       type: Object,
       default: () => {
@@ -461,6 +463,8 @@ export default {
           <lemon-editor
             ref="editor"
             tools={this.editorTools}
+            sendText={this.sendText}
+            sendKey={this.sendKey}
             onSend={this._handleSend}
             onUpload={this._handleUpload}
           />
@@ -723,7 +727,7 @@ export default {
      * @param {Array<Contact>} data 联系人列表
      */
     initContacts(data) {
-      this.contacts.push(...data);
+      this.contacts = data;
       this.sortContacts();
     },
     /**

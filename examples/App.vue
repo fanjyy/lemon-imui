@@ -65,7 +65,12 @@
         @message-click="handleMessageClick"
         @change-contact="handleChangeContact"
         @send="handleSend"
+        send-text="发送消息"
+        :send-key="(e)=>e.ctrlKey == true"
       >
+        <template #editor-footer>
+          按 ctrl 键发送消息
+        </template>
         <template #cover>
           <div class="cover">
             <i class="lemon-icon-message"></i>
@@ -176,7 +181,7 @@
           <td></td>
         </tr>
         <tr>
-          <td>lastSendTime</td>
+          <td>lastContent</td>
           <td>最近一条消息的内容</td>
           <td>String | Vnode</td>
           <td></td>
@@ -294,7 +299,21 @@
           <td width="350">主题</td>
           <td width="150">default | blue</td>
           <td width="100">default</td>
-          <td>主题颜色</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">sendText</td>
+          <td width="350">发送消息按钮的文字</td>
+          <td width="150">String</td>
+          <td width="100">发送消息</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">sendKey</td>
+          <td width="350">快捷发送键检查函数</td>
+          <td width="150">Function(event)=>Boolean</td>
+          <td width="100"></td>
+          <td>(e)=>e.keyCode == 13 && e.ctrlKey</td>
         </tr>
         <tr>
           <td width="150">simple</td>
@@ -583,6 +602,11 @@
         <tr>
           <td width="150">cover</td>
           <td width="350">初始化时的封面</td>
+          <td width="150">-</td>
+        </tr>
+        <tr>
+          <td width="150">editor-footer</td>
+          <td width="350">消息输入框底部</td>
           <td width="150">-</td>
         </tr>
         <tr>

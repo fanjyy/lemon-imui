@@ -2837,6 +2837,52 @@ module.exports = function (TO_STRING) {
 
 /***/ }),
 
+/***/ "7333":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+// 19.1.2.1 Object.assign(target, source, ...)
+var DESCRIPTORS = __webpack_require__("9e1e");
+var getKeys = __webpack_require__("0d58");
+var gOPS = __webpack_require__("2621");
+var pIE = __webpack_require__("52a7");
+var toObject = __webpack_require__("4bf8");
+var IObject = __webpack_require__("626a");
+var $assign = Object.assign;
+
+// should work with symbols and should have deterministic property order (V8 bug)
+module.exports = !$assign || __webpack_require__("79e5")(function () {
+  var A = {};
+  var B = {};
+  // eslint-disable-next-line no-undef
+  var S = Symbol();
+  var K = 'abcdefghijklmnopqrst';
+  A[S] = 7;
+  K.split('').forEach(function (k) { B[k] = k; });
+  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
+}) ? function assign(target, source) { // eslint-disable-line no-unused-vars
+  var T = toObject(target);
+  var aLen = arguments.length;
+  var index = 1;
+  var getSymbols = gOPS.f;
+  var isEnum = pIE.f;
+  while (aLen > index) {
+    var S = IObject(arguments[index++]);
+    var keys = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S);
+    var length = keys.length;
+    var j = 0;
+    var key;
+    while (length > j) {
+      key = keys[j++];
+      if (!DESCRIPTORS || isEnum.call(S, key)) T[key] = S[key];
+    }
+  } return T;
+} : $assign;
+
+
+/***/ }),
+
 /***/ "7514":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5297,6 +5343,17 @@ $export($export.P + $export.F * __webpack_require__("5147")(STARTS_WITH), 'Strin
 
 /***/ }),
 
+/***/ "f751":
+/***/ (function(module, exports, __webpack_require__) {
+
+// 19.1.3.1 Object.assign(target, source)
+var $export = __webpack_require__("5ca1");
+
+$export($export.S + $export.F, 'Object', { assign: __webpack_require__("7333") });
+
+
+/***/ }),
+
 /***/ "f772":
 /***/ (function(module, exports) {
 
@@ -6325,6 +6382,7 @@ var es6_array_from = __webpack_require__("1c4c");
 
 
 
+
 function editorvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function editorvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { editorvue_type_script_lang_js_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { editorvue_type_script_lang_js_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -6342,12 +6400,30 @@ var emojiData = [];
 var isInitTool = false;
 /* harmony default export */ var editorvue_type_script_lang_js_ = ({
   name: "LemonEditor",
+  inject: {
+    IMUI: {
+      from: 'IMUI',
+      default: function _default() {
+        return this;
+      }
+    }
+  },
   components: {},
   props: {
     tools: {
       type: Array,
       default: function _default() {
         return [];
+      }
+    },
+    sendText: {
+      type: String,
+      default: '发 送'
+    },
+    sendKey: {
+      type: Function,
+      default: function _default(e) {
+        return e.keyCode == 13 && e.ctrlKey === true;
       }
     }
   },
@@ -6457,7 +6533,7 @@ var isInitTool = false;
       "class": "lemon-editor__footer"
     }, [h("div", {
       "class": "lemon-editor__tip"
-    }, ["\u4F7F\u7528 ctrl + enter \u5FEB\u6377\u53D1\u9001\u6D88\u606F"]), h("div", {
+    }, [useScopedSlot(this.IMUI.$scopedSlots['editor-footer'], "使用 ctrl + enter 快捷发送消息")]), h("div", {
       "class": "lemon-editor__submit"
     }, [h("lemon-button", {
       "attrs": {
@@ -6466,7 +6542,7 @@ var isInitTool = false;
       "on": {
         "click": this._handleSend
       }
-    }, ["\u53D1 \u9001"])])])]);
+    }, [this.sendText])])])]);
   },
   methods: {
     /**
@@ -6640,10 +6716,7 @@ var isInitTool = false;
 
     },
     _handleKeydown: function _handleKeydown(e) {
-      var keyCode = e.keyCode,
-          ctrlKey = e.ctrlKey;
-
-      if (keyCode == 13 && ctrlKey === true && this.submitDisabled == false) {
+      if (this.submitDisabled == false && this.sendKey(e)) {
         this._handleSend();
       }
     },
@@ -7403,6 +7476,9 @@ function _toConsumableArray(arr) {
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.string.starts-with.js
 var es6_string_starts_with = __webpack_require__("f559");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es6.object.assign.js
+var es6_object_assign = __webpack_require__("f751");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.array.sort.js
 var es6_array_sort = __webpack_require__("55dd");
 
@@ -7530,6 +7606,8 @@ function () {
 
 
 
+
+
 function componentsvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { componentsvue_type_script_lang_js_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { componentsvue_type_script_lang_js_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -7602,6 +7680,8 @@ var renderDrawerContent = function renderDrawerContent() {};
      * 是否隐藏消息列表内的发送时间
      */
     hideMessageTime: Boolean,
+    sendKey: Function,
+    sendText: String,
     user: {
       type: Object,
       default: function _default() {
@@ -8039,7 +8119,9 @@ var renderDrawerContent = function renderDrawerContent() {};
       }), h("lemon-editor", {
         "ref": "editor",
         "attrs": {
-          "tools": this.editorTools
+          "tools": this.editorTools,
+          "sendText": this.sendText,
+          "sendKey": this.sendKey
         },
         "on": {
           "send": this._handleSend,
@@ -8369,10 +8451,7 @@ var renderDrawerContent = function renderDrawerContent() {};
      * @param {Array<Contact>} data 联系人列表
      */
     initContacts: function initContacts(data) {
-      var _this$contacts;
-
-      (_this$contacts = this.contacts).push.apply(_this$contacts, _toConsumableArray(data));
-
+      this.contacts = data;
       this.sortContacts();
     },
 

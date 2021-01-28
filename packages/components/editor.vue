@@ -1,5 +1,5 @@
 <script>
-import { toEmojiName } from "utils";
+import { toEmojiName,useScopedSlot } from "utils";
 const exec = (val, command = "insertHTML") => {
   document.execCommand(command, false, val);
 };
@@ -9,12 +9,30 @@ let emojiData = [];
 let isInitTool = false;
 export default {
   name: "LemonEditor",
+  inject: {
+    IMUI: {
+      from:'IMUI',
+      default (){
+        return this;
+      }
+    }
+  },
   components: {},
   props: {
     tools:{
       type:Array,
       default:()=>[],
-    }
+    },
+    sendText:{
+      type:String,
+      default:'发 送'
+    },
+    sendKey:{
+      type:Function,
+      default(e){
+        return e.keyCode == 13 && e.ctrlKey === true;
+      }
+    },
   },
   data() {
     return {
@@ -82,13 +100,15 @@ export default {
           />
         </div>
         <div class="lemon-editor__footer">
-          <div class="lemon-editor__tip">使用 ctrl + enter 快捷发送消息</div>
+          <div class="lemon-editor__tip">
+            {useScopedSlot(this.IMUI.$scopedSlots['editor-footer'],"使用 ctrl + enter 快捷发送消息")}
+          </div>
           <div class="lemon-editor__submit">
             <lemon-button
               disabled={this.submitDisabled}
               on-click={this._handleSend}
             >
-              发 送
+              {this.sendText}
             </lemon-button>
           </div>
         </div>
@@ -218,8 +238,7 @@ export default {
       //this._checkSubmitDisabled();
     },
     _handleKeydown(e) {
-      const { keyCode,ctrlKey } = e;
-      if (keyCode == 13 && ctrlKey === true && this.submitDisabled == false) {
+      if(this.submitDisabled == false && this.sendKey(e)){
         this._handleSend();
       }
     },

@@ -653,11 +653,16 @@ export default {
      * EmojiItem = {name: wx,title: 微笑,src: url} 无分组
      */
     initEmoji(data) {
+      let flatData = [];
       this.$refs.editor.initEmoji(data);
       if (data[0].label) {
-        data = data.flatMap(item => item.children);
+        data.forEach(item=>{
+          flatData.push(...item.children);
+        })
+      }else{
+        flatData = data;
       }
-      data.forEach(({ name, src }) => (emojiMap[name] = src));
+      flatData.forEach(({ name, src }) => (emojiMap[name] = src));
     },
     initEditorTools(data){
       this.editorTools = data;
@@ -802,19 +807,11 @@ export default {
       return this.findContactIndexById(contactId) !== -1;
     },
     findMessage(messageId){
-      return Object.values(allMessages).flat().find(({id})=>id == messageId);
+      for(const key in allMessages){
+        const message = allMessages[key].find(({id})=>id == messageId)
+        if(message) return message;
+      }
     },
-    // findMessageIndexById(messageId, contactId) {
-    //   const msg = messages[contactId];
-    //   if (isEmpty(msg)) {
-    //     return -1;
-    //   }
-    //   return msg.findIndex(item => item.id == messageId);
-    // },
-    // findMessageById(messageId, contactId) {
-    //   const index = this.findMessageIndexById(messageId, contactId);
-    //   if (index !== -1) return messages[contactId][index];
-    // },
     /**
      * 返回所有联系人
      * @return {Array<Contact>}
@@ -858,6 +855,7 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 +b(lemon-wrapper)
   display flex
   font-size 14px
+  font-family "Microsoft YaHei"
   //mask-image radial-gradient(circle, white 100%, black 100%)
   background #efefef
   transition all .4s bezier

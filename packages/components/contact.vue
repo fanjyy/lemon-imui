@@ -128,11 +128,14 @@ export default {
   +e(content)
     font-size 12px
     color #999
+    padding-top 3px
+    height 14px
+    line-height 14px
     ellipsis()
     img
       height 14px
       display inline-block
-      vertical-align middle
+      vertical-align top
       margin 0 1px
   +m(name-center)
     +e(label)

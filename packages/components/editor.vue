@@ -1,5 +1,5 @@
 <script>
-import { toEmojiName,useScopedSlot } from "utils";
+import { toEmojiName,useScopedSlot,clearHtml } from "utils";
 const exec = (val, command = "insertHTML") => {
   document.execCommand(command, false, val);
 };
@@ -95,7 +95,6 @@ export default {
             on-keydown={this._handleKeydown}
             on-paste={this._handlePaste}
             on-click={this._handleClick}
-            on-input={this._handleInput}
             spellcheck="false"
           />
         </div>
@@ -182,9 +181,6 @@ export default {
     _handleClick() {
       this._saveLastRange();
     },
-    _handleInput() {
-      this._checkSubmitDisabled();
-    },
     _renderEmojiTabs() {
       const renderImageGrid = items => {
         return items.map(item => (
@@ -225,17 +221,17 @@ export default {
     },
     _handlePaste(e) {
       e.preventDefault();
-      const { clipboardData } = e;
-      const text = clipboardData.getData("text");
-      exec(text, "insertText");
-      // Array.from(clipboardData.items).forEach(item => {
-      //   console.log(item.type);
-      // });
-      //e.target.innerText = text;
+      const clipboardData = e.clipboardData || window.clipboardData;
+      const text = clipboardData.getData("Text");
+      if(window.clipboardData){
+        this.$refs.textarea.innerHTML = text;
+      }else{
+        exec(text, "insertText");
+      }
     },
     _handleKeyup(e) {
       this._saveLastRange();
-      //this._checkSubmitDisabled();
+      this._checkSubmitDisabled();
     },
     _handleKeydown(e) {
       if(this.submitDisabled == false && this.sendKey(e)){
@@ -243,15 +239,16 @@ export default {
       }
     },
     getFormatValue() {
-      return toEmojiName(
-        this.$refs.textarea.innerHTML
-          .replace(/<br>|<\/br>/, "")
-          .replace(/<div>|<p>/g, "\r\n")
-          .replace(/<\/div>|<\/p>/g, "")
-      );
+      // return toEmojiName(
+      //   this.$refs.textarea.innerHTML
+      //     .replace(/<br>|<\/br>/, "")
+      //     .replace(/<div>|<p>/g, "\r\n")
+      //     .replace(/<\/div>|<\/p>/g, "")
+      // );
+      return toEmojiName(this.$refs.textarea.innerHTML);
     },
     _checkSubmitDisabled() {
-      this.submitDisabled = !this.$refs.textarea.innerHTML.trim();
+      this.submitDisabled = !this.$refs.textarea.innerText.trim();
     },
     _handleSend(e) {
       const text = this.getFormatValue();

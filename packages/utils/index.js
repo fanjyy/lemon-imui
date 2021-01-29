@@ -70,6 +70,10 @@ export function funCall(event, callback) {
 export function arrayIntersect(a, b) {
   return a.filter(x => b.includes(x));
 }
+//清除字符串内的所有HTML标签
+export function clearHtml(str){
+  return str.replace(/<.*?>/ig,"");
+}
 
 export function error(text) {
   throw new Error(text);

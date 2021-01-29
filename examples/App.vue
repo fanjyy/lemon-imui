@@ -1557,6 +1557,7 @@ export default {
 <style lang="stylus">
 ::selection{background:#000;color:#fff;}
 body
+  font-family "Microsoft YaHei"
   background #f6f6f6 !important
 #app
   width 90%

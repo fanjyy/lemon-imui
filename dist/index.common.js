@@ -6103,6 +6103,7 @@ var es6_regexp_replace = __webpack_require__("a481");
 
 
 
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -6179,6 +6180,10 @@ function arrayIntersect(a, b) {
   return a.filter(function (x) {
     return b.includes(x);
   });
+} //清除字符串内的所有HTML标签
+
+function clearHtml(str) {
+  return str.replace(/<.*?>/ig, "");
 }
 function error(text) {
   throw new Error(text);
@@ -6373,7 +6378,6 @@ var es6_array_from = __webpack_require__("1c4c");
 
 
 
-
 function editorvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function editorvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { editorvue_type_script_lang_js_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { editorvue_type_script_lang_js_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -6517,8 +6521,7 @@ var isInitTool = false;
         "keyup": this._handleKeyup,
         "keydown": this._handleKeydown,
         "paste": this._handlePaste,
-        "click": this._handleClick,
-        "input": this._handleInput
+        "click": this._handleClick
       }
     })]), h("div", {
       "class": "lemon-editor__footer"
@@ -6612,9 +6615,6 @@ var isInitTool = false;
     _handleClick: function _handleClick() {
       this._saveLastRange();
     },
-    _handleInput: function _handleInput() {
-      this._checkSubmitDisabled();
-    },
     _renderEmojiTabs: function _renderEmojiTabs() {
       var _this3 = this;
 
@@ -6695,16 +6695,19 @@ var isInitTool = false;
     }(),
     _handlePaste: function _handlePaste(e) {
       e.preventDefault();
-      var clipboardData = e.clipboardData;
-      var text = clipboardData.getData("text");
-      exec(text, "insertText"); // Array.from(clipboardData.items).forEach(item => {
-      //   console.log(item.type);
-      // });
-      //e.target.innerText = text;
+      var clipboardData = e.clipboardData || window.clipboardData;
+      var text = clipboardData.getData("Text");
+
+      if (window.clipboardData) {
+        this.$refs.textarea.innerHTML = text;
+      } else {
+        exec(text, "insertText");
+      }
     },
     _handleKeyup: function _handleKeyup(e) {
-      this._saveLastRange(); //this._checkSubmitDisabled();
+      this._saveLastRange();
 
+      this._checkSubmitDisabled();
     },
     _handleKeydown: function _handleKeydown(e) {
       if (this.submitDisabled == false && this.sendKey(e)) {
@@ -6712,10 +6715,16 @@ var isInitTool = false;
       }
     },
     getFormatValue: function getFormatValue() {
-      return toEmojiName(this.$refs.textarea.innerHTML.replace(/<br>|<\/br>/, "").replace(/<div>|<p>/g, "\r\n").replace(/<\/div>|<\/p>/g, ""));
+      // return toEmojiName(
+      //   this.$refs.textarea.innerHTML
+      //     .replace(/<br>|<\/br>/, "")
+      //     .replace(/<div>|<p>/g, "\r\n")
+      //     .replace(/<\/div>|<\/p>/g, "")
+      // );
+      return toEmojiName(this.$refs.textarea.innerHTML);
     },
     _checkSubmitDisabled: function _checkSubmitDisabled() {
-      this.submitDisabled = !this.$refs.textarea.innerHTML.trim();
+      this.submitDisabled = !this.$refs.textarea.innerText.trim();
     },
     _handleSend: function _handleSend(e) {
       var text = this.getFormatValue();
@@ -7493,6 +7502,7 @@ var MESSAGE_TYPE = ["voice", "file", "video", "image", "text"];
 var MESSAGE_STATUS = ["going", "succeed", "failed"];
 var CONTACT_TYPE = ["many", "single"];
 // CONCATENATED MODULE: ./packages/lastContentRender.js
+
 /* harmony default export */ var packages_lastContentRender = ({
   file: function file(message) {
     return "[文件]";
@@ -7501,7 +7511,7 @@ var CONTACT_TYPE = ["many", "single"];
     return "[图片]";
   },
   text: function text(message) {
-    return this.replaceEmojiName(message.content);
+    return this.replaceEmojiName(clearHtml(message.content));
   },
   event: function event(message) {
     return '[通知]';
@@ -7579,7 +7589,6 @@ function () {
 
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./packages/components/index.vue?vue&type=script&lang=js&
-
 
 
 
@@ -8359,15 +8368,20 @@ var renderDrawerContent = function renderDrawerContent() {};
      * EmojiItem = {name: wx,title: 微笑,src: url} 无分组
      */
     initEmoji: function initEmoji(data) {
+      var flatData = [];
       this.$refs.editor.initEmoji(data);
 
       if (data[0].label) {
-        data = data.flatMap(function (item) {
-          return item.children;
+        data.forEach(function (item) {
+          var _flatData;
+
+          (_flatData = flatData).push.apply(_flatData, _toConsumableArray(item.children));
         });
+      } else {
+        flatData = data;
       }
 
-      data.forEach(function (_ref2) {
+      flatData.forEach(function (_ref2) {
         var name = _ref2.name,
             src = _ref2.src;
         return emojiMap[name] = src;
@@ -8521,22 +8535,14 @@ var renderDrawerContent = function renderDrawerContent() {};
       return this.findContactIndexById(contactId) !== -1;
     },
     findMessage: function findMessage(messageId) {
-      return Object.values(allMessages).flat().find(function (_ref3) {
-        var id = _ref3.id;
-        return id == messageId;
-      });
+      for (var key in allMessages) {
+        var message = allMessages[key].find(function (_ref3) {
+          var id = _ref3.id;
+          return id == messageId;
+        });
+        if (message) return message;
+      }
     },
-    // findMessageIndexById(messageId, contactId) {
-    //   const msg = messages[contactId];
-    //   if (isEmpty(msg)) {
-    //     return -1;
-    //   }
-    //   return msg.findIndex(item => item.id == messageId);
-    // },
-    // findMessageById(messageId, contactId) {
-    //   const index = this.findMessageIndexById(messageId, contactId);
-    //   if (index !== -1) return messages[contactId][index];
-    // },
 
     /**
      * 返回所有联系人

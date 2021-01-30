@@ -1,6 +1,7 @@
 <script>
 import { useScopedSlot, funCall, generateUUID,cloneDeep } from "utils";
 import { isFunction, isString, isEmpty } from "utils/validate";
+import dropdown from "../directives/dropdown";
 import {
   DEFAULT_MENUS,
   DEFAULT_MENU_LASTMESSAGES,
@@ -68,6 +69,8 @@ export default {
     hideMessageTime:Boolean,
     sendKey:Function,
     sendText:String,
+    contextmenu:Array,
+    contactContextmenu:Array,
     user: {
       type: Object,
       default: () => {
@@ -153,7 +156,8 @@ export default {
      */
     appendMessage(message,scrollToBottom = false) {
       if(allMessages[message.toContactId] === undefined){
-        this.updateContact(message.toContactId, {
+        this.updateContact({
+          id:message.toContactId,
           unread: "+1",
           lastSendTime: message.sendTime,
           lastContent: this.lastContentRender(message)
@@ -161,6 +165,7 @@ export default {
       }else{
         this._addMessage(message,message.toContactId, 1);
         const updateContact = {
+          id:message.toContactId,
           lastContent: this.lastContentRender(message),
           lastSendTime: message.sendTime
         }
@@ -171,7 +176,7 @@ export default {
         }else{
           updateContact.unread = '+1';
         }
-        this.updateContact(message.toContactId,updateContact);
+        this.updateContact(updateContact);
       }
     },
     _emitSend(message, next, file) {
@@ -189,7 +194,8 @@ export default {
       const message = this._createMessage({ content: text });
       this.appendMessage(message,true);
       this._emitSend(message, () => {
-        this.updateContact(message.toContactId, {
+        this.updateContact({
+          id:message.toContactId,
           lastContent: this.lastContentRender(message),
           lastSendTime: message.sendTime
         });
@@ -216,7 +222,8 @@ export default {
       this._emitSend(
         message,
         () => {
-          this.updateContact(message.toContactId, {
+          this.updateContact({
+            id:message.toContactId,
             lastContent: this.lastContentRender(message),
             lastSendTime: message.sendTime
           });
@@ -356,6 +363,7 @@ export default {
           class={{
             "lemon-contact--active": this.currentContactId == props.contact.id
           }}
+          v-dropdown_contact={this.contactContextmenu}
           props={props}
           on-click={click}
           scopedSlots={{default:slot}}
@@ -394,7 +402,7 @@ export default {
     },
     _renderSidebar(children, name) {
       return (
-        <div class="lemon-sidebar" v-show={this.activeSidebar == name}>
+        <div class="lemon-sidebar" v-show={this.activeSidebar == name} on-scroll={this._handleSidebarScroll}>
           {children}
         </div>
       );
@@ -487,6 +495,12 @@ export default {
               <h4>{curact.displayName}</h4>
               <lemon-button
                 on-click={() => {
+                  if(isEmpty(curact.lastContent)){
+                    this.updateContact({
+                      id:curact.id,
+                      lastContent:' ',
+                    });
+                  }
                   this.changeContact(curact.id, DEFAULT_MENU_LASTMESSAGES);
                 }}
               >
@@ -498,6 +512,9 @@ export default {
         </div>
       );
       return nodes;
+    },
+    _handleSidebarScroll(){
+      dropdown.hide();
     },
     _addContact(data, t) {
       const type = {
@@ -566,6 +583,7 @@ export default {
       }
 
       this.currentContactId = contactId;
+      if(!this.currentContactId) return false;
       this.$emit("change-contact", this.currentContact,this);
       if (isFunction(this.currentContact.renderContainer)) {
         return;
@@ -606,12 +624,14 @@ export default {
      */
     updateMessage(message) {
       if(!message.id) return false;
-      delete message.toContactId;
       let historyMessage = this.findMessage(message.id);
       if(!historyMessage) return false;
       historyMessage = Object.assign(
         historyMessage,
-        message
+        message,
+        {
+          toContactId:historyMessage.toContactId
+        }
       );
       return true;
     },
@@ -769,11 +789,11 @@ export default {
     },
     /**
      * 修改联系人数据
-     * @param {Contact} data 修改的数据，根据 data.id 查找联系人并覆盖传入的值
+     * @param {Contact} data 修改的数据，根据 Contact.id 查找联系人并覆盖传入的值
      */
-    updateContact(contactId, data) {
+    updateContact(data) {
+      const contactId = data.id;
       delete data.id;
-      delete data.toContactId;
 
       const index = this.findContactIndexById(contactId);
       if (index !== -1) {
@@ -812,6 +832,9 @@ export default {
         if(message) return message;
       }
     },
+    findContact(contactId){
+      return this.getContacts().find(({id})=>id == contactId);
+    },
     /**
      * 返回所有联系人
      * @return {Array<Contact>}
@@ -825,6 +848,12 @@ export default {
     },
     getCurrentMessages() {
       return this.currentMessages;
+    },
+    setEditorValue(val){
+      this.$refs.editor.setValue(this.replaceEmojiName(val));
+    },
+    getEditorValue(){
+      return this.$refs.editor.getFormatValue();
     },
     /**
      * 返回所有消息
@@ -985,4 +1014,40 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   .lemon-menu
   .lemon-sidebar
     display none
++b(lemon-dropdown)
+  border-radius 4px
+  font-size 14px
+  font-variant tabular-nums
+  line-height 1.5
+  color rgba(0, 0, 0, 0.65)
+  z-index 10
+  background-color #fff
+  border-radius 4px
+  box-shadow 0 2px 8px rgba(0, 0, 0, 0.06)
+  position absolute
+  transform-origin 50% 150%
+  box-sizing border-box
+  user-select none
+  overflow hidden
+  +e(item)
+    font-size 12px
+    line-height 14px
+    padding 8px 10px
+    cursor pointer
+    display flex
+    align-items center
+    color #444
+    > span
+      display inline-block
+      flex none
+      //max-width 100px
+      ellipsis()
+    &:hover
+      background #f3f3f3
+      color #000
+    &:active
+      background #e9e9e9
+  +e(icon)
+    font-size 16px
+    margin-right 4px
 </style>

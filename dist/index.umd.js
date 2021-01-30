@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
+		module.exports = factory(require("vue"));
 	else if(typeof define === 'function' && define.amd)
 		define([], factory);
 	else if(typeof exports === 'object')
-		exports["index"] = factory();
+		exports["index"] = factory(require("vue"));
 	else
-		root["index"] = factory();
-})((typeof self !== 'undefined' ? self : this), function() {
+		root["index"] = factory(root["Vue"]);
+})((typeof self !== 'undefined' ? self : this), function(__WEBPACK_EXTERNAL_MODULE__8bbf__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -3198,6 +3198,13 @@ module.exports = {
 
 /***/ }),
 
+/***/ "8bbf":
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__8bbf__;
+
+/***/ }),
+
 /***/ "8e60":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5575,7 +5582,7 @@ var tabs_render, staticRenderFns
 
 /* normalize component */
 
-var component = normalizeComponent(
+var tabs_component = normalizeComponent(
   components_tabsvue_type_script_lang_js_,
   tabs_render,
   staticRenderFns,
@@ -5586,7 +5593,7 @@ var component = normalizeComponent(
   
 )
 
-/* harmony default export */ var tabs = (component.exports);
+/* harmony default export */ var tabs = (tabs_component.exports);
 // EXTERNAL MODULE: ./node_modules/regenerator-runtime/runtime.js
 var runtime = __webpack_require__("96cf");
 
@@ -5721,7 +5728,7 @@ var triggerEvents = {
       "style": "position:relative"
     }, [h("transition", {
       "attrs": {
-        "name": "slide-top"
+        "name": "lemon-slide-top"
       }
     }, [this.visible && h("div", {
       "class": "lemon-popover",
@@ -6193,6 +6200,10 @@ function arrayIntersect(a, b) {
 
 function clearHtml(str) {
   return str.replace(/<.*?>/ig, "");
+} //清除字符串内的所有HTML标签，除了IMG
+
+function clearHtmlExcludeImg(str) {
+  return str.replace(/<(?!img).*?>/ig, "");
 }
 function error(text) {
   throw new Error(text);
@@ -6258,6 +6269,14 @@ function generateUUID() {
 /* harmony default export */ var contactvue_type_script_lang_js_ = ({
   name: "LemonContact",
   components: {},
+  inject: {
+    IMUI: {
+      from: 'IMUI',
+      default: function _default() {
+        return this;
+      }
+    }
+  },
   data: function data() {
     return {};
   },
@@ -6292,24 +6311,16 @@ function generateUUID() {
   watch: {},
   methods: {
     _renderInner: function _renderInner() {
-      var _this2 = this;
-
       var h = this.$createElement;
       var contact = this.contact;
       return [h("lemon-badge", {
         "attrs": {
-          "count": !this.simple ? contact.unread : 0,
-          "native-on-click": function nativeOnClick(e) {
-            return _this2._handleBubbleClick(e, contact);
-          }
+          "count": !this.simple ? contact.unread : 0
         },
         "class": "lemon-contact__avatar"
       }, [h("lemon-avatar", {
         "attrs": {
           "size": 40,
-          "native-on-click": function nativeOnClick(e) {
-            return _this2._handleAvatarClick(e, contact);
-          },
           "src": contact.avatar
         }
       })]), h("div", {
@@ -6330,14 +6341,6 @@ function generateUUID() {
     },
     _handleClick: function _handleClick(e, data) {
       this.$emit("click", data);
-    },
-    _handleAvatarClick: function _handleAvatarClick(e, data) {
-      e.stopPropagation();
-      this.$emit("avatar-click", data);
-    },
-    _handleBubbleClick: function _handleBubbleClick(e, data) {
-      e.stopPropagation();
-      this.$emit("bubble-click", data);
     }
   }
 });
@@ -6671,6 +6674,8 @@ var isInitTool = false;
 
       exec("<img emoji-name=\"".concat(item.name, "\" src=\"").concat(item.src, "\"></img>"));
 
+      this._checkSubmitDisabled();
+
       this._saveLastRange();
     },
     selectFile: function () {
@@ -6733,7 +6738,7 @@ var isInitTool = false;
       return toEmojiName(this.$refs.textarea.innerHTML);
     },
     _checkSubmitDisabled: function _checkSubmitDisabled() {
-      this.submitDisabled = !this.$refs.textarea.innerText.trim();
+      this.submitDisabled = !clearHtmlExcludeImg(this.$refs.textarea.innerHTML.trim());
     },
     _handleSend: function _handleSend(e) {
       var text = this.getFormatValue();
@@ -6757,6 +6762,11 @@ var isInitTool = false;
     initEmoji: function initEmoji(data) {
       emojiData = data;
       this.$forceUpdate();
+    },
+    setValue: function setValue(val) {
+      this.$refs.textarea.innerHTML = val;
+
+      this._checkSubmitDisabled();
     }
   }
 });
@@ -6786,7 +6796,88 @@ var editor_component = normalizeComponent(
 )
 
 /* harmony default export */ var editor = (editor_component.exports);
+// EXTERNAL MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
+var external_commonjs_vue_commonjs2_vue_root_Vue_ = __webpack_require__("8bbf");
+var external_commonjs_vue_commonjs2_vue_root_Vue_default = /*#__PURE__*/__webpack_require__.n(external_commonjs_vue_commonjs2_vue_root_Vue_);
+
+// CONCATENATED MODULE: ./packages/directives/dropdown.js
+
+
+
+var dropdown_popover;
+
+var hidePopover = function hidePopover() {
+  if (dropdown_popover) dropdown_popover.style.display = 'none';
+};
+
+var showPopover = function showPopover() {
+  if (dropdown_popover) dropdown_popover.style.display = 'block';
+};
+
+document.addEventListener('click', function (e) {
+  hidePopover();
+});
+/* harmony default export */ var dropdown = ({
+  hide: hidePopover,
+  bind: function bind(el, binding, vnode) {
+    el.addEventListener('contextmenu', function (e) {
+      if (isEmpty(binding.value) || !Array.isArray(binding.value)) return;
+      e.preventDefault();
+      var component;
+      var visibleItems = [];
+      if (binding.modifiers.message) component = vnode.context;else if (binding.modifiers.contact) component = vnode.child;
+
+      if (!dropdown_popover) {
+        dropdown_popover = document.createElement('div');
+        dropdown_popover.className = 'lemon-dropdown';
+        document.body.appendChild(dropdown_popover);
+      }
+
+      dropdown_popover.innerHTML = binding.value.map(function (item) {
+        var visible;
+
+        if (isFunction(item.visible)) {
+          visible = item.visible(component);
+        } else {
+          visible = item.visible === undefined ? true : item.visible;
+        }
+
+        if (visible) {
+          visibleItems.push(item);
+          var icon = item.icon ? "<i class=\"lemon-dropdown__icon ".concat(item.icon, "\"></i>") : '';
+          return "<div style=\"color:".concat(item.color, "\" title=\"").concat(item.text, "\" class=\"lemon-dropdown__item\">").concat(icon, "<span>").concat(item.text, "</span></div>");
+        }
+
+        return '';
+      }).join("");
+      dropdown_popover.style.top = "".concat(e.pageY, "px");
+      dropdown_popover.style.left = "".concat(e.pageX, "px");
+      dropdown_popover.childNodes.forEach(function (node, index) {
+        var _visibleItems$index = visibleItems[index],
+            click = _visibleItems$index.click,
+            _render = _visibleItems$index.render;
+        node.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (isFunction(click)) click(e, component, hidePopover);
+        });
+
+        if (isFunction(_render)) {
+          var ins = external_commonjs_vue_commonjs2_vue_root_Vue_default.a.extend({
+            render: function render(h) {
+              return _render(h, component, hidePopover);
+            }
+          });
+          var renderComponent = new ins().$mount();
+          node.querySelector('span').innerHTML = renderComponent.$el.outerHTML;
+        }
+      });
+      showPopover();
+    });
+  },
+  inserted: function inserted(el, binding, vnode) {}
+});
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./packages/components/messages.vue?vue&type=script&lang=js&
+
 
 
 
@@ -6916,17 +7007,18 @@ var editor_component = normalizeComponent(
             switch (_context2.prev = _context2.next) {
               case 0:
                 target = e.target;
+                dropdown.hide();
 
                 if (!(target.scrollTop == 0 && this._loading == false && this._loadend == false)) {
-                  _context2.next = 7;
+                  _context2.next = 8;
                   break;
                 }
 
                 this._loading = true;
-                _context2.next = 5;
+                _context2.next = 6;
                 return this.$nextTick();
 
-              case 5:
+              case 6:
                 hst = target.scrollHeight;
                 this.$emit("reach-top",
                 /*#__PURE__*/
@@ -6959,7 +7051,7 @@ var editor_component = normalizeComponent(
                   };
                 }());
 
-              case 7:
+              case 8:
               case "end":
                 return _context2.stop();
             }
@@ -7049,6 +7141,7 @@ var messages_component = normalizeComponent(
     }
   },
   props: {
+    contextmenu: Array,
     message: {
       type: Object,
       default: function _default() {
@@ -7114,6 +7207,13 @@ var messages_component = normalizeComponent(
     }, [this.timeFormat(sendTime)])]), h("div", {
       "class": "lemon-message__content-flex"
     }, [h("div", {
+      "directives": [{
+        name: "dropdown",
+        value: this.IMUI.contextmenu,
+        modifiers: {
+          "message": true
+        }
+      }],
       "class": "lemon-message__content",
       "on": {
         "click": function click(e) {
@@ -7140,7 +7240,7 @@ var messages_component = normalizeComponent(
         color: "#ff2525",
         cursor: "pointer"
       }
-    }), this._renderStatue(status)])])])]);
+    })])])])]);
   },
   created: function created() {},
   mounted: function mounted() {},
@@ -7149,22 +7249,6 @@ var messages_component = normalizeComponent(
   methods: {
     _emitClick: function _emitClick(e, key) {
       this.IMUI.$emit("message-click", e, key, this.message, this.IMUI);
-    },
-    _renderStatue: function _renderStatue(status) {// if (status == "going") {
-      //   return <i class="lemon-icon-loading lemonani-spin" />;
-      // } else if (status == "failed") {
-      //   return (
-      //     <i
-      //       class="lemon-icon-prompt"
-      //       title="重发消息"
-      //       style={{
-      //         color: "#ff2525",
-      //         cursor: "pointer"
-      //       }}
-      //     />
-      //   );
-      // }
-      // return;
     }
   }
 });
@@ -7626,6 +7710,7 @@ function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1
 
 
 
+
 var allMessages = {};
 var emojiMap = {};
 
@@ -7691,6 +7776,8 @@ var renderDrawerContent = function renderDrawerContent() {};
     hideMessageTime: Boolean,
     sendKey: Function,
     sendText: String,
+    contextmenu: Array,
+    contactContextmenu: Array,
     user: {
       type: Object,
       default: function _default() {
@@ -7799,7 +7886,8 @@ var renderDrawerContent = function renderDrawerContent() {};
       var scrollToBottom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
       if (allMessages[message.toContactId] === undefined) {
-        this.updateContact(message.toContactId, {
+        this.updateContact({
+          id: message.toContactId,
           unread: "+1",
           lastSendTime: message.sendTime,
           lastContent: this.lastContentRender(message)
@@ -7808,6 +7896,7 @@ var renderDrawerContent = function renderDrawerContent() {};
         this._addMessage(message, message.toContactId, 1);
 
         var updateContact = {
+          id: message.toContactId,
           lastContent: this.lastContentRender(message),
           lastSendTime: message.sendTime
         };
@@ -7820,7 +7909,7 @@ var renderDrawerContent = function renderDrawerContent() {};
           updateContact.unread = '+1';
         }
 
-        this.updateContact(message.toContactId, updateContact);
+        this.updateContact(updateContact);
       }
     },
     _emitSend: function _emitSend(message, next, file) {
@@ -7845,7 +7934,8 @@ var renderDrawerContent = function renderDrawerContent() {};
       this.appendMessage(message, true);
 
       this._emitSend(message, function () {
-        _this4.updateContact(message.toContactId, {
+        _this4.updateContact({
+          id: message.toContactId,
           lastContent: _this4.lastContentRender(message),
           lastSendTime: message.sendTime
         });
@@ -7876,7 +7966,8 @@ var renderDrawerContent = function renderDrawerContent() {};
       this.appendMessage(message, true);
 
       this._emitSend(message, function () {
-        _this5.updateContact(message.toContactId, {
+        _this5.updateContact({
+          id: message.toContactId,
           lastContent: _this5.lastContentRender(message),
           lastSendTime: message.sendTime
         });
@@ -8021,7 +8112,14 @@ var renderDrawerContent = function renderDrawerContent() {};
       return h("lemon-contact", helper_default()([{
         "class": {
           "lemon-contact--active": this.currentContactId == props.contact.id
-        }
+        },
+        "directives": [{
+          name: "dropdown",
+          value: this.contactContextmenu,
+          modifiers: {
+            "contact": true
+          }
+        }]
       }, {
         "props": props
       }, {
@@ -8060,7 +8158,10 @@ var renderDrawerContent = function renderDrawerContent() {};
         "directives": [{
           name: "show",
           value: this.activeSidebar == name
-        }]
+        }],
+        "on": {
+          "scroll": this._handleSidebarScroll
+        }
       }, [children]);
     },
     _renderDrawer: function _renderDrawer() {
@@ -8160,11 +8261,21 @@ var renderDrawerContent = function renderDrawerContent() {};
       }), h("h4", [curact.displayName]), h("lemon-button", {
         "on": {
           "click": function click() {
+            if (isEmpty(curact.lastContent)) {
+              _this12.updateContact({
+                id: curact.id,
+                lastContent: ' '
+              });
+            }
+
             _this12.changeContact(curact.id, DEFAULT_MENU_LASTMESSAGES);
           }
         }
       }, ["\u53D1\u9001\u6D88\u606F"])]), curact)]));
       return nodes;
+    },
+    _handleSidebarScroll: function _handleSidebarScroll() {
+      dropdown.hide();
     },
     _addContact: function _addContact(data, t) {
       var type = {
@@ -8261,16 +8372,25 @@ var renderDrawerContent = function renderDrawerContent() {};
 
               case 6:
                 this.currentContactId = contactId;
+
+                if (this.currentContactId) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                return _context2.abrupt("return", false);
+
+              case 9:
                 this.$emit("change-contact", this.currentContact, this);
 
                 if (!isFunction(this.currentContact.renderContainer)) {
-                  _context2.next = 10;
+                  _context2.next = 12;
                   break;
                 }
 
                 return _context2.abrupt("return");
 
-              case 10:
+              case 12:
                 if (this.CacheMessageLoaded.has(contactId)) {
                   this.$refs.messages.loaded();
                 } else {
@@ -8291,7 +8411,7 @@ var renderDrawerContent = function renderDrawerContent() {};
                   }, 0);
                 }
 
-              case 12:
+              case 14:
               case "end":
                 return _context2.stop();
             }
@@ -8329,10 +8449,11 @@ var renderDrawerContent = function renderDrawerContent() {};
      */
     updateMessage: function updateMessage(message) {
       if (!message.id) return false;
-      delete message.toContactId;
       var historyMessage = this.findMessage(message.id);
       if (!historyMessage) return false;
-      historyMessage = Object.assign(historyMessage, message);
+      historyMessage = Object.assign(historyMessage, message, {
+        toContactId: historyMessage.toContactId
+      });
       return true;
     },
 
@@ -8504,11 +8625,11 @@ var renderDrawerContent = function renderDrawerContent() {};
 
     /**
      * 修改联系人数据
-     * @param {Contact} data 修改的数据，根据 data.id 查找联系人并覆盖传入的值
+     * @param {Contact} data 修改的数据，根据 Contact.id 查找联系人并覆盖传入的值
      */
-    updateContact: function updateContact(contactId, data) {
+    updateContact: function updateContact(data) {
+      var contactId = data.id;
       delete data.id;
-      delete data.toContactId;
       var index = this.findContactIndexById(contactId);
 
       if (index !== -1) {
@@ -8552,6 +8673,12 @@ var renderDrawerContent = function renderDrawerContent() {};
         if (message) return message;
       }
     },
+    findContact: function findContact(contactId) {
+      return this.getContacts().find(function (_ref4) {
+        var id = _ref4.id;
+        return id == contactId;
+      });
+    },
 
     /**
      * 返回所有联系人
@@ -8566,6 +8693,12 @@ var renderDrawerContent = function renderDrawerContent() {};
     },
     getCurrentMessages: function getCurrentMessages() {
       return this.currentMessages;
+    },
+    setEditorValue: function setEditorValue(val) {
+      this.$refs.editor.setValue(this.replaceEmojiName(val));
+    },
+    getEditorValue: function getEditorValue() {
+      return this.$refs.editor.getFormatValue();
     },
 
     /**
@@ -8617,6 +8750,10 @@ var components_component = normalizeComponent(
 // EXTERNAL MODULE: ./packages/styles/common/index.styl
 var common = __webpack_require__("6a2b");
 
+// CONCATENATED MODULE: ./packages/directives/index.js
+
+
+external_commonjs_vue_commonjs2_vue_root_Vue_default.a.directive('dropdown', dropdown);
 // CONCATENATED MODULE: ./packages/index.js
 
 
@@ -8635,7 +8772,8 @@ var common = __webpack_require__("6a2b");
 
 
 
-var version = "0.1";
+
+var version = "1.4.2";
 var packages_components = [components, components_contact, messages, editor, avatar, badge, components_button, popover, tabs, basic, message_text, message_image, file, message_event];
 
 var install = function install(Vue) {

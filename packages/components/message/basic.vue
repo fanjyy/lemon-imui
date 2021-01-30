@@ -11,6 +11,7 @@ export default {
     }
   },
   props: {
+    contextmenu:Array,
     message: {
       type: Object,
       default: () => {
@@ -66,6 +67,7 @@ export default {
           </div>
           <div class="lemon-message__content-flex">
             <div
+              v-dropdown_message={this.IMUI.contextmenu}
               class="lemon-message__content"
               on-click={e => {
                 this._emitClick(e, "content");
@@ -93,7 +95,6 @@ export default {
                   cursor: "pointer"
                 }}
               />
-              {this._renderStatue(status)}
             </div>
           </div>
         </div>
@@ -107,23 +108,6 @@ export default {
   methods: {
     _emitClick(e, key) {
       this.IMUI.$emit("message-click", e, key, this.message,this.IMUI);
-    },
-    _renderStatue(status) {
-      // if (status == "going") {
-      //   return <i class="lemon-icon-loading lemonani-spin" />;
-      // } else if (status == "failed") {
-      //   return (
-      //     <i
-      //       class="lemon-icon-prompt"
-      //       title="重发消息"
-      //       style={{
-      //         color: "#ff2525",
-      //         cursor: "pointer"
-      //       }}
-      //     />
-      //   );
-      // }
-      // return;
     },
   }
 };

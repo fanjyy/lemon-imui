@@ -1,5 +1,6 @@
 <script>
 import { hoursTimeFormat } from "utils";
+import dropdown from "../directives/dropdown";
 export default {
   name: "LemonMessages",
   components: {},
@@ -110,6 +111,7 @@ export default {
     },
     async _handleScroll(e) {
       const { target } = e;
+      dropdown.hide();
       if (
         target.scrollTop == 0 &&
         this._loading == false &&

@@ -14,7 +14,8 @@ import lemonMessageEvent from "./components/message/event";
 
 import LemonIMUI from "./components/index";
 import "./styles/common/index.styl";
-const version = "0.1";
+import './directives';
+const version = "1.4.2";
 const components = [
   LemonIMUI,
   LemonContact,

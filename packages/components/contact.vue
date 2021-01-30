@@ -4,6 +4,14 @@ import { timeFormat,useScopedSlot } from "utils";
 export default {
   name: "LemonContact",
   components: {},
+  inject: {
+    IMUI: {
+      from:'IMUI',
+      default (){
+        return this;
+      }
+    }
+  },
   data() {
     return {};
   },
@@ -39,11 +47,9 @@ export default {
         <lemon-badge
           count={!this.simple ? contact.unread : 0}
           class="lemon-contact__avatar"
-          native-on-click={e => this._handleBubbleClick(e, contact)}
         >
           <lemon-avatar
             size={40}
-            native-on-click={e => this._handleAvatarClick(e, contact)}
             src={contact.avatar}
           />
         </lemon-badge>,
@@ -71,14 +77,6 @@ export default {
     _handleClick(e, data) {
       this.$emit("click", data);
     },
-    _handleAvatarClick(e, data) {
-      e.stopPropagation();
-      this.$emit("avatar-click", data);
-    },
-    _handleBubbleClick(e, data) {
-      e.stopPropagation();
-      this.$emit("bubble-click", data);
-    }
   }
 };
 </script>

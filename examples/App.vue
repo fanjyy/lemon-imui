@@ -18,6 +18,8 @@
       <lemon-imui
         :user="user"
         ref="IMUI"
+        :contextmenu="contextmenu"
+        :contact-contextmenu="contactContextmenu"
         :theme="theme"
         :hide-menu="hideMenu"
         :hide-menu-avatar="hideMenuAvatar"
@@ -30,6 +32,12 @@
         @menu-avatar-click="handleMenuAvatarClick"
         @send="handleSend"
       >
+        <template #cover>
+          <div class="cover">
+            <i class="lemon-icon-message"></i>
+            <p><b>自定义封面 Lemon</b> IMUI</p>
+          </div>
+        </template>
         <template #message-title="contact">
           <span>{{ contact.displayName }}</span>
           <small class="more" @click="changeDrawer(contact,$refs.IMUI)">{{($refs.IMUI ? $refs.IMUI.drawerVisible : false) ? '关闭' : '打开'}}抽屉</small>
@@ -266,6 +274,58 @@
         </tr>
       </table>
 
+      <div class="title">右键菜单 ContextmenuItem</div>
+      <table class="table">
+        <tr class="table-head">
+          <th>名称</th>
+          <th>说明</th>
+          <th>类型</th>
+          <th>示例</th>
+        </tr>
+        <tr>
+          <td width="150">text</td>
+          <td width="350">显示文字</td>
+          <td width="150">String</td>
+          <td width="100">-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">color</td>
+          <td width="350">颜色</td>
+          <td width="150">String</td>
+          <td width="100">-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">icon</td>
+          <td width="350">图标 class</td>
+          <td width="150">String</td>
+          <td width="100">-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">click</td>
+          <td width="350">点击事件，调用hide方法隐藏右键菜单。</td>
+          <td width="150">Function(e,instance,hide)</td>
+          <td width="100">-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">visible</td>
+          <td width="350">是否显示的判断函数</td>
+          <td width="150">Function(instance)</td>
+          <td width="100">-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">render</td>
+          <td width="350">负责样式的渲染函数，使用render的时候text属性会失去作用，调用hide方法隐藏右键菜单。</td>
+          <td width="150">Function(e,instance,hide)</td>
+          <td width="100">-</td>
+          <td></td>
+        </tr>
+      </table>
+
       <div class="title">组件属性</div>
       <table class="table">
         <tr class="table-head">
@@ -372,6 +432,20 @@
           <td>是否隐藏聊天窗口内的消息发送时间</td>
           <td>Boolean</td>
           <td>false</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>contextmenu</td>
+          <td>聊天消息右键菜单配置</td>
+          <td>[ContextmenuItem]</td>
+          <td>-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>contactContextmenu</td>
+          <td>联系人右键菜单配置</td>
+          <td>[ContextmenuItem]</td>
+          <td>-</td>
           <td></td>
         </tr>
       </table>
@@ -592,6 +666,21 @@
           <td>-</td>
           <td></td>
         </tr>
+        <tr>
+          <td>setEditorValue</td>
+          <td>设置编辑框内容</td>
+          <td>Function(string)</td>
+          <td>-</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>getEditorValue</td>
+          <td>获取编辑框内容</td>
+          <td>Function()=>string</td>
+          <td>-</td>
+          <td></td>
+        </tr>
+        
       </table>
 
       <div class="title">组件插槽</div>
@@ -820,6 +909,7 @@ import LemonMessageVoice from './lemon-message-voice';
 import packageData from '../package.json';
 Vue.component(LemonMessageVoice.name,LemonMessageVoice);
 
+
 const tip = `export default {
   //组件的name必须以lemonMessage开头，后面跟上 Message.type
   name: "lemonMessageVoice",
@@ -891,6 +981,102 @@ export default {
   data() {
     return {
       theme:'default',
+      contactContextmenu:[{
+        text:'删除该聊天',
+        click:(e,instance,hide)=>{
+          const {IMUI,contact} = instance;
+          IMUI.updateContact({
+            id:contact.id,
+            lastContent:null,
+          });
+          if(IMUI.currentContactId == contact.id) IMUI.changeContact(null);
+          hide();
+        },
+      },{
+        text:'设置备注和标签',
+      },{
+        text:'投诉',
+      },{
+        icon:'lemon-icon-message',
+        render:(h,instance,hide)=>{
+          return <div style="display:flex;justify-content:space-between;align-items:center;width:130px">
+            <span>加入黑名单</span>
+            <span>
+              <input type="checkbox" id="switch" />
+              <label id="switch-label" for="switch">Toggle</label>
+            </span>
+          </div>;
+        },
+      },{
+        click(e,instance,hide){
+          const {IMUI,contact} = instance;
+          IMUI.removeContact(contact.id);
+          if(IMUI.currentContactId == contact.id) IMUI.changeContact(null);
+          hide();
+        },
+        color:'red',
+        text:'删除好友',
+      }],
+      contextmenu:[{
+        click:(e,instance,hide)=>{
+          const { IMUI,message } = instance;
+          const data = {
+            id:generateRandId(),
+            type:'event',
+            //使用 jsx 时 click必须使用箭头函数（使上下文停留在vue内）
+            content:<span>你撤回了一条消息 <span v-show={message.type == 'text'} style="color:#333;cursor:pointer" content={message.content} on-click={(e)=>{
+              IMUI.setEditorValue(e.target.getAttribute('content'));
+            }}>重新编辑</span></span>,
+
+            toContactId:message.toContactId,
+            sendTime:getTime(),
+          };
+          IMUI.removeMessage(message.id);
+          IMUI.appendMessage(data,true);
+          hide();
+        },
+        visible:(instance)=>{
+          return instance.message.fromUser.id == this.user.id;
+        },
+        text:'撤回消息',
+      },
+      {
+        visible:(instance)=>{
+          return instance.message.fromUser.id != this.user.id;
+        },
+        text:'举报',
+      },
+      {
+        text:'转发',
+      },
+      {
+        visible:(instance)=>{
+          return instance.message.type == 'text';
+        },
+        text:'复制文字',
+      },
+      {
+        visible:(instance)=>{
+          return instance.message.type == 'image';
+        },
+        text:'下载图片',
+      },
+      {
+        visible:(instance)=>{
+          return instance.message.type == 'file';
+        },
+        text:'下载文件',
+      },
+      {
+        click:(e,instance,hide)=>{
+          const { IMUI,message } = instance;
+          IMUI.removeMessage(message.id);
+          hide();
+        },
+        icon:'lemon-icon-folder',
+        color:'red',
+        text:'删除',
+      }],
       tip:tip,
       packageData,
       hideMenuAvatar: false,
@@ -950,7 +1136,6 @@ export default {
     };
 
     const { IMUI } = this.$refs;
-
     setTimeout(()=>{
       console.log(IMUI.hasContact('cont1act-3'));
     },2000);
@@ -962,7 +1147,7 @@ export default {
     let contactList = [
       { ...contactData1 },
       { ...contactData2 },
-      { ...contactData3 }
+      { ...contactData3 },
       //...Array(100).fill(contactData1)
     ];
 
@@ -1479,14 +1664,15 @@ export default {
       const message = {
         id:generateRandId(),
         type:'event',
-        content:<span>邀请你加入群聊 <b style="color:#333;cursor:pointer" on-click={()=>alert('OK')}>接受</b></span>,
+        content:<span>邀请你加入群聊 <span style="color:#333;cursor:pointer" on-click={()=>alert('OK')}>接受</span></span>,
         toContactId:'contact-3',
         sendTime:getTime(),
       };
       IMUI.appendMessage(message,true);
     },
     updateContact() {
-      this.$refs.IMUI.updateContact("contact-3", {
+      this.$refs.IMUI.updateContact({
+        id:"contact-3",
         unread: 10,
         displayName: generateRandWord(),
         lastSendTime: getTime(),
@@ -1507,7 +1693,8 @@ export default {
     },
     handleChangeContact(contact,instance) {
       console.log("Event:change-contact");
-      instance.updateContact(contact.id, {
+      instance.updateContact({
+        id:contact.id,
         //displayName: "123",
         unread: 0
       });
@@ -1709,5 +1896,49 @@ pre
 }
 .lemon-simple .lemon-drawer{
   z-index:4
+}
+
+
+
+input#switch[type=checkbox]{
+	height: 0;
+	width: 0;
+	display:none;
+}
+
+label#switch-label {
+	cursor: pointer;
+	text-indent: -9999px;
+	width: 34px;
+	height: 20px;
+	background: #aaa;
+	display: block;
+	border-radius: 100px;
+	position: relative;
+}
+
+label#switch-label:after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	background: #fff;
+	border-radius: 20px;
+	transition: 0.3s;
+}
+
+input#switch:checked + label {
+	background: #0fd547;
+}
+
+input#switch:checked + label:after {
+	left: calc(100% - 2px);
+	transform: translateX(-100%);
+}
+
+label#switch-label:active:after {
+	width: 20px;
 }
 </style>

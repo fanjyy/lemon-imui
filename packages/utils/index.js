@@ -74,7 +74,10 @@ export function arrayIntersect(a, b) {
 export function clearHtml(str){
   return str.replace(/<.*?>/ig,"");
 }
-
+//清除字符串内的所有HTML标签，除了IMG
+export function clearHtmlExcludeImg(str){
+  return str.replace(/<(?!img).*?>/ig, "");
+}
 export function error(text) {
   throw new Error(text);
 }

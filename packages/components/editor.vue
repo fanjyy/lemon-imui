@@ -1,5 +1,5 @@
 <script>
-import { toEmojiName,useScopedSlot,clearHtml } from "utils";
+import { toEmojiName,useScopedSlot,clearHtmlExcludeImg } from "utils";
 const exec = (val, command = "insertHTML") => {
   document.execCommand(command, false, val);
 };
@@ -212,6 +212,7 @@ export default {
     _handleSelectEmoji(item) {
       this._focusLastRange();
       exec(`<img emoji-name="${item.name}" src="${item.src}"></img>`);
+      this._checkSubmitDisabled();
       this._saveLastRange();
     },
     async selectFile(accept) {
@@ -248,7 +249,7 @@ export default {
       return toEmojiName(this.$refs.textarea.innerHTML);
     },
     _checkSubmitDisabled() {
-      this.submitDisabled = !this.$refs.textarea.innerText.trim();
+      this.submitDisabled = !clearHtmlExcludeImg(this.$refs.textarea.innerHTML.trim());
     },
     _handleSend(e) {
       const text = this.getFormatValue();
@@ -269,7 +270,11 @@ export default {
     initEmoji(data) {
       emojiData = data;
       this.$forceUpdate();
-    }
+    },
+    setValue(val){
+      this.$refs.textarea.innerHTML = val;
+      this._checkSubmitDisabled();
+    },
   }
 };
 </script>

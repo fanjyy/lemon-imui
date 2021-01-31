@@ -30,7 +30,7 @@ export default {
         display inline-block
         background transparent
         position relative
-        top -2px
+        top -1px
         padding 0 2px
         vertical-align middle
 </style>

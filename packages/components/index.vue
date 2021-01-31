@@ -1,7 +1,7 @@
 <script>
 import { useScopedSlot, funCall, generateUUID,cloneDeep } from "utils";
 import { isFunction, isString, isEmpty } from "utils/validate";
-import dropdown from "../directives/dropdown";
+import contextmenu from "../directives/contextmenu";
 import {
   DEFAULT_MENUS,
   DEFAULT_MENU_LASTMESSAGES,
@@ -71,6 +71,7 @@ export default {
     sendText:String,
     contextmenu:Array,
     contactContextmenu:Array,
+    avatarCricle:Boolean,
     user: {
       type: Object,
       default: () => {
@@ -82,6 +83,7 @@ export default {
     this.CacheContactContainer = new MemoryCache();
     this.CacheMenuContainer = new MemoryCache();
     this.CacheMessageLoaded = new MemoryCache();
+    this.CacheDraft = new MemoryCache();
     return {
       drawerVisible: !this.hideDrawer,
       currentContactId:null,
@@ -173,6 +175,7 @@ export default {
           if(scrollToBottom == true){
             this.messageViewToBottom();
           }
+          this.CacheDraft.remove(message.toContactId);
         }else{
           updateContact.unread = '+1';
         }
@@ -199,6 +202,7 @@ export default {
           lastContent: this.lastContentRender(message),
           lastSendTime: message.sendTime
         });
+        this.CacheDraft.remove(message.toContactId);
       });
     },
     _handleUpload(file) {
@@ -326,7 +330,7 @@ export default {
     _renderSidebarMessage() {
       return this._renderSidebar(
         [
-          useScopedSlot(this.$scopedSlots["sidebar-message-top"]),
+          useScopedSlot(this.$scopedSlots["sidebar-message-top"],null,this),
           this.lastMessages.map(contact => {
             return this._renderContact(
               {
@@ -338,7 +342,8 @@ export default {
             );
           })
         ],
-        DEFAULT_MENU_LASTMESSAGES
+        DEFAULT_MENU_LASTMESSAGES,
+        useScopedSlot(this.$scopedSlots["sidebar-message-fixedtop"],null,this)
       );
     },
     _renderContact(props, onClick,slot) {
@@ -363,7 +368,7 @@ export default {
           class={{
             "lemon-contact--active": this.currentContactId == props.contact.id
           }}
-          v-dropdown_contact={this.contactContextmenu}
+          v-lemon-contextmenu_contact={this.contactContextmenu}
           props={props}
           on-click={click}
           scopedSlots={{default:slot}}
@@ -374,7 +379,7 @@ export default {
       let prevIndex;
       return this._renderSidebar(
         [
-          useScopedSlot(this.$scopedSlots["sidebar-contact-top"]),
+          useScopedSlot(this.$scopedSlots["sidebar-contact-top"],null,this),
           this.contacts.map(contact => {
             if (!contact.index) return;
             contact.index = contact.index.replace(/\[[0-9]*\]/, "");
@@ -397,13 +402,19 @@ export default {
             return node;
           })
         ],
-        DEFAULT_MENU_CONTACTS
+        DEFAULT_MENU_CONTACTS,
+        useScopedSlot(this.$scopedSlots["sidebar-contact-fixedtop"],null,this)
       );
     },
-    _renderSidebar(children, name) {
+    _renderSidebar(children, name,fixedtop) {
       return (
         <div class="lemon-sidebar" v-show={this.activeSidebar == name} on-scroll={this._handleSidebarScroll}>
-          {children}
+          <div class="lemon-sidebar__fixed-top">
+            {fixedtop}
+          </div>
+          <div class="lemon-sidebar__scroll">
+            {children}
+          </div>
         </div>
       );
     },
@@ -514,14 +525,13 @@ export default {
       return nodes;
     },
     _handleSidebarScroll(){
-      dropdown.hide();
+      contextmenu.hide();
     },
     _addContact(data, t) {
       const type = {
         0: "unshift",
         1: "push"
       }[t];
-      //this.contacts[type](cloneDeep(data));
       this.contacts[type](data);
     },
     _addMessage(data, contactId, t) {
@@ -553,13 +563,16 @@ export default {
      * @param {String} str 被替换的字符串
      * @return {String} 替换后的字符串
      */
-    replaceEmojiName(str) {
+    emojiNameToImage(str) {
       return str.replace(/\[!(\w+)\]/gi, (str, match) => {
         const file = match;
         return emojiMap[file]
-          ? `<img src="${emojiMap[file]}" />`
+          ? `<img emoji-name="${match}" src="${emojiMap[file]}" />`
           : `[!${match}]`;
       });
+    },
+    emojiImageToName(str){
+      return str.replace(/<img emoji-name=\"([^\"]*?)\" [^>]*>/gi, "[!$1]")
     },
     updateCurrentMessages(){
       if(!allMessages[this.currentContactId]) allMessages[this.currentContactId] = []
@@ -581,13 +594,36 @@ export default {
       }else{
        if(this._changeContactLock || this.currentContactId == contactId) return false; 
       }
+      const prevCurrentContactId = this.currentContactId;
+      //保存上个聊天目标的草稿
+      if(prevCurrentContactId){
+        const editorValue = this.getEditorValue();
+        if(editorValue){
+          this.CacheDraft.set(prevCurrentContactId,editorValue);
+          this.updateContact({
+            id:prevCurrentContactId,
+            lastContent:[
+              <span style="color:red;">[草稿]</span>,
+              <span domProps={{
+                innerHTML:this.lastContentRender({type:'text',content:editorValue})
+              }}></span>
+            ],
+          });
+          this.setEditorValue('');
+        }
+      }
 
       this.currentContactId = contactId;
       if(!this.currentContactId) return false;
+
       this.$emit("change-contact", this.currentContact,this);
       if (isFunction(this.currentContact.renderContainer)) {
         return;
       }
+      //填充草稿内容
+      const draft = this.CacheDraft.get(contactId) || "";
+      if(draft) this.setEditorValue(draft);
+
       
       if (this.CacheMessageLoaded.has(contactId)) {
         this.$refs.messages.loaded();
@@ -785,6 +821,8 @@ export default {
       const index = this.findContactIndexById(id);
       if(index === -1) return false;
       this.contacts.splice(index,1);
+      this.CacheDraft.remove(id);
+      this.CacheMessageLoaded.remove(id);
       return true;
     },
     /**
@@ -850,7 +888,7 @@ export default {
       return this.currentMessages;
     },
     setEditorValue(val){
-      this.$refs.editor.setValue(this.replaceEmojiName(val));
+      this.$refs.editor.setValue(this.emojiNameToImage(val));
     },
     getEditorValue(){
       return this.$refs.editor.getFormatValue();
@@ -933,8 +971,12 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 +b(lemon-sidebar)
   width 250px
   background #efefef
-  overflow-y auto
-  scrollbar-light()
+  display flex
+  flex-direction column
+  +e(scroll){
+    overflow-y auto
+    scrollbar-light()
+  }
   +e(label)
     padding 6px 14px 6px 14px
     color #666
@@ -1014,7 +1056,11 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   .lemon-menu
   .lemon-sidebar
     display none
-+b(lemon-dropdown)
+.lemon-wrapper--simple
+  .lemon-menu
+  .lemon-sidebar
+    display none
++b(lemon-contextmenu)
   border-radius 4px
   font-size 14px
   font-variant tabular-nums
@@ -1022,21 +1068,22 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   color rgba(0, 0, 0, 0.65)
   z-index 10
   background-color #fff
-  border-radius 4px
+  border-radius 6px
   box-shadow 0 2px 8px rgba(0, 0, 0, 0.06)
   position absolute
   transform-origin 50% 150%
   box-sizing border-box
   user-select none
   overflow hidden
+  min-width 120px
   +e(item)
-    font-size 12px
-    line-height 14px
-    padding 8px 10px
+    font-size 14px
+    line-height 16px
+    padding 10px 15px
     cursor pointer
     display flex
     align-items center
-    color #444
+    color #333
     > span
       display inline-block
       flex none

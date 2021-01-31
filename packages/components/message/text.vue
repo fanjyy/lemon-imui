@@ -10,7 +10,7 @@ export default {
         props={{ ...this.$attrs }}
         scopedSlots={{
           content: props => {
-            const content = this.IMUI.replaceEmojiName(props.content);
+            const content = this.IMUI.emojiNameToImage(props.content);
             return <span domProps={{ innerHTML: content }} />;
           }
         }}

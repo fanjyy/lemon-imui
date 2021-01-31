@@ -7,7 +7,7 @@ export default {
     return "[图片]";
   },
   text(message) {
-    return this.replaceEmojiName(clearHtml(message.content));
+    return this.emojiNameToImage(clearHtml(message.content));
   },
   event(message){
     return '[通知]';

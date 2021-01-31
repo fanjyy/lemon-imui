@@ -11,7 +11,7 @@
         <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=xzUa9CPYQ5KCNQ86h7ep4Z3TtkqJxRZE&jump_from=webapi">QQ交流群：1081773406</a>
       </div>
       <br/>
-      <div><a style="font-size:14px;" href="#help1">1.如何创建自定义消息？</a></div>
+      <div><a style="font-size:14px;" href="#help1">1.如何创建消息？</a></div>
       <div><a style="font-size:14px;" href="#help2">2.如何对接后端接口？</a></div>
     </div>
     <div class="imui-center">
@@ -49,7 +49,7 @@
         <lemon-button @click="appendEventMessage">发送 event 消息</lemon-button>
         <lemon-button @click="removeMessage">删除最近一条消息</lemon-button>
         <lemon-button @click="updateMessage">修改消息</lemon-button>
-        <lemon-button @click="appendCustomMessage">发送自定义消息</lemon-button>
+        <lemon-button @click="appendCustomMessage">发送消息</lemon-button>
         <br/>
         <lemon-button @click="updateContact">修改联系人信息</lemon-button>
         <lemon-button @click="changeMenuVisible">切换导航显示</lemon-button>
@@ -96,7 +96,7 @@
         </template>
 
         <template #contact-info="contact">
-          自定义联系人信息 {{ contact.displayName }}
+          自定义通讯录信息 {{ contact.displayName }}
         </template>
         <template #sidebar-message="contact">
           <lemon-badge :count="contact.unread" style="width:100%">
@@ -110,10 +110,16 @@
           <span>{{ contact.displayName }}</span>
         </template>
         <template #sidebar-message-top>
-          <div class="bar">自定义消息顶部</div>
+          <div class="bar">最新消息顶部</div>
         </template>
         <template #sidebar-contact-top>
-          <div class="bar">自定义联系人顶部</div>
+          <div class="bar">联系人顶部</div>
+        </template>
+        <template #sidebar-message-fixedtop>
+          <div class="bar">最新消息顶部 Fixed</div>
+        </template>
+        <template #sidebar-contact-fixedtop>
+          <div class="bar">联系人顶部 Fixed</div>
         </template>
       </lemon-imui>
     </div>
@@ -128,6 +134,7 @@
         :user="user"
         ref="SimpleIMUI"
         width="340px"
+        :avatar-cricle="true"
         simple
         @pull-messages="handlePullMessages"
         @message-click="handleMessageClick"
@@ -361,6 +368,13 @@
           <td width="350">主题</td>
           <td width="150">default | blue</td>
           <td width="100">default</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td width="150">avatarCricle</td>
+          <td width="350">使用圆形头像</td>
+          <td width="150">Boolean</td>
+          <td width="100">false</td>
           <td></td>
         </tr>
         <tr>
@@ -722,13 +736,23 @@
         </tr>
         <tr>
           <td width="150">sidebar-message-top</td>
-          <td width="350">左侧最新消息列表的顶部</td>
-          <td width="150">-</td>
+          <td width="350">左侧最新消息列表的顶部，会随列表滚动</td>
+          <td width="150">instance</td>
         </tr>
         <tr>
           <td width="150">sidebar-contact-top</td>
-          <td width="350">左侧联系人列表的顶部</td>
-          <td width="150">-</td>
+          <td width="350">左侧联系人列表的顶部，会随列表滚动</td>
+          <td width="150">instance</td>
+        </tr>
+        <tr>
+          <td width="150">sidebar-message-fixedtop</td>
+          <td width="350">固定在左侧最新消息列表的顶部</td>
+          <td width="150">instance</td>
+        </tr>
+        <tr>
+          <td width="150">sidebar-contact-fixedtop</td>
+          <td width="350">固定在左侧联系人列表的顶部</td>
+          <td width="150">instance</td>
         </tr>
         <tr>
           <td width="150">contact-info</td>
@@ -776,9 +800,9 @@
         </tr>
       </table>
 
-      <div class="title" id="help1">如何创建自定义消息？</div>
+      <div class="title" id="help1">如何创建消息？</div>
       <div>
-        <p>Lemon-IMUI 目前内置了file、image、text、event四种消息类型，在实际应用当中肯定是不够的哦，咋办？没事的，我们继续往下see。<br/>要创建自定义消息首先要确定新消息的 Message 结构。</p>
+        <p>Lemon-IMUI 目前内置了file、image、text、event四种消息类型，在实际应用当中肯定是不够的哦，咋办？没事的，我们继续往下see。<br/>要创建消息首先要确定新消息的 Message 结构。</p>
         <pre>
 {
   //值为 voice，用于解析的组件 name 必须为 lemonMessageVoice
@@ -1091,6 +1115,10 @@ export default {
     };
   },
   mounted() {
+
+    
+
+
 
     const contactData1 = {
       id: "contact-1",

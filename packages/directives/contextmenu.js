@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import {isFunction,isEmpty} from 'utils/validate';
+import LemonPopover from '../components/popover.vue';
 let popover;
 
 const hidePopover = ()=>{
@@ -17,13 +18,14 @@ export default{
     el.addEventListener('contextmenu',(e)=>{
       if(isEmpty(binding.value) || !Array.isArray(binding.value)) return;
       e.preventDefault();
+      LemonPopover.methods.closeAll()
       let component;
       let visibleItems = []
       if(binding.modifiers.message) component = vnode.context;
       else if(binding.modifiers.contact) component = vnode.child;
       if(!popover){
         popover = document.createElement('div');
-        popover.className = 'lemon-dropdown';
+        popover.className = 'lemon-contextmenu';
         document.body.appendChild(popover);
       }
       popover.innerHTML = binding.value.map((item)=>{
@@ -36,8 +38,8 @@ export default{
 
         if(visible){
           visibleItems.push(item);
-          const icon = item.icon ? `<i class="lemon-dropdown__icon ${item.icon}"></i>` : '';
-          return `<div style="color:${item.color}" title="${item.text}" class="lemon-dropdown__item">${icon}<span>${item.text}</span></div>`;
+          const icon = item.icon ? `<i class="lemon-contextmenu__icon ${item.icon}"></i>` : '';
+          return `<div style="color:${item.color}" title="${item.text}" class="lemon-contextmenu__item">${icon}<span>${item.text}</span></div>`;
         }
         return '';
       }).join("");

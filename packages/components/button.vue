@@ -2,12 +2,16 @@
 export default {
   name: "LemonButton",
   props: {
+    color:{
+      type:String,
+      default:'default'
+    },
     disabled: Boolean
   },
   render() {
     return (
       <button
-        class="lemon-button"
+        class={['lemon-button',`lemon-button--color-${this.color}`]}
         disabled={this.disabled}
         type="button"
         on-click={this._handleClick}
@@ -47,13 +51,20 @@ export default {
   background-color #fff
   box-shadow 0 2px 0 rgba(0, 0, 0, 0.015)
   text-shadow 0 -1px 0 rgba(0, 0, 0, 0.12)
-  &:hover:not([disabled])
-    border-color #666
-    color #333
-  &:active
-    background-color #ddd
-  &[disabled]
-    cursor not-allowed
-    color #aaa
-    background #eee
+  +m(color-default)
+    &:hover:not([disabled])
+      border-color #666
+      color #333
+    &:active
+      background-color #ddd
+    &[disabled]
+      cursor not-allowed
+      color #aaa
+      background #eee
+  +m(color-grey)
+    background #e1e1e1
+    border-color #e1e1e1
+    color #666
+    &:hover:not([disabled])
+      border-color #bbb
 </style>

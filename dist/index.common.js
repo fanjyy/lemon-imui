@@ -5642,6 +5642,136 @@ var es7_array_includes = __webpack_require__("6762");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.string.includes.js
 var es6_string_includes = __webpack_require__("2fdb");
 
+// EXTERNAL MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
+var external_commonjs_vue_commonjs2_vue_root_Vue_ = __webpack_require__("8bbf");
+var external_commonjs_vue_commonjs2_vue_root_Vue_default = /*#__PURE__*/__webpack_require__.n(external_commonjs_vue_commonjs2_vue_root_Vue_);
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es6.regexp.constructor.js
+var es6_regexp_constructor = __webpack_require__("3b2b");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es7.object.values.js
+var es7_object_values = __webpack_require__("8615");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es6.regexp.to-string.js
+var es6_regexp_to_string = __webpack_require__("6b54");
+
+// CONCATENATED MODULE: ./packages/utils/validate.js
+
+
+
+
+
+function isPlainObject(obj) {
+  return Object.prototype.toString.call(obj) === "[object Object]";
+}
+function isString(str) {
+  return typeof str == "string";
+}
+function isToday(time) {
+  return new Date().getTime() - time < 86400000;
+}
+function isEmpty(obj) {
+  if (!obj) return true;
+  if (Array.isArray(obj) && obj.length == 0) return true;
+  if (isPlainObject(obj) && Object.values(obj).length == 0) return true;
+  return false;
+}
+function isUrl(str) {
+  var reg = "^((https|http|ftp|rtsp|mms)?://)" + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" + //ftp的user@
+  "(([0-9]{1,3}.){3}[0-9]{1,3}" + // IP形式的URL- 199.194.52.184
+  "|" + // 允许IP和DOMAIN（域名）
+  "([0-9a-z_!~*'()-]+.)*" + // 域名- www.
+  "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]." + // 二级域名
+  "[a-z]{2,6})" + // first level domain- .com or .museum
+  "(:[0-9]{1,4})?" + // 端口- :80
+  "((/?)|" + // 如果没有文件名，则不需要斜杠
+  "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+  return new RegExp(reg).test(str) ? true : false;
+}
+function isFunction(val) {
+  return val && typeof val === "function";
+}
+function isEng(val) {
+  return /^[A-Za-z]+$/.test(val);
+}
+// CONCATENATED MODULE: ./packages/directives/contextmenu.js
+
+
+
+
+var popover;
+
+var hidePopover = function hidePopover() {
+  if (popover) popover.style.display = 'none';
+};
+
+var showPopover = function showPopover() {
+  if (popover) popover.style.display = 'block';
+};
+
+document.addEventListener('click', function (e) {
+  hidePopover();
+});
+/* harmony default export */ var contextmenu = ({
+  hide: hidePopover,
+  bind: function bind(el, binding, vnode) {
+    el.addEventListener('contextmenu', function (e) {
+      if (isEmpty(binding.value) || !Array.isArray(binding.value)) return;
+      e.preventDefault();
+      components_popover.methods.closeAll();
+      var component;
+      var visibleItems = [];
+      if (binding.modifiers.message) component = vnode.context;else if (binding.modifiers.contact) component = vnode.child;
+
+      if (!popover) {
+        popover = document.createElement('div');
+        popover.className = 'lemon-contextmenu';
+        document.body.appendChild(popover);
+      }
+
+      popover.innerHTML = binding.value.map(function (item) {
+        var visible;
+
+        if (isFunction(item.visible)) {
+          visible = item.visible(component);
+        } else {
+          visible = item.visible === undefined ? true : item.visible;
+        }
+
+        if (visible) {
+          visibleItems.push(item);
+          var icon = item.icon ? "<i class=\"lemon-contextmenu__icon ".concat(item.icon, "\"></i>") : '';
+          return "<div style=\"color:".concat(item.color, "\" title=\"").concat(item.text, "\" class=\"lemon-contextmenu__item\">").concat(icon, "<span>").concat(item.text, "</span></div>");
+        }
+
+        return '';
+      }).join("");
+      popover.style.top = "".concat(e.pageY, "px");
+      popover.style.left = "".concat(e.pageX, "px");
+      popover.childNodes.forEach(function (node, index) {
+        var _visibleItems$index = visibleItems[index],
+            click = _visibleItems$index.click,
+            _render = _visibleItems$index.render;
+        node.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (isFunction(click)) click(e, component, hidePopover);
+        });
+
+        if (isFunction(_render)) {
+          var ins = external_commonjs_vue_commonjs2_vue_root_Vue_default.a.extend({
+            render: function render(h) {
+              return _render(h, component, hidePopover);
+            }
+          });
+          var renderComponent = new ins().$mount();
+          node.querySelector('span').innerHTML = renderComponent.$el.outerHTML;
+        }
+      });
+      showPopover();
+    });
+  },
+  inserted: function inserted(el, binding, vnode) {}
+});
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./packages/components/popover.vue?vue&type=script&lang=js&
 
 
@@ -5651,12 +5781,6 @@ var es6_string_includes = __webpack_require__("2fdb");
 
 
 var popoverCloseQueue = [];
-
-var popoverCloseAll = function popoverCloseAll() {
-  return popoverCloseQueue.forEach(function (callback) {
-    return callback();
-  });
-};
 
 var triggerEvents = {
   hover: function hover(el) {},
@@ -5675,6 +5799,7 @@ var triggerEvents = {
 
     el.addEventListener("click", function (e) {
       e.stopPropagation();
+      contextmenu.hide();
 
       _this2.changeVisible();
     });
@@ -5731,8 +5856,6 @@ var triggerEvents = {
         }
       }
     }, [h("div", {
-      "class": "lemon-popover__title"
-    }), h("div", {
       "class": "lemon-popover__content"
     }, [this.$slots.content]), h("div", {
       "class": "lemon-popover__arrow"
@@ -5792,8 +5915,13 @@ var triggerEvents = {
       this.visible ? this.close() : this.open();
     },
     open: function open() {
-      popoverCloseAll();
+      this.closeAll();
       this.visible = true;
+    },
+    closeAll: function closeAll() {
+      popoverCloseQueue.forEach(function (callback) {
+        return callback();
+      });
     },
     close: function close() {
       this.visible = false;
@@ -5825,17 +5953,21 @@ var popover_component = normalizeComponent(
   
 )
 
-/* harmony default export */ var popover = (popover_component.exports);
+/* harmony default export */ var components_popover = (popover_component.exports);
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./packages/components/button.vue?vue&type=script&lang=js&
 /* harmony default export */ var buttonvue_type_script_lang_js_ = ({
   name: "LemonButton",
   props: {
+    color: {
+      type: String,
+      default: 'default'
+    },
     disabled: Boolean
   },
   render: function render() {
     var h = arguments[0];
     return h("button", {
-      "class": "lemon-button",
+      "class": ['lemon-button', "lemon-button--color-".concat(this.color)],
       "attrs": {
         "disabled": this.disabled,
         "type": "button"
@@ -5940,11 +6072,18 @@ var badge_component = normalizeComponent(
 
 /* harmony default export */ var avatarvue_type_script_lang_js_ = ({
   name: "LemonAvatar",
+  inject: ['IMUI'],
   props: {
     src: String,
     icon: {
       type: String,
       default: "lemon-icon-people"
+    },
+    circle: {
+      type: Boolean,
+      default: function _default() {
+        return this.IMUI ? this.IMUI.avatarCricle : false;
+      }
     },
     size: {
       type: Number,
@@ -5962,7 +6101,9 @@ var badge_component = normalizeComponent(
     var h = arguments[0];
     return h("span", {
       "style": this.style,
-      "class": "lemon-avatar",
+      "class": ['lemon-avatar', {
+        'lemon-avatar--circle': this.circle
+      }],
       "on": {
         "click": function click(e) {
           return _this.$emit("click", e);
@@ -6026,54 +6167,6 @@ var avatar_component = normalizeComponent(
 var helper = __webpack_require__("2638");
 var helper_default = /*#__PURE__*/__webpack_require__.n(helper);
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es6.regexp.constructor.js
-var es6_regexp_constructor = __webpack_require__("3b2b");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es7.object.values.js
-var es7_object_values = __webpack_require__("8615");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es6.regexp.to-string.js
-var es6_regexp_to_string = __webpack_require__("6b54");
-
-// CONCATENATED MODULE: ./packages/utils/validate.js
-
-
-
-
-
-function isPlainObject(obj) {
-  return Object.prototype.toString.call(obj) === "[object Object]";
-}
-function isString(str) {
-  return typeof str == "string";
-}
-function isToday(time) {
-  return new Date().getTime() - time < 86400000;
-}
-function isEmpty(obj) {
-  if (!obj) return true;
-  if (Array.isArray(obj) && obj.length == 0) return true;
-  if (isPlainObject(obj) && Object.values(obj).length == 0) return true;
-  return false;
-}
-function isUrl(str) {
-  var reg = "^((https|http|ftp|rtsp|mms)?://)" + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" + //ftp的user@
-  "(([0-9]{1,3}.){3}[0-9]{1,3}" + // IP形式的URL- 199.194.52.184
-  "|" + // 允许IP和DOMAIN（域名）
-  "([0-9a-z_!~*'()-]+.)*" + // 域名- www.
-  "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]." + // 二级域名
-  "[a-z]{2,6})" + // first level domain- .com or .museum
-  "(:[0-9]{1,4})?" + // 端口- :80
-  "((/?)|" + // 如果没有文件名，则不需要斜杠
-  "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
-  return new RegExp(reg).test(str) ? true : false;
-}
-function isFunction(val) {
-  return val && typeof val === "function";
-}
-function isEng(val) {
-  return /^[A-Za-z]+$/.test(val);
-}
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es7.object.get-own-property-descriptors.js
 var es7_object_get_own_property_descriptors = __webpack_require__("8e6e");
 
@@ -6222,9 +6315,6 @@ function mergeDeep(o1, o2) {
   }
 
   return o1;
-}
-function toEmojiName(str) {
-  return str.replace(/<img emoji-name=\"([^\"]*?)\" [^>]*>/gi, "[!$1]");
 }
 function formatByte(value) {
   if (null == value || value == "") {
@@ -6426,13 +6516,18 @@ var isInitTool = false;
     }
   },
   data: function data() {
+    this.clipboardBlob = null;
     return {
+      //剪切板图片URL
+      clipboardUrl: '',
       submitDisabled: true,
       proxyTools: [],
       accept: ""
     };
   },
   created: function created() {
+    var _this = this;
+
     if (this.tools && this.tools.length > 0) {
       this.initTools(this.tools);
     } else {
@@ -6444,9 +6539,13 @@ var isInitTool = false;
         name: 'uploadImage'
       }]);
     }
+
+    this.IMUI.$on('change-contact', function () {
+      _this.closeClipboardImage();
+    });
   },
   render: function render() {
-    var _this = this;
+    var _this2 = this;
 
     var h = arguments[0];
     var toolLeft = [];
@@ -6468,7 +6567,7 @@ var isInitTool = false;
           "class": "lemon-editor__emoji"
         }, [h("template", {
           "slot": "content"
-        }, [_this._renderEmojiTabs()]), h("div", {
+        }, [_this2._renderEmojiTabs()]), h("div", {
           "class": classes,
           "attrs": {
             "title": title
@@ -6494,7 +6593,27 @@ var isInitTool = false;
     });
     return h("div", {
       "class": "lemon-editor"
-    }, [h("input", {
+    }, [this.clipboardUrl && h("div", {
+      "class": "lemon-editor__clipboard-image"
+    }, [h("img", {
+      "attrs": {
+        "src": this.clipboardUrl
+      }
+    }), h("div", [h("lemon-button", {
+      "style": {
+        marginRight: '10px'
+      },
+      "on": {
+        "click": this.closeClipboardImage
+      },
+      "attrs": {
+        "color": "grey"
+      }
+    }, ["\u53D6\u6D88"]), h("lemon-button", {
+      "on": {
+        "click": this.sendClipboardImage
+      }
+    }, ["\u53D1\u9001\u56FE\u7247"])])]), h("input", {
       "style": "display:none",
       "attrs": {
         "type": "file",
@@ -6542,11 +6661,21 @@ var isInitTool = false;
     }, [this.sendText])])])]);
   },
   methods: {
+    closeClipboardImage: function closeClipboardImage() {
+      this.clipboardUrl = '';
+      this.clipboardBlob = null;
+    },
+    sendClipboardImage: function sendClipboardImage() {
+      if (!this.clipboardBlob) return;
+      this.$emit("upload", this.clipboardBlob);
+      this.closeClipboardImage();
+    },
+
     /**
      * 初始化工具栏
      */
     initTools: function initTools(data) {
-      var _this2 = this;
+      var _this3 = this;
 
       var h = this.$createElement;
       if (!data) return;
@@ -6563,7 +6692,7 @@ var isInitTool = false;
         name: 'uploadFile',
         title: "文件上传",
         click: function click() {
-          return _this2.selectFile("*");
+          return _this3.selectFile("*");
         },
         render: function render(menu) {
           return h("i", {
@@ -6574,7 +6703,7 @@ var isInitTool = false;
         name: 'uploadImage',
         title: "图片上传",
         click: function click() {
-          return _this2.selectFile("image/*");
+          return _this3.selectFile("image/*");
         },
         render: function render(menu) {
           return h("i", {
@@ -6619,7 +6748,7 @@ var isInitTool = false;
       this._saveLastRange();
     },
     _renderEmojiTabs: function _renderEmojiTabs() {
-      var _this3 = this;
+      var _this4 = this;
 
       var h = this.$createElement;
 
@@ -6633,7 +6762,7 @@ var isInitTool = false;
             "class": "lemon-editor__emoji-item",
             "on": {
               "click": function click() {
-                return _this3._handleSelectEmoji(item);
+                return _this4._handleSelectEmoji(item);
               }
             }
           });
@@ -6703,11 +6832,35 @@ var isInitTool = false;
       var clipboardData = e.clipboardData || window.clipboardData;
       var text = clipboardData.getData("Text");
 
-      if (window.clipboardData) {
-        this.$refs.textarea.innerHTML = text;
+      if (text) {
+        if (window.clipboardData) {
+          this.$refs.textarea.innerHTML = text;
+        } else {
+          exec(text, "insertText");
+        }
       } else {
-        exec(text, "insertText");
+        var _this$_getClipboardBl = this._getClipboardBlob(clipboardData),
+            blob = _this$_getClipboardBl.blob,
+            blobUrl = _this$_getClipboardBl.blobUrl;
+
+        this.clipboardBlob = blob;
+        this.clipboardUrl = blobUrl;
       }
+    },
+    _getClipboardBlob: function _getClipboardBlob(clipboard) {
+      var blob, blobUrl;
+
+      for (var i = 0; i < clipboard.items.length; ++i) {
+        if (clipboard.items[i].kind == 'file' && clipboard.items[i].type.indexOf('image/') !== -1) {
+          blob = clipboard.items[i].getAsFile();
+          blobUrl = (window.URL || window.webkitURL).createObjectURL(blob);
+        }
+      }
+
+      return {
+        blob: blob,
+        blobUrl: blobUrl
+      };
     },
     _handleKeyup: function _handleKeyup(e) {
       this._saveLastRange();
@@ -6726,7 +6879,7 @@ var isInitTool = false;
       //     .replace(/<div>|<p>/g, "\r\n")
       //     .replace(/<\/div>|<\/p>/g, "")
       // );
-      return toEmojiName(this.$refs.textarea.innerHTML);
+      return this.IMUI.emojiImageToName(this.$refs.textarea.innerHTML);
     },
     _checkSubmitDisabled: function _checkSubmitDisabled() {
       this.submitDisabled = !clearHtmlExcludeImg(this.$refs.textarea.innerHTML.trim());
@@ -6739,11 +6892,11 @@ var isInitTool = false;
       this._checkSubmitDisabled();
     },
     _handleChangeFile: function _handleChangeFile(e) {
-      var _this4 = this;
+      var _this5 = this;
 
       var fileInput = this.$refs.fileInput;
       Array.from(fileInput.files).forEach(function (file) {
-        _this4.$emit("upload", file);
+        _this5.$emit("upload", file);
       });
       fileInput.value = "";
     },
@@ -6755,7 +6908,7 @@ var isInitTool = false;
       this.$forceUpdate();
     },
     setValue: function setValue(val) {
-      this.$refs.textarea.innerHTML = val;
+      this.$refs.textarea.innerHTML = this.IMUI.emojiNameToImage(val);
 
       this._checkSubmitDisabled();
     }
@@ -6787,86 +6940,6 @@ var editor_component = normalizeComponent(
 )
 
 /* harmony default export */ var editor = (editor_component.exports);
-// EXTERNAL MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
-var external_commonjs_vue_commonjs2_vue_root_Vue_ = __webpack_require__("8bbf");
-var external_commonjs_vue_commonjs2_vue_root_Vue_default = /*#__PURE__*/__webpack_require__.n(external_commonjs_vue_commonjs2_vue_root_Vue_);
-
-// CONCATENATED MODULE: ./packages/directives/dropdown.js
-
-
-
-var dropdown_popover;
-
-var hidePopover = function hidePopover() {
-  if (dropdown_popover) dropdown_popover.style.display = 'none';
-};
-
-var showPopover = function showPopover() {
-  if (dropdown_popover) dropdown_popover.style.display = 'block';
-};
-
-document.addEventListener('click', function (e) {
-  hidePopover();
-});
-/* harmony default export */ var dropdown = ({
-  hide: hidePopover,
-  bind: function bind(el, binding, vnode) {
-    el.addEventListener('contextmenu', function (e) {
-      if (isEmpty(binding.value) || !Array.isArray(binding.value)) return;
-      e.preventDefault();
-      var component;
-      var visibleItems = [];
-      if (binding.modifiers.message) component = vnode.context;else if (binding.modifiers.contact) component = vnode.child;
-
-      if (!dropdown_popover) {
-        dropdown_popover = document.createElement('div');
-        dropdown_popover.className = 'lemon-dropdown';
-        document.body.appendChild(dropdown_popover);
-      }
-
-      dropdown_popover.innerHTML = binding.value.map(function (item) {
-        var visible;
-
-        if (isFunction(item.visible)) {
-          visible = item.visible(component);
-        } else {
-          visible = item.visible === undefined ? true : item.visible;
-        }
-
-        if (visible) {
-          visibleItems.push(item);
-          var icon = item.icon ? "<i class=\"lemon-dropdown__icon ".concat(item.icon, "\"></i>") : '';
-          return "<div style=\"color:".concat(item.color, "\" title=\"").concat(item.text, "\" class=\"lemon-dropdown__item\">").concat(icon, "<span>").concat(item.text, "</span></div>");
-        }
-
-        return '';
-      }).join("");
-      dropdown_popover.style.top = "".concat(e.pageY, "px");
-      dropdown_popover.style.left = "".concat(e.pageX, "px");
-      dropdown_popover.childNodes.forEach(function (node, index) {
-        var _visibleItems$index = visibleItems[index],
-            click = _visibleItems$index.click,
-            _render = _visibleItems$index.render;
-        node.addEventListener('click', function (e) {
-          e.stopPropagation();
-          if (isFunction(click)) click(e, component, hidePopover);
-        });
-
-        if (isFunction(_render)) {
-          var ins = external_commonjs_vue_commonjs2_vue_root_Vue_default.a.extend({
-            render: function render(h) {
-              return _render(h, component, hidePopover);
-            }
-          });
-          var renderComponent = new ins().$mount();
-          node.querySelector('span').innerHTML = renderComponent.$el.outerHTML;
-        }
-      });
-      showPopover();
-    });
-  },
-  inserted: function inserted(el, binding, vnode) {}
-});
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./packages/components/messages.vue?vue&type=script&lang=js&
 
 
@@ -6998,7 +7071,7 @@ document.addEventListener('click', function (e) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 target = e.target;
-                dropdown.hide();
+                contextmenu.hide();
 
                 if (!(target.scrollTop == 0 && this._loading == false && this._loadend == false)) {
                   _context2.next = 8;
@@ -7199,7 +7272,7 @@ var messages_component = normalizeComponent(
       "class": "lemon-message__content-flex"
     }, [h("div", {
       "directives": [{
-        name: "dropdown",
+        name: "lemon-contextmenu",
         value: this.IMUI.contextmenu,
         modifiers: {
           "message": true
@@ -7277,6 +7350,7 @@ var basic_component = normalizeComponent(
 
 
 
+
 function textvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function textvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { textvue_type_script_lang_js_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { textvue_type_script_lang_js_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -7296,7 +7370,7 @@ function textvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < 
     }, {
       "scopedSlots": {
         content: function content(props) {
-          var content = _this.IMUI.replaceEmojiName(props.content);
+          var content = _this.IMUI.emojiNameToImage(props.content);
 
           return h("span", helper_default()([{}, {
             "domProps": {
@@ -7595,7 +7669,7 @@ var CONTACT_TYPE = ["many", "single"];
     return "[图片]";
   },
   text: function text(message) {
-    return this.replaceEmojiName(clearHtml(message.content));
+    return this.emojiNameToImage(clearHtml(message.content));
   },
   event: function event(message) {
     return '[通知]';
@@ -7692,6 +7766,7 @@ function () {
 
 
 
+
 function componentsvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { componentsvue_type_script_lang_js_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { componentsvue_type_script_lang_js_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -7769,6 +7844,7 @@ var renderDrawerContent = function renderDrawerContent() {};
     sendText: String,
     contextmenu: Array,
     contactContextmenu: Array,
+    avatarCricle: Boolean,
     user: {
       type: Object,
       default: function _default() {
@@ -7780,6 +7856,7 @@ var renderDrawerContent = function renderDrawerContent() {};
     this.CacheContactContainer = new memory_MemoryCache();
     this.CacheMenuContainer = new memory_MemoryCache();
     this.CacheMessageLoaded = new memory_MemoryCache();
+    this.CacheDraft = new memory_MemoryCache();
     return {
       drawerVisible: !this.hideDrawer,
       currentContactId: null,
@@ -7896,6 +7973,8 @@ var renderDrawerContent = function renderDrawerContent() {};
           if (scrollToBottom == true) {
             this.messageViewToBottom();
           }
+
+          this.CacheDraft.remove(message.toContactId);
         } else {
           updateContact.unread = '+1';
         }
@@ -7930,6 +8009,8 @@ var renderDrawerContent = function renderDrawerContent() {};
           lastContent: _this4.lastContentRender(message),
           lastSendTime: message.sendTime
         });
+
+        _this4.CacheDraft.remove(message.toContactId);
       });
     },
     _handleUpload: function _handleUpload(file) {
@@ -8074,14 +8155,14 @@ var renderDrawerContent = function renderDrawerContent() {};
     _renderSidebarMessage: function _renderSidebarMessage() {
       var _this9 = this;
 
-      return this._renderSidebar([useScopedSlot(this.$scopedSlots["sidebar-message-top"]), this.lastMessages.map(function (contact) {
+      return this._renderSidebar([useScopedSlot(this.$scopedSlots["sidebar-message-top"], null, this), this.lastMessages.map(function (contact) {
         return _this9._renderContact({
           contact: contact,
           timeFormat: _this9.contactTimeFormat
         }, function () {
           return _this9.changeContact(contact.id);
         }, _this9.$scopedSlots["sidebar-message"]);
-      })], DEFAULT_MENU_LASTMESSAGES);
+      })], DEFAULT_MENU_LASTMESSAGES, useScopedSlot(this.$scopedSlots["sidebar-message-fixedtop"], null, this));
     },
     _renderContact: function _renderContact(props, onClick, slot) {
       var _this10 = this;
@@ -8105,7 +8186,7 @@ var renderDrawerContent = function renderDrawerContent() {};
           "lemon-contact--active": this.currentContactId == props.contact.id
         },
         "directives": [{
-          name: "dropdown",
+          name: "lemon-contextmenu",
           value: this.contactContextmenu,
           modifiers: {
             "contact": true
@@ -8127,7 +8208,7 @@ var renderDrawerContent = function renderDrawerContent() {};
 
       var h = this.$createElement;
       var prevIndex;
-      return this._renderSidebar([useScopedSlot(this.$scopedSlots["sidebar-contact-top"]), this.contacts.map(function (contact) {
+      return this._renderSidebar([useScopedSlot(this.$scopedSlots["sidebar-contact-top"], null, this), this.contacts.map(function (contact) {
         if (!contact.index) return;
         contact.index = contact.index.replace(/\[[0-9]*\]/, "");
         var node = [contact.index !== prevIndex && h("p", {
@@ -8140,9 +8221,9 @@ var renderDrawerContent = function renderDrawerContent() {};
         }, _this11.$scopedSlots["sidebar-contact"])];
         prevIndex = contact.index;
         return node;
-      })], DEFAULT_MENU_CONTACTS);
+      })], DEFAULT_MENU_CONTACTS, useScopedSlot(this.$scopedSlots["sidebar-contact-fixedtop"], null, this));
     },
-    _renderSidebar: function _renderSidebar(children, name) {
+    _renderSidebar: function _renderSidebar(children, name, fixedtop) {
       var h = this.$createElement;
       return h("div", {
         "class": "lemon-sidebar",
@@ -8153,7 +8234,11 @@ var renderDrawerContent = function renderDrawerContent() {};
         "on": {
           "scroll": this._handleSidebarScroll
         }
-      }, [children]);
+      }, [h("div", {
+        "class": "lemon-sidebar__fixed-top"
+      }, [fixedtop]), h("div", {
+        "class": "lemon-sidebar__scroll"
+      }, [children])]);
     },
     _renderDrawer: function _renderDrawer() {
       var h = this.$createElement;
@@ -8266,14 +8351,13 @@ var renderDrawerContent = function renderDrawerContent() {};
       return nodes;
     },
     _handleSidebarScroll: function _handleSidebarScroll() {
-      dropdown.hide();
+      contextmenu.hide();
     },
     _addContact: function _addContact(data, t) {
       var type = {
         0: "unshift",
         1: "push"
-      }[t]; //this.contacts[type](cloneDeep(data));
-
+      }[t];
       this.contacts[type](data);
     },
     _addMessage: function _addMessage(data, contactId, t) {
@@ -8312,11 +8396,14 @@ var renderDrawerContent = function renderDrawerContent() {};
      * @param {String} str 被替换的字符串
      * @return {String} 替换后的字符串
      */
-    replaceEmojiName: function replaceEmojiName(str) {
+    emojiNameToImage: function emojiNameToImage(str) {
       return str.replace(/\[!(\w+)\]/gi, function (str, match) {
         var file = match;
-        return emojiMap[file] ? "<img src=\"".concat(emojiMap[file], "\" />") : "[!".concat(match, "]");
+        return emojiMap[file] ? "<img emoji-name=\"".concat(match, "\" src=\"").concat(emojiMap[file], "\" />") : "[!".concat(match, "]");
       });
+    },
+    emojiImageToName: function emojiImageToName(str) {
+      return str.replace(/<img emoji-name=\"([^\"]*?)\" [^>]*>/gi, "[!$1]");
     },
     updateCurrentMessages: function updateCurrentMessages() {
       if (!allMessages[this.currentContactId]) allMessages[this.currentContactId] = [];
@@ -8340,48 +8427,79 @@ var renderDrawerContent = function renderDrawerContent() {};
       regeneratorRuntime.mark(function _callee2(contactId, menuName) {
         var _this13 = this;
 
+        var h, prevCurrentContactId, editorValue, draft;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                h = this.$createElement;
+
                 if (!menuName) {
-                  _context2.next = 4;
+                  _context2.next = 5;
                   break;
                 }
 
                 this.changeMenu(menuName);
-                _context2.next = 6;
+                _context2.next = 7;
                 break;
 
-              case 4:
+              case 5:
                 if (!(this._changeContactLock || this.currentContactId == contactId)) {
-                  _context2.next = 6;
+                  _context2.next = 7;
                   break;
                 }
 
                 return _context2.abrupt("return", false);
 
-              case 6:
+              case 7:
+                prevCurrentContactId = this.currentContactId; //保存上个聊天目标的草稿
+
+                if (prevCurrentContactId) {
+                  editorValue = this.getEditorValue();
+
+                  if (editorValue) {
+                    this.CacheDraft.set(prevCurrentContactId, editorValue);
+                    this.updateContact({
+                      id: prevCurrentContactId,
+                      lastContent: [h("span", {
+                        "style": "color:red;"
+                      }, ["[\u8349\u7A3F]"]), h("span", helper_default()([{}, {
+                        "domProps": {
+                          innerHTML: this.lastContentRender({
+                            type: 'text',
+                            content: editorValue
+                          })
+                        }
+                      }]))]
+                    });
+                    this.setEditorValue('');
+                  }
+                }
+
                 this.currentContactId = contactId;
 
                 if (this.currentContactId) {
-                  _context2.next = 9;
+                  _context2.next = 12;
                   break;
                 }
 
                 return _context2.abrupt("return", false);
 
-              case 9:
+              case 12:
                 this.$emit("change-contact", this.currentContact, this);
 
                 if (!isFunction(this.currentContact.renderContainer)) {
-                  _context2.next = 12;
+                  _context2.next = 15;
                   break;
                 }
 
                 return _context2.abrupt("return");
 
-              case 12:
+              case 15:
+                //填充草稿内容
+                draft = this.CacheDraft.get(contactId) || "";
+                if (draft) this.setEditorValue(draft);
+
                 if (this.CacheMessageLoaded.has(contactId)) {
                   this.$refs.messages.loaded();
                 } else {
@@ -8402,7 +8520,7 @@ var renderDrawerContent = function renderDrawerContent() {};
                   }, 0);
                 }
 
-              case 14:
+              case 19:
               case "end":
                 return _context2.stop();
             }
@@ -8611,6 +8729,8 @@ var renderDrawerContent = function renderDrawerContent() {};
       var index = this.findContactIndexById(id);
       if (index === -1) return false;
       this.contacts.splice(index, 1);
+      this.CacheDraft.remove(id);
+      this.CacheMessageLoaded.remove(id);
       return true;
     },
 
@@ -8686,7 +8806,7 @@ var renderDrawerContent = function renderDrawerContent() {};
       return this.currentMessages;
     },
     setEditorValue: function setEditorValue(val) {
-      this.$refs.editor.setValue(this.replaceEmojiName(val));
+      this.$refs.editor.setValue(this.emojiNameToImage(val));
     },
     getEditorValue: function getEditorValue() {
       return this.$refs.editor.getFormatValue();
@@ -8744,7 +8864,7 @@ var common = __webpack_require__("6a2b");
 // CONCATENATED MODULE: ./packages/directives/index.js
 
 
-external_commonjs_vue_commonjs2_vue_root_Vue_default.a.directive('dropdown', dropdown);
+external_commonjs_vue_commonjs2_vue_root_Vue_default.a.directive('LemonContextmenu', contextmenu);
 // CONCATENATED MODULE: ./packages/index.js
 
 
@@ -8765,7 +8885,7 @@ external_commonjs_vue_commonjs2_vue_root_Vue_default.a.directive('dropdown', dro
 
 
 var version = "1.4.2";
-var packages_components = [components, components_contact, messages, editor, avatar, badge, components_button, popover, tabs, basic, message_text, message_image, file, message_event];
+var packages_components = [components, components_contact, messages, editor, avatar, badge, components_button, components_popover, tabs, basic, message_text, message_image, file, message_event];
 
 var install = function install(Vue) {
   var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};

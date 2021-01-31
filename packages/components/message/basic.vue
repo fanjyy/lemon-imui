@@ -67,7 +67,7 @@ export default {
           </div>
           <div class="lemon-message__content-flex">
             <div
-              v-dropdown_message={this.IMUI.contextmenu}
+              v-lemon-contextmenu_message={this.IMUI.contextmenu}
               class="lemon-message__content"
               on-click={e => {
                 this._emitClick(e, "content");

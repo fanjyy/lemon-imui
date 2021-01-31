@@ -1,6 +1,6 @@
 <script>
 const popoverCloseQueue = [];
-const popoverCloseAll = () => popoverCloseQueue.forEach(callback => callback());
+import contextmenu from "../directives/contextmenu";
 const triggerEvents = {
   hover(el) {},
   focus(el) {
@@ -14,6 +14,7 @@ const triggerEvents = {
   click(el) {
     el.addEventListener("click", e => {
       e.stopPropagation();
+      contextmenu.hide();
       this.changeVisible();
     });
   },
@@ -59,7 +60,6 @@ export default {
               style={this.popoverStyle}
               on-click={e => e.stopPropagation()}
             >
-              <div class="lemon-popover__title" />
               <div class="lemon-popover__content">{this.$slots.content}</div>
               <div class="lemon-popover__arrow" />
             </div>
@@ -96,8 +96,11 @@ export default {
       this.visible ? this.close() : this.open();
     },
     open() {
-      popoverCloseAll();
+      this.closeAll();
       this.visible = true;
+    },
+    closeAll(){
+      popoverCloseQueue.forEach(callback => callback())
     },
     close() {
       this.visible = false;

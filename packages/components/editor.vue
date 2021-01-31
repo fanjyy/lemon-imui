@@ -35,7 +35,10 @@ export default {
     },
   },
   data() {
+    this.clipboardBlob = null;
     return {
+      //剪切板图片URL
+      clipboardUrl:'',
       submitDisabled: true,
       proxyTools:[],
       accept: ""
@@ -47,6 +50,9 @@ export default {
     }else{
       this.initTools([{name:'emoji'},{name:'uploadFile'},{name:'uploadImage'}]);
     }
+    this.IMUI.$on('change-contact',()=>{
+      this.closeClipboardImage();
+    })
   },
   render() {
     const toolLeft = [];
@@ -74,6 +80,15 @@ export default {
     
     return (
       <div class="lemon-editor">
+        {this.clipboardUrl && <div class="lemon-editor__clipboard-image">
+          <img src={this.clipboardUrl} />
+          <div>
+            <lemon-button style={{marginRight:'10px'}} on-click={this.closeClipboardImage} color="grey">
+              取消
+            </lemon-button>
+            <lemon-button on-click={this.sendClipboardImage}>发送图片</lemon-button>
+          </div>
+        </div>}
         <input
           style="display:none"
           type="file"
@@ -115,6 +130,15 @@ export default {
     );
   },
   methods: {
+    closeClipboardImage(){
+      this.clipboardUrl = '';
+      this.clipboardBlob = null;
+    },
+    sendClipboardImage(){
+      if(!this.clipboardBlob) return;
+      this.$emit("upload", this.clipboardBlob);
+      this.closeClipboardImage();
+    },
     /**
      * 初始化工具栏
      */
@@ -224,11 +248,27 @@ export default {
       e.preventDefault();
       const clipboardData = e.clipboardData || window.clipboardData;
       const text = clipboardData.getData("Text");
-      if(window.clipboardData){
-        this.$refs.textarea.innerHTML = text;
+      if(text){
+        if(window.clipboardData){
+          this.$refs.textarea.innerHTML = text;
+        }else{
+          exec(text, "insertText");
+        }
       }else{
-        exec(text, "insertText");
+        const {blob,blobUrl} = this._getClipboardBlob(clipboardData);
+        this.clipboardBlob = blob;
+        this.clipboardUrl = blobUrl;
       }
+    },
+    _getClipboardBlob(clipboard){
+      let blob,blobUrl;
+      for (var i = 0; i < clipboard.items.length; ++i) {
+        if ( clipboard.items[i].kind == 'file' && clipboard.items[i].type.indexOf('image/') !== -1 ) {
+          blob = clipboard.items[i].getAsFile();
+          blobUrl = (window.URL || window.webkitURL).createObjectURL(blob);
+        }
+      }
+      return {blob,blobUrl};
     },
     _handleKeyup(e) {
       this._saveLastRange();
@@ -246,7 +286,7 @@ export default {
       //     .replace(/<div>|<p>/g, "\r\n")
       //     .replace(/<\/div>|<\/p>/g, "")
       // );
-      return toEmojiName(this.$refs.textarea.innerHTML);
+      return this.IMUI.emojiImageToName(this.$refs.textarea.innerHTML);
     },
     _checkSubmitDisabled() {
       this.submitDisabled = !clearHtmlExcludeImg(this.$refs.textarea.innerHTML.trim());
@@ -272,7 +312,7 @@ export default {
       this.$forceUpdate();
     },
     setValue(val){
-      this.$refs.textarea.innerHTML = val;
+      this.$refs.textarea.innerHTML = this.IMUI.emojiNameToImage(val);
       this._checkSubmitDisabled();
     },
   }
@@ -283,6 +323,7 @@ export default {
 gap = 10px;
 +b(lemon-editor)
   height 200px
+  position relative
   flex-column()
   +e(tool)
     display flex
@@ -317,6 +358,31 @@ gap = 10px;
     overflow-x hidden
     overflow-y auto
     scrollbar-light()
+  +e(clipboard-image)
+    position absolute
+    top 0
+    left 0
+    width 100%
+    height 100%
+    flex-column()
+    justify-content center
+    align-items center
+    background #f4f4f4
+    z-index 1
+    img 
+      max-height 66%
+      max-width 80%
+      background #e9e9e9
+      //box-shadow 0 0 20px rgba(0,0,0,0.15)
+      user-select none 
+      cursor pointer
+      border-radius 4px
+      margin-bottom 10px
+      border 3px dashed #ddd !important
+      box-sizing border-box
+    .clipboard-popover-title
+      font-size 14px
+      color #333
   +e(input)
     height 100%
     box-sizing border-box

@@ -103,9 +103,6 @@ export function mergeDeep(o1, o2) {
   return o1;
 }
 
-export function toEmojiName(str) {
-  return str.replace(/<img emoji-name=\"([^\"]*?)\" [^>]*>/gi, "[!$1]");
-}
 export function formatByte(value) {
   if (null == value || value == "") {
     return "0 Bytes";

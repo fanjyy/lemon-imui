@@ -29,6 +29,8 @@ export default {
         height 18px
         display inline-block
         background transparent
+        position relative
+        top -2px
         padding 0 2px
         vertical-align middle
 </style>

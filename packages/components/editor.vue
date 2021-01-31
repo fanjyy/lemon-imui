@@ -396,6 +396,8 @@ gap = 10px;
       height 20px
       padding 0 2px
       pointer-events none
+      position relative
+      top -1px
       vertical-align middle
   +e(footer)
     display flex

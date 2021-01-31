@@ -1048,9 +1048,9 @@ export default {
             id:generateRandId(),
             type:'event',
             //使用 jsx 时 click必须使用箭头函数（使上下文停留在vue内）
-            content:<span>你撤回了一条消息 <span v-show={message.type == 'text'} style="color:#333;cursor:pointer" content={message.content} on-click={(e)=>{
+            content:<div><span>你撤回了一条消息 <span v-show={message.type == 'text'} style="color:#333;cursor:pointer" content={message.content} on-click={(e)=>{
               IMUI.setEditorValue(e.target.getAttribute('content'));
-            }}>重新编辑</span></span>,
+            }}>重新编辑</span></span></div>,
 
             toContactId:message.toContactId,
             sendTime:getTime(),
@@ -1169,7 +1169,7 @@ export default {
     },2000);
 
     IMUI.setLastContentRender('event',(message)=>{
-      return '[有人邀请你加入群组]';
+      return `[自定义通知内容]`;
     });
 
     let contactList = [

@@ -8815,6 +8815,7 @@ var renderDrawerContent = function renderDrawerContent() {};
       return this.currentMessages;
     },
     setEditorValue: function setEditorValue(val) {
+      if (!isString(val)) return false;
       this.$refs.editor.setValue(this.emojiNameToImage(val));
     },
     getEditorValue: function getEditorValue() {

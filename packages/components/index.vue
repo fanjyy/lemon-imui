@@ -888,6 +888,7 @@ export default {
       return this.currentMessages;
     },
     setEditorValue(val){
+      if(!isString(val)) return false;
       this.$refs.editor.setValue(this.emojiNameToImage(val));
     },
     getEditorValue(){

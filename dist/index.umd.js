@@ -7775,7 +7775,6 @@ function () {
 
 
 
-
 function componentsvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { componentsvue_type_script_lang_js_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { componentsvue_type_script_lang_js_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -8436,31 +8435,29 @@ var renderDrawerContent = function renderDrawerContent() {};
       regeneratorRuntime.mark(function _callee2(contactId, menuName) {
         var _this13 = this;
 
-        var h, prevCurrentContactId, editorValue, draft;
+        var prevCurrentContactId, editorValue, draft;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                h = this.$createElement;
-
                 if (!menuName) {
-                  _context2.next = 5;
+                  _context2.next = 4;
                   break;
                 }
 
                 this.changeMenu(menuName);
-                _context2.next = 7;
+                _context2.next = 6;
                 break;
 
-              case 5:
+              case 4:
                 if (!(this._changeContactLock || this.currentContactId == contactId)) {
-                  _context2.next = 7;
+                  _context2.next = 6;
                   break;
                 }
 
                 return _context2.abrupt("return", false);
 
-              case 7:
+              case 6:
                 prevCurrentContactId = this.currentContactId; //保存上个聊天目标的草稿
 
                 if (prevCurrentContactId) {
@@ -8470,16 +8467,10 @@ var renderDrawerContent = function renderDrawerContent() {};
                     this.CacheDraft.set(prevCurrentContactId, editorValue);
                     this.updateContact({
                       id: prevCurrentContactId,
-                      lastContent: [h("span", {
-                        "style": "color:red;"
-                      }, ["[\u8349\u7A3F]"]), h("span", helper_default()([{}, {
-                        "domProps": {
-                          innerHTML: this.lastContentRender({
-                            type: 'text',
-                            content: editorValue
-                          })
-                        }
-                      }]))]
+                      lastContent: "<span style=\"color:red;\">[\u8349\u7A3F]</span><span>".concat(this.lastContentRender({
+                        type: 'text',
+                        content: editorValue
+                      }), "</span>")
                     });
                     this.setEditorValue('');
                   }
@@ -8488,23 +8479,23 @@ var renderDrawerContent = function renderDrawerContent() {};
                 this.currentContactId = contactId;
 
                 if (this.currentContactId) {
-                  _context2.next = 12;
+                  _context2.next = 11;
                   break;
                 }
 
                 return _context2.abrupt("return", false);
 
-              case 12:
+              case 11:
                 this.$emit("change-contact", this.currentContact, this);
 
                 if (!isFunction(this.currentContact.renderContainer)) {
-                  _context2.next = 15;
+                  _context2.next = 14;
                   break;
                 }
 
                 return _context2.abrupt("return");
 
-              case 15:
+              case 14:
                 //填充草稿内容
                 draft = this.CacheDraft.get(contactId) || "";
                 if (draft) this.setEditorValue(draft);
@@ -8529,7 +8520,7 @@ var renderDrawerContent = function renderDrawerContent() {};
                   }, 0);
                 }
 
-              case 19:
+              case 18:
               case "end":
                 return _context2.stop();
             }

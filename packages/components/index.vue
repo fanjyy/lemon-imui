@@ -602,12 +602,7 @@ export default {
           this.CacheDraft.set(prevCurrentContactId,editorValue);
           this.updateContact({
             id:prevCurrentContactId,
-            lastContent:[
-              <span style="color:red;">[草稿]</span>,
-              <span domProps={{
-                innerHTML:this.lastContentRender({type:'text',content:editorValue})
-              }}></span>
-            ],
+            lastContent:`<span style="color:red;">[草稿]</span><span>${this.lastContentRender({type:'text',content:editorValue})}</span>`,
           });
           this.setEditorValue('');
         }

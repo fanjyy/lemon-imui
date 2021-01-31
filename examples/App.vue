@@ -102,7 +102,10 @@
           <lemon-badge :count="contact.unread" style="width:100%">
           <div>
             <p><span>{{ contact.displayName }}</span></p>
-            <p class="lemon-contact__content" style="height:18px;font-size:12px;color:#aaa;">最新消息：<span v-html="contact.lastContent"></span></p>
+            <p class="lemon-contact__content" style="height:18px;font-size:12px;color:#aaa;">
+              最新消息：
+              <span v-html="contact.lastContent"></span>
+            </p>
           </div>
           </lemon-badge>
         </template>

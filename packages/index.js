@@ -32,7 +32,7 @@ const components = [
   lemonMessageFile,
   lemonMessageEvent
 ];
-const install = (Vue, opts = {}) => {
+const install = (Vue) => {
   Vue.directive("LemonContextmenu", Contextmenu);
   components.forEach(component => {
     Vue.component(component.name, component);

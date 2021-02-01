@@ -803,8 +803,7 @@ document.addEventListener("click", function (e) {
       });
       showPopover();
     });
-  },
-  inserted: function inserted(el, binding, vnode) {}
+  }
 });
 // CONCATENATED MODULE: ./node_modules/_cache-loader@2.0.1@cache-loader/dist/cjs.js??ref--12-0!./node_modules/_thread-loader@2.1.3@thread-loader/dist/cjs.js!./node_modules/_babel-loader@8.2.2@babel-loader/lib!./node_modules/_cache-loader@2.0.1@cache-loader/dist/cjs.js??ref--0-0!./node_modules/_vue-loader@15.9.6@vue-loader/lib??vue-loader-options!./packages/components/tabs.vue?vue&type=script&lang=js&
 /* harmony default export */ var tabsvue_type_script_lang_js_ = ({
@@ -3616,14 +3615,15 @@ var renderDrawerContent = function renderDrawerContent() {};
       }
 
       if (this.hasContact(contact.id)) return true;
-      this.contacts.push(Object.assign(_defineProperty({
+      this.contacts.push(Object.assign({
         id: "",
         displayName: "",
         avatar: "",
         index: "",
         unread: 0,
-        lastSendTime: ""
-      }, "lastSendTime", ""), contact));
+        lastSendTime: "",
+        lastContent: ""
+      }, contact));
       return true;
     },
     removeContact: function removeContact(id) {
@@ -3786,7 +3786,6 @@ var version = "1.4.2";
 var packages_components = [components, components_contact, messages, editor, avatar, badge, components_button, popover, tabs, basic, message_text, message_image, file, message_event];
 
 var packages_install = function install(Vue) {
-  var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   Vue.directive("LemonContextmenu", contextmenu);
   packages_components.forEach(function (component) {
     Vue.component(component.name, component);

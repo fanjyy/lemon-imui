@@ -8,7 +8,7 @@ export default {
       <lemon-message-basic
         class="lemon-message-text"
         props={{ ...this.$attrs }}
-        scopedSlots={{
+        scopedSlots={{ 
           content: props => {
             const content = this.IMUI.emojiNameToImage(props.content);
             return <span domProps={{ innerHTML: content }} />;

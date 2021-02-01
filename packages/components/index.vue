@@ -813,7 +813,7 @@ export default {
             index: "",
             unread: 0,
             lastSendTime: "",
-            lastSendTime: ""
+            lastContent: ""
           },
           contact
         )

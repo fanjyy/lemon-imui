@@ -71,5 +71,4 @@ export default {
       showPopover();
     });
   },
-  inserted(el, binding, vnode) {}
 };

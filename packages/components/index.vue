@@ -1,6 +1,7 @@
 <script>
-import { useScopedSlot, fastDone, generateUUID } from "utils";
+import { useScopedSlot, funCall, generateUUID, cloneDeep } from "utils";
 import { isFunction, isString, isEmpty } from "utils/validate";
+import contextmenu from "../directives/contextmenu";
 import {
   DEFAULT_MENUS,
   DEFAULT_MENU_LASTMESSAGES,
@@ -10,11 +11,7 @@ import lastContentRender from "../lastContentRender";
 
 import MemoryCache from "utils/cache/memory";
 
-const CacheContactContainer = new MemoryCache();
-const CacheMenuContainer = new MemoryCache();
-const CacheMessageLoaded = new MemoryCache();
-
-const messages = {};
+const allMessages = {};
 const emojiMap = {};
 let renderDrawerContent = () => {};
 
@@ -26,6 +23,22 @@ export default {
     };
   },
   props: {
+    width: {
+      type: String,
+      default: "850px"
+    },
+    height: {
+      type: String,
+      default: "580px"
+    },
+    theme: {
+      type: String,
+      default: "default"
+    },
+    simple: {
+      type: Boolean,
+      default: false
+    },
     /**
      * 消息时间格式化规则
      */
@@ -42,10 +55,23 @@ export default {
       default: true
     },
     /**
-     * 初始化时是否隐藏导航按钮上的头像
+     * 是否隐藏导航按钮上的头像
      */
     hideMenuAvatar: Boolean,
     hideMenu: Boolean,
+    /**
+     * 是否隐藏消息列表内的联系人名字
+     */
+    hideMessageName: Boolean,
+    /**
+     * 是否隐藏消息列表内的发送时间
+     */
+    hideMessageTime: Boolean,
+    sendKey: Function,
+    sendText: String,
+    contextmenu: Array,
+    contactContextmenu: Array,
+    avatarCricle: Boolean,
     user: {
       type: Object,
       default: () => {
@@ -54,12 +80,18 @@ export default {
     }
   },
   data() {
+    this.CacheContactContainer = new MemoryCache();
+    this.CacheMenuContainer = new MemoryCache();
+    this.CacheMessageLoaded = new MemoryCache();
+    this.CacheDraft = new MemoryCache();
     return {
       drawerVisible: !this.hideDrawer,
-      currentContactId: "",
+      currentContactId: null,
+      currentMessages: [],
       activeSidebar: DEFAULT_MENU_LASTMESSAGES,
       contacts: [],
-      menus: []
+      menus: [],
+      editorTools: []
     };
   },
 
@@ -79,9 +111,6 @@ export default {
     await this.$nextTick();
   },
   computed: {
-    currentMessages() {
-      return messages[this.currentContactId] || [];
-    },
     currentContact() {
       return this.contacts.find(item => item.id == this.currentContactId) || {};
     },
@@ -124,9 +153,34 @@ export default {
         ...message
       };
     },
-    appendMessage(message, contactId = this.currentContactId) {
-      this._addMessage(message, contactId, 1);
-      this.messageViewToBottom();
+    /**
+     * 新增一条消息
+     */
+    appendMessage(message, scrollToBottom = false) {
+      if (allMessages[message.toContactId] === undefined) {
+        this.updateContact({
+          id: message.toContactId,
+          unread: "+1",
+          lastSendTime: message.sendTime,
+          lastContent: this.lastContentRender(message)
+        });
+      } else {
+        this._addMessage(message, message.toContactId, 1);
+        const updateContact = {
+          id: message.toContactId,
+          lastContent: this.lastContentRender(message),
+          lastSendTime: message.sendTime
+        };
+        if (message.toContactId == this.currentContactId) {
+          if (scrollToBottom == true) {
+            this.messageViewToBottom();
+          }
+          this.CacheDraft.remove(message.toContactId);
+        } else {
+          updateContact.unread = "+1";
+        }
+        this.updateContact(updateContact);
+      }
     },
     _emitSend(message, next, file) {
       this.$emit(
@@ -134,20 +188,21 @@ export default {
         message,
         (replaceMessage = { status: "succeed" }) => {
           next();
-          message = Object.assign(message, replaceMessage);
-          this.forceUpdateMessage(message.id);
+          this.updateMessage(Object.assign(message, replaceMessage));
         },
         file
       );
     },
     _handleSend(text) {
       const message = this._createMessage({ content: text });
-      this.appendMessage(message);
+      this.appendMessage(message, true);
       this._emitSend(message, () => {
-        this.updateContact(message.toContactId, {
+        this.updateContact({
+          id: message.toContactId,
           lastContent: this.lastContentRender(message),
           lastSendTime: message.sendTime
         });
+        this.CacheDraft.remove(message.toContactId);
       });
     },
     _handleUpload(file) {
@@ -167,11 +222,12 @@ export default {
         };
       }
       const message = this._createMessage(joinMessage);
-      this.appendMessage(message);
+      this.appendMessage(message, true);
       this._emitSend(
         message,
         () => {
-          this.updateContact(message.toContactId, {
+          this.updateContact({
+            id: message.toContactId,
             lastContent: this.lastContentRender(message),
             lastSendTime: message.sendTime
           });
@@ -180,26 +236,36 @@ export default {
       );
     },
     _emitPullMessages(next) {
+      this._changeContactLock = true;
       this.$emit(
         "pull-messages",
         this.currentContact,
         (messages, isEnd = false) => {
           this._addMessage(messages, this.currentContactId, 0);
-          CacheMessageLoaded.set(this.currentContactId, isEnd);
+          this.CacheMessageLoaded.set(this.currentContactId, isEnd);
           if (isEnd == true) this.$refs.messages.loaded();
+          this.updateCurrentMessages();
+          this._changeContactLock = false;
           next(isEnd);
-        }
+        },
+        this
       );
     },
     clearCacheContainer(name) {
-      CacheContactContainer.remove(name);
-      CacheMenuContainer.remove(name);
+      this.CacheContactContainer.remove(name);
+      this.CacheMenuContainer.remove(name);
     },
     _renderWrapper(children) {
       return (
         <div
+          style={{
+            width: this.width,
+            height: this.height
+          }}
           class={[
             "lemon-wrapper",
+            `lemon-wrapper--theme-${this.theme}`,
+            { "lemon-wrapper--simple": this.simple },
             this.drawerVisible && "lemon-wrapper--drawer-show"
           ]}
         >
@@ -245,7 +311,7 @@ export default {
               { "lemon-menu__item--active": this.activeSidebar == name }
             ]}
             on-click={() => {
-              fastDone(click, () => {
+              funCall(click, () => {
                 if (name) this.changeMenu(name);
               });
             }}
@@ -264,51 +330,56 @@ export default {
     _renderSidebarMessage() {
       return this._renderSidebar(
         [
-          useScopedSlot(this.$scopedSlots["message-sidebar"]),
+          useScopedSlot(this.$scopedSlots["sidebar-message-top"], null, this),
           this.lastMessages.map(contact => {
             return this._renderContact(
               {
                 contact,
                 timeFormat: this.contactTimeFormat
               },
-              () => this.changeContact(contact.id)
+              () => this.changeContact(contact.id),
+              this.$scopedSlots["sidebar-message"]
             );
           })
         ],
-        DEFAULT_MENU_LASTMESSAGES
+        DEFAULT_MENU_LASTMESSAGES,
+        useScopedSlot(this.$scopedSlots["sidebar-message-fixedtop"], null, this)
       );
     },
-    _renderContact(props, onClick) {
+    _renderContact(props, onClick, slot) {
       const {
         click: customClick,
         renderContainer,
         id: contactId
       } = props.contact;
       const click = () => {
-        fastDone(customClick, () => {
+        funCall(customClick, () => {
           onClick();
           this._customContainerReady(
             renderContainer,
-            CacheContactContainer,
+            this.CacheContactContainer,
             contactId
           );
         });
       };
+
       return (
         <lemon-contact
           class={{
             "lemon-contact--active": this.currentContactId == props.contact.id
           }}
+          v-lemon-contextmenu_contact={this.contactContextmenu}
           props={props}
           on-click={click}
-        />
+          scopedSlots={{ default: slot }}
+        ></lemon-contact>
       );
     },
     _renderSidebarContact() {
       let prevIndex;
       return this._renderSidebar(
         [
-          useScopedSlot(this.$scopedSlots["contact-sidebar"]),
+          useScopedSlot(this.$scopedSlots["sidebar-contact-top"], null, this),
           this.contacts.map(contact => {
             if (!contact.index) return;
             contact.index = contact.index.replace(/\[[0-9]*\]/, "");
@@ -321,20 +392,29 @@ export default {
                   contact: contact,
                   simple: true
                 },
-                () => this.changeContact(contact.id)
+                () => {
+                  this.changeContact(contact.id);
+                },
+                this.$scopedSlots["sidebar-contact"]
               )
             ];
             prevIndex = contact.index;
             return node;
           })
         ],
-        DEFAULT_MENU_CONTACTS
+        DEFAULT_MENU_CONTACTS,
+        useScopedSlot(this.$scopedSlots["sidebar-contact-fixedtop"], null, this)
       );
     },
-    _renderSidebar(children, name) {
+    _renderSidebar(children, name, fixedtop) {
       return (
-        <div class="lemon-sidebar" v-show={this.activeSidebar == name}>
-          {children}
+        <div
+          class="lemon-sidebar"
+          v-show={this.activeSidebar == name}
+          on-scroll={this._handleSidebarScroll}
+        >
+          <div class="lemon-sidebar__fixed-top">{fixedtop}</div>
+          <div class="lemon-sidebar__scroll">{children}</div>
         </div>
       );
     },
@@ -356,22 +436,22 @@ export default {
       const cls = "lemon-container";
       const curact = this.currentContact;
       let defIsShow = true;
-      for (const name in CacheContactContainer.get()) {
+      for (const name in this.CacheContactContainer.get()) {
         const show = curact.id == name && this.currentIsDefSidebar;
         defIsShow = !show;
         nodes.push(
           <div class={cls} v-show={show}>
-            {CacheContactContainer.get(name)}
+            {this.CacheContactContainer.get(name)}
           </div>
         );
       }
-      for (const name in CacheMenuContainer.get()) {
+      for (const name in this.CacheMenuContainer.get()) {
         nodes.push(
           <div
             class={cls}
             v-show={this.activeSidebar == name && !this.currentIsDefSidebar}
           >
-            {CacheMenuContainer.get(name)}
+            {this.CacheMenuContainer.get(name)}
           </div>
         );
       }
@@ -384,7 +464,7 @@ export default {
           <div class="lemon-container__title">
             <div class="lemon-container__displayname">
               {useScopedSlot(
-                this.$scopedSlots["contact-title"],
+                this.$scopedSlots["message-title"],
                 curact.displayName,
                 curact
               )}
@@ -392,6 +472,8 @@ export default {
           </div>
           <lemon-messages
             ref="messages"
+            hide-time={this.hideMessageTime}
+            hide-name={this.hideMessageName}
             time-format={this.messageTimeFormat}
             reverse-user-id={this.user.id}
             on-reach-top={this._emitPullMessages}
@@ -399,6 +481,9 @@ export default {
           />
           <lemon-editor
             ref="editor"
+            tools={this.editorTools}
+            sendText={this.sendText}
+            sendKey={this.sendKey}
             onSend={this._handleSend}
             onUpload={this._handleUpload}
           />
@@ -421,6 +506,12 @@ export default {
               <h4>{curact.displayName}</h4>
               <lemon-button
                 on-click={() => {
+                  if (isEmpty(curact.lastContent)) {
+                    this.updateContact({
+                      id: curact.id,
+                      lastContent: " "
+                    });
+                  }
                   this.changeContact(curact.id, DEFAULT_MENU_LASTMESSAGES);
                 }}
               >
@@ -433,12 +524,14 @@ export default {
       );
       return nodes;
     },
+    _handleSidebarScroll() {
+      contextmenu.hide();
+    },
     _addContact(data, t) {
       const type = {
         0: "unshift",
         1: "push"
       }[t];
-      //this.contacts[type](cloneDeep(data));
       this.contacts[type](data);
     },
     _addMessage(data, contactId, t) {
@@ -447,10 +540,8 @@ export default {
         1: "push"
       }[t];
       if (!Array.isArray(data)) data = [data];
-      messages[contactId] = messages[contactId] || [];
-      messages[contactId][type](...data);
-      //console.log(messages[contactId]);
-      this.forceUpdateMessage();
+      allMessages[contactId] = allMessages[contactId] || [];
+      allMessages[contactId][type](...data);
     },
     /**
      * 设置最新消息DOM
@@ -461,6 +552,12 @@ export default {
       lastContentRender[messageType] = render;
     },
     lastContentRender(message) {
+      if (!isFunction(lastContentRender[message.type])) {
+        console.error(
+          `not found '${message.type}' of the latest message renderer,try to use ‘setLastContentRender()’`
+        );
+        return "";
+      }
       return lastContentRender[message.type].call(this, message);
     },
     /**
@@ -468,13 +565,21 @@ export default {
      * @param {String} str 被替换的字符串
      * @return {String} 替换后的字符串
      */
-    replaceEmojiName(str) {
+    emojiNameToImage(str) {
       return str.replace(/\[!(\w+)\]/gi, (str, match) => {
         const file = match;
         return emojiMap[file]
-          ? `<img src="${emojiMap[file]}" />`
+          ? `<img emoji-name="${match}" src="${emojiMap[file]}" />`
           : `[!${match}]`;
       });
+    },
+    emojiImageToName(str) {
+      return str.replace(/<img emoji-name=\"([^\"]*?)\" [^>]*>/gi, "[!$1]");
+    },
+    updateCurrentMessages() {
+      if (!allMessages[this.currentContactId])
+        allMessages[this.currentContactId] = [];
+      this.currentMessages = allMessages[this.currentContactId];
     },
     /**
      * 将当前聊天窗口滚动到底部
@@ -486,30 +591,54 @@ export default {
      * 改变聊天对象
      * @param contactId 联系人 id
      */
-    changeContact(contactId, menuName) {
-      if (this.currentContactId == contactId) {
-        this.currentContactId = undefined;
-      }
-
+    async changeContact(contactId, menuName) {
       if (menuName) {
         this.changeMenu(menuName);
+      } else {
+        if (this._changeContactLock || this.currentContactId == contactId)
+          return false;
       }
+      const prevCurrentContactId = this.currentContactId;
+      //保存上个聊天目标的草稿
+      if (prevCurrentContactId) {
+        const editorValue = this.getEditorValue();
+        if (editorValue) {
+          this.CacheDraft.set(prevCurrentContactId, editorValue);
+          this.updateContact({
+            id: prevCurrentContactId,
+            lastContent: `<span style="color:red;">[草稿]</span><span>${this.lastContentRender(
+              { type: "text", content: editorValue }
+            )}</span>`
+          });
+          this.setEditorValue("");
+        }
+      }
+
       this.currentContactId = contactId;
-      this.$emit("change-contact", this.currentContact);
+      if (!this.currentContactId) return false;
+
+      this.$emit("change-contact", this.currentContact, this);
       if (isFunction(this.currentContact.renderContainer)) {
         return;
       }
-      if (this._menuIsMessages()) {
-        if (!CacheMessageLoaded.has(contactId)) {
-          this.$refs.messages.resetLoadState();
-        }
-        if (!messages[contactId]) {
-          this._emitPullMessages(isEnd => this.messageViewToBottom());
-        } else {
-          setTimeout(() => {
-            this.messageViewToBottom();
-          }, 0);
-        }
+      //填充草稿内容
+      const draft = this.CacheDraft.get(contactId) || "";
+      if (draft) this.setEditorValue(draft);
+
+      if (this.CacheMessageLoaded.has(contactId)) {
+        this.$refs.messages.loaded();
+      } else {
+        this.$refs.messages.resetLoadState();
+      }
+
+      if (!allMessages[contactId]) {
+        this.updateCurrentMessages();
+        this._emitPullMessages(isEnd => this.messageViewToBottom());
+      } else {
+        setTimeout(() => {
+          this.updateCurrentMessages();
+          this.messageViewToBottom();
+        }, 0);
       }
     },
     /**
@@ -517,28 +646,28 @@ export default {
      * @param messageId 消息 id
      * @param contactId 联系人 id
      */
-    removeMessage(messageId, contactId) {
-      const index = this.findMessageIndexById(messageId, contactId);
-      if (index !== -1) {
-        messages[contactId].splice(index, 1);
-        this.forceUpdateMessage();
-      }
+    removeMessage(messageId) {
+      const message = this.findMessage(messageId);
+      if (!message) return false;
+      const index = allMessages[message.toContactId].findIndex(
+        ({ id }) => id == messageId
+      );
+      allMessages[message.toContactId].splice(index, 1);
+      return true;
     },
     /**
      * 修改聊天一条聊天消息
      * @param {Message} data 根据 data.id 查找聊天消息并覆盖传入的值
      * @param contactId 联系人 id
      */
-    updateMessage(messageId, contactId, data) {
-      const index = this.findMessageIndexById(messageId, contactId);
-      if (index !== -1) {
-        messages[contactId][index] = Object.assign(
-          messages[contactId][index],
-          data
-        );
-        console.log("--------", messages[contactId][index]);
-        this.forceUpdateMessage(messageId);
-      }
+    updateMessage(message) {
+      if (!message.id) return false;
+      let historyMessage = this.findMessage(message.id);
+      if (!historyMessage) return false;
+      historyMessage = Object.assign(historyMessage, message, {
+        toContactId: historyMessage.toContactId
+      });
+      return true;
     },
     /**
      * 手动更新对话消息
@@ -567,6 +696,7 @@ export default {
      * @param {String} name 按钮 name
      */
     changeMenu(name) {
+      if (this._changeContactLock) return false;
       this.$emit("change-menu", name);
       this.activeSidebar = name;
     },
@@ -577,11 +707,20 @@ export default {
      * EmojiItem = {name: wx,title: 微笑,src: url} 无分组
      */
     initEmoji(data) {
+      let flatData = [];
       this.$refs.editor.initEmoji(data);
       if (data[0].label) {
-        data = data.flatMap(item => item.children);
+        data.forEach(item => {
+          flatData.push(...item.children);
+        });
+      } else {
+        flatData = data;
       }
-      data.forEach(({ name, src }) => (emojiMap[name] = src));
+      flatData.forEach(({ name, src }) => (emojiMap[name] = src));
+    },
+    initEditorTools(data) {
+      this.editorTools = data;
+      this.$refs.editor.initTools(data);
     },
     /**
      * 初始化左侧按钮
@@ -613,7 +752,7 @@ export default {
       let menus = [];
       if (Array.isArray(data)) {
         const indexMap = {
-          lastMessages: 0,
+          messages: 0,
           contacts: 1
         };
         const indexKeys = Object.keys(indexMap);
@@ -629,7 +768,7 @@ export default {
           if (item.renderContainer) {
             this._customContainerReady(
               item.renderContainer,
-              CacheMenuContainer,
+              this.CacheMenuContainer,
               item.name
             );
           }
@@ -647,7 +786,7 @@ export default {
      * @param {Array<Contact>} data 联系人列表
      */
     initContacts(data) {
-      this.contacts.push(...data);
+      this.contacts = data;
       this.sortContacts();
     },
     /**
@@ -659,13 +798,43 @@ export default {
         return a.index.localeCompare(b.index);
       });
     },
+    appendContact(contact) {
+      if (isEmpty(contact.id) || isEmpty(contact.displayName)) {
+        console.error("id | displayName cant be empty");
+        return false;
+      }
+      if (this.hasContact(contact.id)) return true;
+      this.contacts.push(
+        Object.assign(
+          {
+            id: "",
+            displayName: "",
+            avatar: "",
+            index: "",
+            unread: 0,
+            lastSendTime: "",
+            lastSendTime: ""
+          },
+          contact
+        )
+      );
+      return true;
+    },
+    removeContact(id) {
+      const index = this.findContactIndexById(id);
+      if (index === -1) return false;
+      this.contacts.splice(index, 1);
+      this.CacheDraft.remove(id);
+      this.CacheMessageLoaded.remove(id);
+      return true;
+    },
     /**
      * 修改联系人数据
-     * @param {Contact} data 修改的数据，根据 data.id 查找联系人并覆盖传入的值
+     * @param {Contact} data 修改的数据，根据 Contact.id 查找联系人并覆盖传入的值
      */
-    updateContact(contactId, data) {
+    updateContact(data) {
+      const contactId = data.id;
       delete data.id;
-      delete data.toContactId;
 
       const index = this.findContactIndexById(contactId);
       if (index !== -1) {
@@ -690,16 +859,22 @@ export default {
     findContactIndexById(contactId) {
       return this.contacts.findIndex(item => item.id == contactId);
     },
-    findMessageIndexById(messageId, contactId) {
-      const msg = messages[contactId];
-      if (isEmpty(msg)) {
-        return -1;
-      }
-      return msg.findIndex(item => item.id == messageId);
+    /**
+     * 根据 id 查找判断是否存在联系人
+     * @param contactId 联系人 id
+     * @return {Boolean}
+     */
+    hasContact(contactId) {
+      return this.findContactIndexById(contactId) !== -1;
     },
-    findMessageById(messageId, contactId) {
-      const index = this.findMessageIndexById(messageId, contactId);
-      if (index !== -1) return messages[contactId][index];
+    findMessage(messageId) {
+      for (const key in allMessages) {
+        const message = allMessages[key].find(({ id }) => id == messageId);
+        if (message) return message;
+      }
+    },
+    findContact(contactId) {
+      return this.getContacts().find(({ id }) => id == contactId);
     },
     /**
      * 返回所有联系人
@@ -708,36 +883,26 @@ export default {
     getContacts() {
       return this.contacts;
     },
+    //返回当前聊天窗口联系人信息
+    getCurrentContact() {
+      return this.currentContact;
+    },
+    getCurrentMessages() {
+      return this.currentMessages;
+    },
+    setEditorValue(val) {
+      if (!isString(val)) return false;
+      this.$refs.editor.setValue(this.emojiNameToImage(val));
+    },
+    getEditorValue() {
+      return this.$refs.editor.getFormatValue();
+    },
     /**
      * 返回所有消息
      * @return {Object<Contact.id,Message>}
      */
     getMessages(contactId) {
-      return (contactId ? messages[contactId] : messages) || [];
-    },
-    // appendContact(data) {
-    //   this._addContact(data, 0);
-    // },
-    // prependContact(data) {
-    //   this._addContact(data, 1);
-    // },
-    // addContactMessage(data) {
-    //   this._addContact(data, 0);
-    // },
-    // prependContactMessage(data) {
-    //   this._addContact(data, 1);
-    // },
-    // appendMessage(data) {},
-    // prependMessage(data) {},
-    // removeContact(contactId) {},
-    // removeContactMessage(contactId) {},
-    // removeContactAll(contactId) {},
-    /**
-     * 将自定义的HTML显示在主窗口内
-     */
-    openrenderContainer(vnode) {
-      //renderContainerQueue[this.activeSidebar] = vnode;
-      //this.$slots._renderContainer = vnode;
+      return (contactId ? allMessages[contactId] : allMessages) || [];
     },
     changeDrawer(render) {
       this.drawerVisible = !this.drawerVisible;
@@ -754,16 +919,14 @@ export default {
 };
 </script>
 <style lang="stylus">
-wrapper-width = 850px
 drawer-width = 200px
 bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 @import '~styles/utils/index'
 
 +b(lemon-wrapper)
-  width wrapper-width
-  height 580px
   display flex
   font-size 14px
+  font-family "Microsoft YaHei"
   //mask-image radial-gradient(circle, white 100%, black 100%)
   background #efefef
   transition all .4s bezier
@@ -812,13 +975,18 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 +b(lemon-sidebar)
   width 250px
   background #efefef
-  overflow-y auto
-  scrollbar-light()
+  display flex
+  flex-direction column
+  +e(scroll){
+    overflow-y auto
+    scrollbar-light()
+  }
   +e(label)
     padding 6px 14px 6px 14px
     color #666
     font-size 12px
     margin 0
+    text-align left
   +b(lemon-contact--active)
     background #d9d9d9
 +b(lemon-container)
@@ -827,7 +995,7 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   background #f4f4f4
   word-break()
   position relative
-  z-index 2
+  z-index 10
   +e(title)
     padding 15px 15px
   +e(displayname)
@@ -842,11 +1010,10 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   overflow hidden
   background #f4f4f4
   transition width .4s bezier
-  z-index 1
+  z-index 9
   width drawer-width
   height 100%
   box-sizing border-box
-  //border-left 1px solid #e9e9e9
 +b(lemon-wrapper)
   +m(drawer-show)
     +b(lemon-drawer)
@@ -861,4 +1028,77 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
     font-weight normal
     margin 10px 0 20px 0
     user-select none
+.lemon-wrapper--theme-blue
+  .lemon-message__content
+    background #f3f3f3
+    &::before
+      border-right-color #f3f3f3
+  .lemon-message--reverse .lemon-message__content
+    background #e6eeff
+    &::before
+      border-left-color #e6eeff
+  .lemon-container
+    background #fff
+  .lemon-sidebar
+    background #f9f9f9
+    .lemon-contact
+      background #f9f9f9
+      &:hover:not(.lemon-contact--active)
+        background #f1f1f1
+      &--active
+        background #e9e9e9
+  .lemon-menu
+    background #096bff
+  .lemon-menu__item
+    color rgba(255,255,255,0.4)
+    &:hover:not(.lemon-menu__item--active)
+      color rgba(255,255,255,0.6)
+    &--active
+      color #fff
+      text-shadow 0 0 10px rgba(2,48,118,0.4)
+.lemon-wrapper--simple
+  .lemon-menu
+  .lemon-sidebar
+    display none
+.lemon-wrapper--simple
+  .lemon-menu
+  .lemon-sidebar
+    display none
++b(lemon-contextmenu)
+  border-radius 4px
+  font-size 14px
+  font-variant tabular-nums
+  line-height 1.5
+  color rgba(0, 0, 0, 0.65)
+  z-index 10
+  background-color #fff
+  border-radius 6px
+  box-shadow 0 2px 8px rgba(0, 0, 0, 0.06)
+  position absolute
+  transform-origin 50% 150%
+  box-sizing border-box
+  user-select none
+  overflow hidden
+  min-width 120px
+  +e(item)
+    font-size 14px
+    line-height 16px
+    padding 10px 15px
+    cursor pointer
+    display flex
+    align-items center
+    color #333
+    > span
+      display inline-block
+      flex none
+      //max-width 100px
+      ellipsis()
+    &:hover
+      background #f3f3f3
+      color #000
+    &:active
+      background #e9e9e9
+  +e(icon)
+    font-size 16px
+    margin-right 4px
 </style>

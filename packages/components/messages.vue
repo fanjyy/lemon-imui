@@ -1,9 +1,14 @@
 <script>
 import { hoursTimeFormat } from "utils";
+import contextmenu from "../directives/contextmenu";
 export default {
   name: "LemonMessages",
   components: {},
   props: {
+    //是否隐藏消息发送人昵称
+    hideName: Boolean,
+    //是否隐藏显示消息时间
+    hideTime: Boolean,
     reverseUserId: String,
     timeRange: {
       type: Number,
@@ -52,24 +57,26 @@ export default {
                   message: {
                     id: "__time__",
                     type: "event",
-                    content: this.timeFormat(message.sendTime)
+                    content: hoursTimeFormat(message.sendTime)
                   }
                 }}
               />
             );
           }
-          node.push(
-            <tagName
-              ref="message"
-              refInFor={true}
-              attrs={{
-                timeFormat: this.msecRange > 0 ? () => {} : this.timeFormat,
-                message: message,
-                reverse: this.reverseUserId == message.fromUser.id,
-                hiddenTitle: false
-              }}
-            />
-          );
+
+          let attrs;
+          if (message.type == "event") {
+            attrs = { message: message };
+          } else {
+            attrs = {
+              timeFormat: this.timeFormat,
+              message: message,
+              reverse: this.reverseUserId == message.fromUser.id,
+              hideTime: this.hideTime,
+              hideName: this.hideName
+            };
+          }
+          node.push(<tagName ref="message" refInFor={true} attrs={attrs} />);
           return node;
         })}
       </div>
@@ -90,6 +97,7 @@ export default {
     },
     loaded() {
       this._loadend = true;
+      this.$forceUpdate();
     },
     resetLoadState() {
       this._loading = false;
@@ -97,6 +105,7 @@ export default {
     },
     async _handleScroll(e) {
       const { target } = e;
+      contextmenu.hide();
       if (
         target.scrollTop == 0 &&
         this._loading == false &&

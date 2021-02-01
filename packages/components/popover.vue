@@ -1,6 +1,6 @@
 <script>
 const popoverCloseQueue = [];
-const popoverCloseAll = () => popoverCloseQueue.forEach(callback => callback());
+import contextmenu from "../directives/contextmenu";
 const triggerEvents = {
   hover(el) {},
   focus(el) {
@@ -14,6 +14,7 @@ const triggerEvents = {
   click(el) {
     el.addEventListener("click", e => {
       e.stopPropagation();
+      contextmenu.hide();
       this.changeVisible();
     });
   },
@@ -51,7 +52,7 @@ export default {
   render() {
     return (
       <span style="position:relative">
-        <transition name="slide-top">
+        <transition name="lemon-slide-top">
           {this.visible && (
             <div
               class="lemon-popover"
@@ -59,7 +60,6 @@ export default {
               style={this.popoverStyle}
               on-click={e => e.stopPropagation()}
             >
-              <div class="lemon-popover__title" />
               <div class="lemon-popover__content">{this.$slots.content}</div>
               <div class="lemon-popover__arrow" />
             </div>
@@ -96,8 +96,11 @@ export default {
       this.visible ? this.close() : this.open();
     },
     open() {
-      popoverCloseAll();
+      this.closeAll();
       this.visible = true;
+    },
+    closeAll() {
+      popoverCloseQueue.forEach(callback => callback());
     },
     close() {
       this.visible = false;
@@ -117,7 +120,7 @@ export default {
   z-index 10
   background-color #fff
   border-radius 4px
-  box-shadow 0 2px 8px rgba(0, 0, 0, 0.15)
+  box-shadow 0 2px 8px rgba(0, 0, 0, 0.08)
   position absolute
   transform-origin 50% 150%
   +e(content)
@@ -135,9 +138,9 @@ export default {
     width 8px
     height 8px
     background #fff
-.slide-top-leave-active ,.slide-top-enter-active
-  transition all .3s cubic-bezier(0.645, 0.045, 0.355, 1)
-.slide-top-enter, .slide-top-leave-to
+.lemon-slide-top-leave-active ,.lemon-slide-top-enter-active
+  transition all .2s cubic-bezier(0.645, 0.045, 0.355, 1)
+.lemon-slide-top-enter, .lemon-slide-top-leave-to
   transform translateY(-10px) scale(.8)
   opacity 0
 </style>

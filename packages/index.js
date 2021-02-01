@@ -1,3 +1,4 @@
+import Contextmenu from "./directives/contextmenu";
 import LemonTabs from "./components/tabs";
 import LemonPopover from "./components/popover";
 import LemonButton from "./components/button";
@@ -14,7 +15,7 @@ import lemonMessageEvent from "./components/message/event";
 
 import LemonIMUI from "./components/index";
 import "./styles/common/index.styl";
-const version = "0.1";
+const version = "1.4.2";
 const components = [
   LemonIMUI,
   LemonContact,
@@ -32,6 +33,7 @@ const components = [
   lemonMessageEvent
 ];
 const install = (Vue, opts = {}) => {
+  Vue.directive("LemonContextmenu", Contextmenu);
   components.forEach(component => {
     Vue.component(component.name, component);
   });

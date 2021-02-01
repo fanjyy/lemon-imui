@@ -53,7 +53,7 @@ export function timeFormat(t, format) {
   return format;
 }
 
-export function fastDone(event, callback) {
+export function funCall(event, callback) {
   if (isFunction(event)) {
     event(() => {
       callback();
@@ -70,7 +70,14 @@ export function fastDone(event, callback) {
 export function arrayIntersect(a, b) {
   return a.filter(x => b.includes(x));
 }
-
+//清除字符串内的所有HTML标签
+export function clearHtml(str){
+  return str.replace(/<.*?>/ig,"");
+}
+//清除字符串内的所有HTML标签，除了IMG
+export function clearHtmlExcludeImg(str){
+  return str.replace(/<(?!img).*?>/ig, "");
+}
 export function error(text) {
   throw new Error(text);
 }
@@ -96,9 +103,6 @@ export function mergeDeep(o1, o2) {
   return o1;
 }
 
-export function toEmojiName(str) {
-  return str.replace(/<img emoji-name=\"([^\"]*?)\" [^>]*>/gi, "[!$1]");
-}
 export function formatByte(value) {
   if (null == value || value == "") {
     return "0 Bytes";

@@ -1,9 +1,17 @@
 <script>
 import { isString, isToday } from "utils/validate";
-import { timeFormat } from "utils";
+import { timeFormat, useScopedSlot } from "utils";
 export default {
   name: "LemonContact",
   components: {},
+  inject: {
+    IMUI: {
+      from: "IMUI",
+      default() {
+        return this;
+      }
+    }
+  },
   data() {
     return {};
   },
@@ -18,23 +26,33 @@ export default {
     }
   },
   render() {
-    const { contact } = this;
     return (
       <div
         class={["lemon-contact", { "lemon-contact--name-center": this.simple }]}
-        on-click={e => this._handleClick(e, contact)}
+        on-click={e => this._handleClick(e, this.contact)}
       >
+        {useScopedSlot(
+          this.$scopedSlots.default,
+          this._renderInner(),
+          this.contact
+        )}
+      </div>
+    );
+  },
+  created() {},
+  mounted() {},
+  computed: {},
+  watch: {},
+  methods: {
+    _renderInner() {
+      const { contact } = this;
+      return [
         <lemon-badge
           count={!this.simple ? contact.unread : 0}
           class="lemon-contact__avatar"
-          native-on-click={e => this._handleBubbleClick(e, contact)}
         >
-          <lemon-avatar
-            size={40}
-            native-on-click={e => this._handleAvatarClick(e, contact)}
-            src={contact.avatar}
-          />
-        </lemon-badge>
+          <lemon-avatar size={40} src={contact.avatar} />
+        </lemon-badge>,
         <div class="lemon-contact__inner">
           <p class="lemon-contact__label">
             <span class="lemon-contact__name">{contact.displayName}</span>
@@ -54,24 +72,10 @@ export default {
             </p>
           )}
         </div>
-      </div>
-    );
-  },
-  created() {},
-  mounted() {},
-  computed: {},
-  watch: {},
-  methods: {
+      ];
+    },
     _handleClick(e, data) {
       this.$emit("click", data);
-    },
-    _handleAvatarClick(e, data) {
-      e.stopPropagation();
-      this.$emit("avatar-click", data);
-    },
-    _handleBubbleClick(e, data) {
-      e.stopPropagation();
-      this.$emit("bubble-click", data);
     }
   }
 };
@@ -85,6 +89,7 @@ export default {
   box-sizing border-box
   overflow hidden
   background #efefef
+  text-align left
   p
     margin 0
   +m(active)
@@ -121,12 +126,17 @@ export default {
   +e(content)
     font-size 12px
     color #999
+    height 18px
+    line-height 18px
+    margin-top 1px !important
     ellipsis()
     img
       height 14px
       display inline-block
       vertical-align middle
       margin 0 1px
+      position relative
+      top -1px
   +m(name-center)
     +e(label)
       padding-bottom 0

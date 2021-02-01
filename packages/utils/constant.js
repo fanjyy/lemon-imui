@@ -1,6 +1,6 @@
 export const EMIT_AVATAR_CLICK = "avatar-click";
 
-export const DEFAULT_MENU_LASTMESSAGES = "lastMessages";
+export const DEFAULT_MENU_LASTMESSAGES = "messages";
 export const DEFAULT_MENU_CONTACTS = "contacts";
 export const DEFAULT_MENUS = [DEFAULT_MENU_LASTMESSAGES, DEFAULT_MENU_CONTACTS];
 /**

@@ -588,6 +588,37 @@ export default {
       this.$refs.messages.scrollToBottom();
     },
     /**
+     * 设置联系人的草稿信息
+     */
+    setDraft(contactId, editorValue) {
+      if (isEmpty(contactId) || isEmpty(editorValue)) return false;
+      const contact = this.findContact(contactId);
+      if (isEmpty(contact)) return false;
+      this.CacheDraft.set(contactId, {
+        editorValue: editorValue,
+        lastContent: contact.lastContent
+      });
+      this.updateContact({
+        id: contactId,
+        lastContent: `<span style="color:red;">[草稿]</span><span>${this.lastContentRender(
+          { type: "text", content: editorValue }
+        )}</span>`
+      });
+    },
+    /**
+     * 清空联系人草稿信息
+     */
+    clearDraft(contactId) {
+      const draft = this.CacheDraft.get(contactId);
+      if (draft) {
+        this.updateContact({
+          id: contactId,
+          lastContent: draft.lastContent
+        });
+        this.CacheDraft.remove(contactId);
+      }
+    },
+    /**
      * 改变聊天对象
      * @param contactId 联系人 id
      */
@@ -598,19 +629,15 @@ export default {
         if (this._changeContactLock || this.currentContactId == contactId)
           return false;
       }
-      const prevCurrentContactId = this.currentContactId;
+
       //保存上个聊天目标的草稿
-      if (prevCurrentContactId) {
+      if (this.currentContactId) {
         const editorValue = this.getEditorValue();
         if (editorValue) {
-          this.CacheDraft.set(prevCurrentContactId, editorValue);
-          this.updateContact({
-            id: prevCurrentContactId,
-            lastContent: `<span style="color:red;">[草稿]</span><span>${this.lastContentRender(
-              { type: "text", content: editorValue }
-            )}</span>`
-          });
-          this.setEditorValue("");
+          this.setDraft(this.currentContactId, editorValue);
+          this.setEditorValue();
+        } else {
+          this.clearDraft(this.currentContactId);
         }
       }
 
@@ -622,8 +649,8 @@ export default {
         return;
       }
       //填充草稿内容
-      const draft = this.CacheDraft.get(contactId) || "";
-      if (draft) this.setEditorValue(draft);
+      const draft = this.CacheDraft.get(contactId);
+      if (draft) this.setEditorValue(draft.editorValue);
 
       if (this.CacheMessageLoaded.has(contactId)) {
         this.$refs.messages.loaded();
@@ -890,7 +917,7 @@ export default {
     getCurrentMessages() {
       return this.currentMessages;
     },
-    setEditorValue(val) {
+    setEditorValue(val = "") {
       if (!isString(val)) return false;
       this.$refs.editor.setValue(this.emojiNameToImage(val));
     },

@@ -1205,11 +1205,6 @@ export default {
     };
   },
   mounted() {
-
-    
-
-
-
     const contactData1 = {
       id: "contact-1",
       displayName: "工作协作群",
@@ -1266,7 +1261,7 @@ export default {
     let contactList = [
       { ...contactData1 },
       { ...contactData2 },
-      { ...contactData3 },
+      { ...contactData3 }
       //...Array(100).fill(contactData1)
     ];
 

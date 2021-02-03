@@ -2544,9 +2544,6 @@ function _toConsumableArray(arr) {
 // EXTERNAL MODULE: ./node_modules/_core-js@2.6.12@core-js/modules/es6.string.starts-with.js
 var es6_string_starts_with = __webpack_require__("d31c");
 
-// EXTERNAL MODULE: ./node_modules/_core-js@2.6.12@core-js/modules/es6.object.assign.js
-var es6_object_assign = __webpack_require__("6ba0");
-
 // EXTERNAL MODULE: ./node_modules/_core-js@2.6.12@core-js/modules/es6.array.sort.js
 var es6_array_sort = __webpack_require__("3441");
 
@@ -2652,8 +2649,6 @@ var memory_MemoryCache = /*#__PURE__*/function () {
 
 
 // CONCATENATED MODULE: ./node_modules/_cache-loader@2.0.1@cache-loader/dist/cjs.js??ref--12-0!./node_modules/_thread-loader@2.1.3@thread-loader/dist/cjs.js!./node_modules/_babel-loader@8.2.2@babel-loader/lib!./node_modules/_cache-loader@2.0.1@cache-loader/dist/cjs.js??ref--0-0!./node_modules/_vue-loader@15.9.6@vue-loader/lib??vue-loader-options!./packages/components/index.vue?vue&type=script&lang=js&
-
-
 
 
 
@@ -3319,6 +3314,41 @@ var renderDrawerContent = function renderDrawerContent() {};
     },
 
     /**
+     * 设置联系人的草稿信息
+     */
+    setDraft: function setDraft(contactId, editorValue) {
+      if (isEmpty(contactId) || isEmpty(editorValue)) return false;
+      var contact = this.findContact(contactId);
+      if (isEmpty(contact)) return false;
+      this.CacheDraft.set(contactId, {
+        editorValue: editorValue,
+        lastContent: contact.lastContent
+      });
+      this.updateContact({
+        id: contactId,
+        lastContent: "<span style=\"color:red;\">[\u8349\u7A3F]</span><span>".concat(this.lastContentRender({
+          type: "text",
+          content: editorValue
+        }), "</span>")
+      });
+    },
+
+    /**
+     * 清空联系人草稿信息
+     */
+    clearDraft: function clearDraft(contactId) {
+      var draft = this.CacheDraft.get(contactId);
+
+      if (draft) {
+        this.updateContact({
+          id: contactId,
+          lastContent: draft.lastContent
+        });
+        this.CacheDraft.remove(contactId);
+      }
+    },
+
+    /**
      * 改变聊天对象
      * @param contactId 联系人 id
      */
@@ -3326,7 +3356,7 @@ var renderDrawerContent = function renderDrawerContent() {};
       var _changeContact = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(contactId, menuName) {
         var _this13 = this;
 
-        var prevCurrentContactId, editorValue, draft;
+        var editorValue, draft;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -3349,47 +3379,41 @@ var renderDrawerContent = function renderDrawerContent() {};
                 return _context2.abrupt("return", false);
 
               case 6:
-                prevCurrentContactId = this.currentContactId; //保存上个聊天目标的草稿
-
-                if (prevCurrentContactId) {
+                //保存上个聊天目标的草稿
+                if (this.currentContactId) {
                   editorValue = this.getEditorValue();
 
                   if (editorValue) {
-                    this.CacheDraft.set(prevCurrentContactId, editorValue);
-                    this.updateContact({
-                      id: prevCurrentContactId,
-                      lastContent: "<span style=\"color:red;\">[\u8349\u7A3F]</span><span>".concat(this.lastContentRender({
-                        type: "text",
-                        content: editorValue
-                      }), "</span>")
-                    });
-                    this.setEditorValue("");
+                    this.setDraft(this.currentContactId, editorValue);
+                    this.setEditorValue();
+                  } else {
+                    this.clearDraft(this.currentContactId);
                   }
                 }
 
                 this.currentContactId = contactId;
 
                 if (this.currentContactId) {
-                  _context2.next = 11;
+                  _context2.next = 10;
                   break;
                 }
 
                 return _context2.abrupt("return", false);
 
-              case 11:
+              case 10:
                 this.$emit("change-contact", this.currentContact, this);
 
                 if (!isFunction(this.currentContact.renderContainer)) {
-                  _context2.next = 14;
+                  _context2.next = 13;
                   break;
                 }
 
                 return _context2.abrupt("return");
 
-              case 14:
+              case 13:
                 //填充草稿内容
-                draft = this.CacheDraft.get(contactId) || "";
-                if (draft) this.setEditorValue(draft);
+                draft = this.CacheDraft.get(contactId);
+                if (draft) this.setEditorValue(draft.editorValue);
 
                 if (this.CacheMessageLoaded.has(contactId)) {
                   this.$refs.messages.loaded();
@@ -3411,7 +3435,7 @@ var renderDrawerContent = function renderDrawerContent() {};
                   }, 0);
                 }
 
-              case 18:
+              case 17:
               case "end":
                 return _context2.stop();
             }
@@ -3697,7 +3721,8 @@ var renderDrawerContent = function renderDrawerContent() {};
     getCurrentMessages: function getCurrentMessages() {
       return this.currentMessages;
     },
-    setEditorValue: function setEditorValue(val) {
+    setEditorValue: function setEditorValue() {
+      var val = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
       if (!isString(val)) return false;
       this.$refs.editor.setValue(this.emojiNameToImage(val));
     },
@@ -5469,17 +5494,6 @@ try {
 
 /***/ }),
 
-/***/ "6ba0":
-/***/ (function(module, exports, __webpack_require__) {
-
-// 19.1.3.1 Object.assign(target, source)
-var $export = __webpack_require__("e99b");
-
-$export($export.S + $export.F, 'Object', { assign: __webpack_require__("9f15") });
-
-
-/***/ }),
-
 /***/ "6bf8":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5922,52 +5936,6 @@ $export($export.P + $export.F * __webpack_require__("581c")(INCLUDES), 'String',
 module.exports = function (it) {
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
-
-
-/***/ }),
-
-/***/ "9f15":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// 19.1.2.1 Object.assign(target, source, ...)
-var DESCRIPTORS = __webpack_require__("26df");
-var getKeys = __webpack_require__("93ca");
-var gOPS = __webpack_require__("0c29");
-var pIE = __webpack_require__("35d4");
-var toObject = __webpack_require__("8078");
-var IObject = __webpack_require__("1b96");
-var $assign = Object.assign;
-
-// should work with symbols and should have deterministic property order (V8 bug)
-module.exports = !$assign || __webpack_require__("0926")(function () {
-  var A = {};
-  var B = {};
-  // eslint-disable-next-line no-undef
-  var S = Symbol();
-  var K = 'abcdefghijklmnopqrst';
-  A[S] = 7;
-  K.split('').forEach(function (k) { B[k] = k; });
-  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
-}) ? function assign(target, source) { // eslint-disable-line no-unused-vars
-  var T = toObject(target);
-  var aLen = arguments.length;
-  var index = 1;
-  var getSymbols = gOPS.f;
-  var isEnum = pIE.f;
-  while (aLen > index) {
-    var S = IObject(arguments[index++]);
-    var keys = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S);
-    var length = keys.length;
-    var j = 0;
-    var key;
-    while (length > j) {
-      key = keys[j++];
-      if (!DESCRIPTORS || isEnum.call(S, key)) T[key] = S[key];
-    }
-  } return T;
-} : $assign;
 
 
 /***/ }),

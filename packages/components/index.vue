@@ -1,5 +1,5 @@
 <script>
-import { useScopedSlot, funCall, generateUUID, cloneDeep } from "utils";
+import { useScopedSlot, funCall, generateUUID } from "utils";
 import { isFunction, isString, isEmpty } from "utils/validate";
 import contextmenu from "../directives/contextmenu";
 import {
@@ -13,6 +13,13 @@ import MemoryCache from "utils/cache/memory";
 
 const allMessages = {};
 const emojiMap = {};
+const toPx = val => {
+  return isString(val) ? val : `${val}px`;
+};
+const toPoint = str => {
+  return str.replace("%", "") / 100;
+};
+
 let renderDrawerContent = () => {};
 
 export default {
@@ -24,12 +31,12 @@ export default {
   },
   props: {
     width: {
-      type: String,
-      default: "850px"
+      type: [String, Number],
+      default: 850
     },
     height: {
-      type: String,
-      default: "580px"
+      type: [String, Number],
+      default: 580
     },
     theme: {
       type: String,
@@ -259,9 +266,10 @@ export default {
       return (
         <div
           style={{
-            width: this.width,
-            height: this.height
+            width: toPx(this.width),
+            height: toPx(this.height)
           }}
+          ref="wrapper"
           class={[
             "lemon-wrapper",
             `lemon-wrapper--theme-${this.theme}`,
@@ -420,7 +428,7 @@ export default {
     },
     _renderDrawer() {
       return this._menuIsMessages() && this.currentContactId ? (
-        <div class="lemon-drawer">
+        <div class="lemon-drawer" ref="drawer">
           {renderDrawerContent()}
           {useScopedSlot(this.$scopedSlots.drawer, "", this.currentContact)}
         </div>
@@ -462,13 +470,13 @@ export default {
           v-show={this._menuIsMessages() && defIsShow && curact.id}
         >
           <div class="lemon-container__title">
-            <div class="lemon-container__displayname">
-              {useScopedSlot(
-                this.$scopedSlots["message-title"],
-                curact.displayName,
-                curact
-              )}
-            </div>
+            {useScopedSlot(
+              this.$scopedSlots["message-title"],
+              <div class="lemon-container__displayname">
+                {curact.displayName}
+              </div>,
+              curact
+            )}
           </div>
           <lemon-messages
             ref="messages"
@@ -931,12 +939,52 @@ export default {
     getMessages(contactId) {
       return (contactId ? allMessages[contactId] : allMessages) || [];
     },
-    changeDrawer(render) {
+    changeDrawer(params) {
       this.drawerVisible = !this.drawerVisible;
-      if (this.drawerVisible == true) this.openDrawer(render);
+      if (this.drawerVisible == true) this.openDrawer(params);
     },
-    openDrawer(render) {
-      renderDrawerContent = render || new Function();
+    // openDrawer(data) {
+    //   renderDrawerContent = data || new Function();
+    //   this.drawerVisible = true;
+    // },
+    openDrawer(params) {
+      renderDrawerContent = isFunction(params)
+        ? params
+        : params.render || new Function();
+      const wrapperWidth = this.$refs.wrapper.clientWidth;
+      const wrapperHeight = this.$refs.wrapper.clientHeight;
+      let width = params.width || 200;
+      let height = params.height || wrapperHeight;
+      let offsetX = params.offsetX || 0;
+      let offsetY = params.offsetY || 0;
+      const position = params.position || "right";
+      if (isString(width)) width = wrapperWidth * toPoint(width);
+      if (isString(height)) height = wrapperHeight * toPoint(height);
+      if (isString(offsetX)) offsetX = wrapperWidth * toPoint(offsetX);
+      if (isString(offsetY)) offsetY = wrapperHeight * toPoint(offsetY);
+
+      this.$refs.drawer.style.width = `${width}px`;
+      this.$refs.drawer.style.height = `${height}px`;
+
+      let left = 0;
+      let top = 0;
+      let shadow = "";
+      if (position == "right") {
+        left = wrapperWidth;
+      } else if (position == "rightInside") {
+        left = wrapperWidth - width;
+        shadow = `-15px 0 16px -14px rgba(0,0,0,0.08)`;
+      } else if (position == "center") {
+        left = wrapperWidth / 2 - width / 2;
+        top = wrapperHeight / 2 - height / 2;
+        shadow = `0 0 20px rgba(0,0,0,0.08)`;
+      }
+      left += offsetX;
+      top += offsetY + -1;
+      this.$refs.drawer.style.top = `${top}px`;
+      this.$refs.drawer.style.left = `${left}px`;
+      this.$refs.drawer.style.boxShadow = shadow;
+
       this.drawerVisible = true;
     },
     closeDrawer() {
@@ -946,7 +994,6 @@ export default {
 };
 </script>
 <style lang="stylus">
-drawer-width = 200px
 bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 @import '~styles/utils/index'
 
@@ -1033,18 +1080,15 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 +b(lemon-drawer)
   position absolute
   top 0
-  right 0
   overflow hidden
-  background #f4f4f4
+  background #f6f6f6
   transition width .4s bezier
-  z-index 9
-  width drawer-width
-  height 100%
-  box-sizing border-box
+  z-index 11
+  display none
 +b(lemon-wrapper)
   +m(drawer-show)
     +b(lemon-drawer)
-      right -200px
+      display block
 +b(lemon-contact-info)
   flex-column()
   justify-content center
@@ -1097,7 +1141,7 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   font-variant tabular-nums
   line-height 1.5
   color rgba(0, 0, 0, 0.65)
-  z-index 10
+  z-index 9999
   background-color #fff
   border-radius 6px
   box-shadow 0 2px 8px rgba(0, 0, 0, 0.06)

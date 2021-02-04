@@ -2553,6 +2553,9 @@ function _toConsumableArray(arr) {
 // EXTERNAL MODULE: ./node_modules/_core-js@2.6.12@core-js/modules/es6.string.starts-with.js
 var es6_string_starts_with = __webpack_require__("d31c");
 
+// EXTERNAL MODULE: ./node_modules/_core-js@2.6.12@core-js/modules/es6.object.assign.js
+var es6_object_assign = __webpack_require__("6ba0");
+
 // EXTERNAL MODULE: ./node_modules/_core-js@2.6.12@core-js/modules/es6.array.sort.js
 var es6_array_sort = __webpack_require__("3441");
 
@@ -2675,6 +2678,9 @@ var memory_MemoryCache = /*#__PURE__*/function () {
 
 
 
+
+
+
 function componentsvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { componentsvue_type_script_lang_js_ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { componentsvue_type_script_lang_js_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -2688,6 +2694,14 @@ function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1
 var allMessages = {};
 var emojiMap = {};
 
+var componentsvue_type_script_lang_js_toPx = function toPx(val) {
+  return isString(val) ? val : "".concat(val, "px");
+};
+
+var toPoint = function toPoint(str) {
+  return str.replace("%", "") / 100;
+};
+
 var renderDrawerContent = function renderDrawerContent() {};
 
 /* harmony default export */ var componentsvue_type_script_lang_js_ = ({
@@ -2699,12 +2713,12 @@ var renderDrawerContent = function renderDrawerContent() {};
   },
   props: {
     width: {
-      type: String,
-      default: "850px"
+      type: [String, Number],
+      default: 850
     },
     height: {
-      type: String,
-      default: "580px"
+      type: [String, Number],
+      default: 580
     },
     theme: {
       type: String,
@@ -2978,9 +2992,10 @@ var renderDrawerContent = function renderDrawerContent() {};
       var h = this.$createElement;
       return h("div", {
         "style": {
-          width: this.width,
-          height: this.height
+          width: componentsvue_type_script_lang_js_toPx(this.width),
+          height: componentsvue_type_script_lang_js_toPx(this.height)
         },
+        "ref": "wrapper",
         "class": ["lemon-wrapper", "lemon-wrapper--theme-".concat(this.theme), {
           "lemon-wrapper--simple": this.simple
         }, this.drawerVisible && "lemon-wrapper--drawer-show"]
@@ -3149,7 +3164,8 @@ var renderDrawerContent = function renderDrawerContent() {};
     _renderDrawer: function _renderDrawer() {
       var h = this.$createElement;
       return this._menuIsMessages() && this.currentContactId ? h("div", {
-        "class": "lemon-drawer"
+        "class": "lemon-drawer",
+        "ref": "drawer"
       }, [renderDrawerContent(), useScopedSlot(this.$scopedSlots.drawer, "", this.currentContact)]) : "";
     },
     _isContactContainerCache: function _isContactContainerCache(name) {
@@ -3194,9 +3210,9 @@ var renderDrawerContent = function renderDrawerContent() {};
         }]
       }, [h("div", {
         "class": "lemon-container__title"
-      }, [h("div", {
+      }, [useScopedSlot(this.$scopedSlots["message-title"], h("div", {
         "class": "lemon-container__displayname"
-      }, [useScopedSlot(this.$scopedSlots["message-title"], curact.displayName, curact)])]), h("lemon-messages", {
+      }, [curact.displayName]), curact)]), h("lemon-messages", {
         "ref": "messages",
         "attrs": {
           "hide-time": this.hideMessageTime,
@@ -3746,12 +3762,49 @@ var renderDrawerContent = function renderDrawerContent() {};
     getMessages: function getMessages(contactId) {
       return (contactId ? allMessages[contactId] : allMessages) || [];
     },
-    changeDrawer: function changeDrawer(render) {
+    changeDrawer: function changeDrawer(params) {
       this.drawerVisible = !this.drawerVisible;
-      if (this.drawerVisible == true) this.openDrawer(render);
+      if (this.drawerVisible == true) this.openDrawer(params);
     },
-    openDrawer: function openDrawer(render) {
-      renderDrawerContent = render || new Function();
+    // openDrawer(data) {
+    //   renderDrawerContent = data || new Function();
+    //   this.drawerVisible = true;
+    // },
+    openDrawer: function openDrawer(params) {
+      renderDrawerContent = isFunction(params) ? params : params.render || new Function();
+      var wrapperWidth = this.$refs.wrapper.clientWidth;
+      var wrapperHeight = this.$refs.wrapper.clientHeight;
+      var width = params.width || 200;
+      var height = params.height || wrapperHeight;
+      var offsetX = params.offsetX || 0;
+      var offsetY = params.offsetY || 0;
+      var position = params.position || "right";
+      if (isString(width)) width = wrapperWidth * toPoint(width);
+      if (isString(height)) height = wrapperHeight * toPoint(height);
+      if (isString(offsetX)) offsetX = wrapperWidth * toPoint(offsetX);
+      if (isString(offsetY)) offsetY = wrapperHeight * toPoint(offsetY);
+      this.$refs.drawer.style.width = "".concat(width, "px");
+      this.$refs.drawer.style.height = "".concat(height, "px");
+      var left = 0;
+      var top = 0;
+      var shadow = "";
+
+      if (position == "right") {
+        left = wrapperWidth;
+      } else if (position == "rightInside") {
+        left = wrapperWidth - width;
+        shadow = "-15px 0 16px -14px rgba(0,0,0,0.08)";
+      } else if (position == "center") {
+        left = wrapperWidth / 2 - width / 2;
+        top = wrapperHeight / 2 - height / 2;
+        shadow = "0 0 20px rgba(0,0,0,0.08)";
+      }
+
+      left += offsetX;
+      top += offsetY + -1;
+      this.$refs.drawer.style.top = "".concat(top, "px");
+      this.$refs.drawer.style.left = "".concat(left, "px");
+      this.$refs.drawer.style.boxShadow = shadow;
       this.drawerVisible = true;
     },
     closeDrawer: function closeDrawer() {
@@ -5503,6 +5556,17 @@ try {
 
 /***/ }),
 
+/***/ "6ba0":
+/***/ (function(module, exports, __webpack_require__) {
+
+// 19.1.3.1 Object.assign(target, source)
+var $export = __webpack_require__("e99b");
+
+$export($export.S + $export.F, 'Object', { assign: __webpack_require__("9f15") });
+
+
+/***/ }),
+
 /***/ "6bf8":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5945,6 +6009,52 @@ $export($export.P + $export.F * __webpack_require__("581c")(INCLUDES), 'String',
 module.exports = function (it) {
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
+
+
+/***/ }),
+
+/***/ "9f15":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+// 19.1.2.1 Object.assign(target, source, ...)
+var DESCRIPTORS = __webpack_require__("26df");
+var getKeys = __webpack_require__("93ca");
+var gOPS = __webpack_require__("0c29");
+var pIE = __webpack_require__("35d4");
+var toObject = __webpack_require__("8078");
+var IObject = __webpack_require__("1b96");
+var $assign = Object.assign;
+
+// should work with symbols and should have deterministic property order (V8 bug)
+module.exports = !$assign || __webpack_require__("0926")(function () {
+  var A = {};
+  var B = {};
+  // eslint-disable-next-line no-undef
+  var S = Symbol();
+  var K = 'abcdefghijklmnopqrst';
+  A[S] = 7;
+  K.split('').forEach(function (k) { B[k] = k; });
+  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
+}) ? function assign(target, source) { // eslint-disable-line no-unused-vars
+  var T = toObject(target);
+  var aLen = arguments.length;
+  var index = 1;
+  var getSymbols = gOPS.f;
+  var isEnum = pIE.f;
+  while (aLen > index) {
+    var S = IObject(arguments[index++]);
+    var keys = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S);
+    var length = keys.length;
+    var j = 0;
+    var key;
+    while (length > j) {
+      key = keys[j++];
+      if (!DESCRIPTORS || isEnum.call(S, key)) T[key] = S[key];
+    }
+  } return T;
+} : $assign;
 
 
 /***/ }),

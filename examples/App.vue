@@ -383,6 +383,51 @@
       </tr>
     </table>
 
+    <div class="title">抽屉配置 DrawerOption</div>
+    <table class="table">
+      <tr class="table-head">
+        <th>名称</th>
+        <th>说明</th>
+        <th>类型</th>
+        <th>示例</th>
+      </tr>
+      <tr>
+        <td width="150">width</td>
+        <td width="350">宽度，可以设置百分比</td>
+        <td width="150">String | Number</td>
+        <td width="100">-</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="150">height</td>
+        <td width="350">高度，可以设置百分比</td>
+        <td width="150">String | Number</td>
+        <td width="100">-</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="150">offsetX</td>
+        <td width="350">X偏移值，可以设置百分比</td>
+        <td width="150">String | Number</td>
+        <td width="100">-</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="150">offsetY</td>
+        <td width="350">Y偏移值，可以设置百分比</td>
+        <td width="150">String | Number</td>
+        <td width="100">-</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="150">position</td>
+        <td width="350">位置</td>
+        <td width="150">right | rightInside | center</td>
+        <td width="100">-</td>
+        <td></td>
+      </tr>
+    </table>
+
     <div class="title">组件属性</div>
     <table class="table">
       <tr class="table-head">
@@ -656,7 +701,7 @@
       <tr>
         <td>changeDrawer</td>
         <td>切换右侧抽屉显示/隐藏，vnode 为抽屉内容</td>
-        <td>Function(vnode)</td>
+        <td>Function(DrawerOption)</td>
         <td>-</td>
         <td></td>
       </tr>
@@ -1799,22 +1844,31 @@ export default {
       });
     },
     changeDrawer(contact, instance) {
-      instance.changeDrawer(() => {
-        return (
-          <div class="drawer-content">
-            <p>
-              <b>自定义抽屉</b>
-            </p>
-            <p>{contact.displayName}</p>
-          </div>
-        );
+      instance.changeDrawer({
+        //width: 240,
+        //height: "90%",
+        //offsetX:0 ,
+        //offsetY: ,
+        //position: "center",
+        // inside: true,
+        // offsetX: -280,
+        // offsetY: -100,
+        render: () => {
+          return (
+            <div class="drawer-content">
+              <p>
+                <b>自定义抽屉</b>
+              </p>
+              <p>{contact.displayName}</p>
+            </div>
+          );
+        }
       });
     },
     handleChangeContact(contact, instance) {
       console.log("Event:change-contact");
       instance.updateContact({
         id: contact.id,
-        //displayName: "123",
         unread: 0
       });
       instance.closeDrawer();
@@ -1960,9 +2014,11 @@ a
     font-weight normal
 .imui-center
   margin-bottom 60px
-  .lemon-wrapper,
-  .lemon-wrapper--drawer-show .lemon-drawer
-    box-shadow 0 0 30px rgba(0,0,0,0.1);
+  .lemon-wrapper
+    border:1px solid #ddd;
+  .lemon-drawer
+    border:1px solid #ddd;
+    border-left:0;
 .drawer-content
   padding 15px
 .more

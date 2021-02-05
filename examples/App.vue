@@ -92,80 +92,8 @@
 
     <div style="display:flex;">
       <div>
-        <div class="title">插槽演示</div>
-        <div class="imui-center">
-          <lemon-imui
-            :user="user"
-            class="lemon-slot"
-            ref="SlotIMUI"
-            @pull-messages="handlePullMessages"
-            @message-click="handleMessageClick"
-            @change-contact="handleChangeContact"
-            @send="handleSend"
-            send-text="发送消息"
-            :send-key="e => e.ctrlKey == true"
-          >
-            <template #editor-footer>
-              按 ctrl 键发送消息
-            </template>
-            <template #cover>
-              <div class="cover">
-                <i class="lemon-icon-message"></i>
-                <p><b>自定义封面 Lemon</b> IMUI</p>
-              </div>
-            </template>
-            <template #message-title="contact">
-              <span>{{ contact.displayName }}</span>
-              <small class="more" @click="changeDrawer(contact, $refs.SlotIMUI)"
-                >{{
-                  ($refs.SlotIMUI
-                  ? $refs.SlotIMUI.drawerVisible
-                  : false)
-                    ? "关闭"
-                    : "打开"
-                }}抽屉</small
-              >
-            </template>
-            <template #message-after="message">
-              <span>未读</span>
-            </template>
-
-            <template #contact-info="contact">
-              自定义通讯录信息 {{ contact.displayName }}
-            </template>
-            <template #sidebar-message="contact">
-              <lemon-badge :count="contact.unread" style="width:100%">
-                <div>
-                  <p>
-                    <span>{{ contact.displayName }}</span>
-                  </p>
-                  <p
-                    class="lemon-contact__content"
-                    style="height:18px;font-size:12px;color:#aaa;"
-                  >
-                    最新消息：
-                    <span v-html="contact.lastContent"></span>
-                  </p>
-                </div>
-              </lemon-badge>
-            </template>
-            <template #sidebar-contact="contact">
-              <span>{{ contact.displayName }}</span>
-            </template>
-            <template #sidebar-message-top>
-              <div class="bar">最新消息顶部</div>
-            </template>
-            <template #sidebar-contact-top>
-              <div class="bar">联系人顶部</div>
-            </template>
-            <template #sidebar-message-fixedtop>
-              <div class="bar">最新消息顶部 Fixed</div>
-            </template>
-            <template #sidebar-contact-fixedtop>
-              <div class="bar">联系人顶部 Fixed</div>
-            </template>
-          </lemon-imui>
-        </div>
+        <div class="title">自定义</div>
+        <div class="imui-center"><qq-imui>12312312</qq-imui></div>
       </div>
 
       <div style="margin:0 55px;">
@@ -1041,8 +969,11 @@ WebSocket.onmessage = function(event) {
 <script>
 import Vue from "vue";
 import LemonMessageVoice from "./lemon-message-voice";
+import QQIMUI from "./qq";
 import packageData from "../package.json";
+import EmojiData from "./database/emoji";
 Vue.component(LemonMessageVoice.name, LemonMessageVoice);
+Vue.component(QQIMUI.name, QQIMUI);
 
 const tip = `export default {
   //组件的name必须以lemonMessage开头，后面跟上 Message.type
@@ -1094,7 +1025,7 @@ const generateMessage = (toContactId = "", fromUser) => {
     fromUser = {
       id: "system",
       displayName: "系统测试",
-      avatar: "http://upload.qqbodys.com/allimg/1710/1035512943-0.jpg"
+      avatar: "http://upload.qqbodys.com/allimg/1710/1035512943-0.jpg",
     };
   }
   return {
@@ -1106,7 +1037,7 @@ const generateMessage = (toContactId = "", fromUser) => {
     //fileSize: 1231,
     //fileName: "asdasd.doc",
     toContactId,
-    fromUser
+    fromUser,
   };
 };
 
@@ -1122,17 +1053,17 @@ export default {
             const { IMUI, contact } = instance;
             IMUI.updateContact({
               id: contact.id,
-              lastContent: null
+              lastContent: null,
             });
             if (IMUI.currentContactId == contact.id) IMUI.changeContact(null);
             hide();
-          }
+          },
         },
         {
-          text: "设置备注和标签"
+          text: "设置备注和标签",
         },
         {
-          text: "投诉"
+          text: "投诉",
         },
         {
           icon: "lemon-icon-message",
@@ -1148,7 +1079,7 @@ export default {
                 </span>
               </div>
             );
-          }
+          },
         },
         {
           click(e, instance, hide) {
@@ -1158,8 +1089,8 @@ export default {
             hide();
           },
           color: "red",
-          text: "删除好友"
-        }
+          text: "删除好友",
+        },
       ],
       contextmenu: [
         {
@@ -1188,7 +1119,7 @@ export default {
               ),
 
               toContactId: message.toContactId,
-              sendTime: getTime()
+              sendTime: getTime(),
             };
             IMUI.removeMessage(message.id);
             IMUI.appendMessage(data, true);
@@ -1197,34 +1128,34 @@ export default {
           visible: instance => {
             return instance.message.fromUser.id == this.user.id;
           },
-          text: "撤回消息"
+          text: "撤回消息",
         },
         {
           visible: instance => {
             return instance.message.fromUser.id != this.user.id;
           },
-          text: "举报"
+          text: "举报",
         },
         {
-          text: "转发"
+          text: "转发",
         },
         {
           visible: instance => {
             return instance.message.type == "text";
           },
-          text: "复制文字"
+          text: "复制文字",
         },
         {
           visible: instance => {
             return instance.message.type == "image";
           },
-          text: "下载图片"
+          text: "下载图片",
         },
         {
           visible: instance => {
             return instance.message.type == "file";
           },
-          text: "下载文件"
+          text: "下载文件",
         },
         {
           click: (e, instance, hide) => {
@@ -1234,8 +1165,8 @@ export default {
           },
           icon: "lemon-icon-folder",
           color: "red",
-          text: "删除"
-        }
+          text: "删除",
+        },
       ],
       tip: tip,
       packageData,
@@ -1246,8 +1177,8 @@ export default {
       user: {
         id: "1",
         displayName: "June",
-        avatar: ""
-      }
+        avatar: "",
+      },
     };
   },
   mounted() {
@@ -1258,7 +1189,7 @@ export default {
       index: "[1]群组",
       unread: 0,
       lastSendTime: 1566047865417,
-      lastContent: "2"
+      lastContent: "2",
     };
     const contactData2 = {
       id: "contact-2",
@@ -1273,7 +1204,7 @@ export default {
       },
       lastSendTime: 1345209465000,
       lastContent: "12312",
-      unread: 2
+      unread: 2,
     };
     const contactData3 = {
       id: "contact-3",
@@ -1282,7 +1213,7 @@ export default {
       index: "T",
       unread: 32,
       lastSendTime: 3,
-      lastContent: "你好123"
+      lastContent: "你好123",
     };
     const contactData4 = {
       id: "contact-4",
@@ -1292,12 +1223,12 @@ export default {
       index: "",
       unread: 1,
       lastSendTime: 3,
-      lastContent: "吃饭了嘛"
+      lastContent: "吃饭了嘛",
     };
 
     const { IMUI } = this.$refs;
     setTimeout(() => {
-      IMUI.changeContact('contact-1');
+      IMUI.changeContact("contact-1");
     }, 500);
 
     IMUI.setLastContentRender("event", message => {
@@ -1307,17 +1238,17 @@ export default {
     let contactList = [
       { ...contactData1 },
       { ...contactData2 },
-      { ...contactData3 }
+      { ...contactData3 },
       //...Array(100).fill(contactData1)
     ];
 
     IMUI.initContacts(contactList);
     IMUI.initMenus([
       {
-        name: "messages"
+        name: "messages",
       },
       {
-        name: "contacts"
+        name: "contacts",
       },
       {
         name: "custom1",
@@ -1357,7 +1288,7 @@ export default {
             </div>
           );
         },
-        isBottom: true
+        isBottom: true,
       },
       {
         name: "custom2",
@@ -1369,19 +1300,19 @@ export default {
         render: menu => {
           return <i class="lemon-icon-group" />;
         },
-        isBottom: true
-      }
+        isBottom: true,
+      },
     ]);
 
     IMUI.initEditorTools([
       {
-        name: "emoji"
+        name: "emoji",
       },
       {
-        name: "uploadFile"
+        name: "uploadFile",
       },
       {
-        name: "uploadImage"
+        name: "uploadImage",
       },
       {
         name: "test1",
@@ -1390,7 +1321,7 @@ export default {
         },
         render: () => {
           return <span>Excel</span>;
-        }
+        },
       },
       {
         name: "test1",
@@ -1399,7 +1330,7 @@ export default {
         },
         render: () => {
           return <span>重制工具栏</span>;
-        }
+        },
       },
       {
         name: "test2",
@@ -1410,302 +1341,10 @@ export default {
         },
         render: () => {
           return <b>···</b>;
-        }
-      }
-    ]);
-    let emojiData = [
-      {
-        label: "表情",
-        children: [
-          {
-            name: "1f600",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f600.png"
-          },
-          {
-            name: "1f62c",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f62c.png"
-          },
-          {
-            name: "1f601",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f601.png"
-          },
-          {
-            name: "1f602",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f602.png"
-          },
-          {
-            name: "1f923",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f923.png"
-          },
-          {
-            name: "1f973",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f973.png"
-          },
-          {
-            name: "1f603",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f603.png"
-          },
-          {
-            name: "1f604",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f604.png"
-          },
-          {
-            name: "1f605",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f605.png"
-          },
-          {
-            name: "1f606",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f606.png"
-          },
-          {
-            name: "1f607",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f607.png"
-          },
-          {
-            name: "1f609",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f609.png"
-          },
-          {
-            name: "1f60a",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f60a.png"
-          },
-          {
-            name: "1f642",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f642.png"
-          },
-          {
-            name: "1f643",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f643.png"
-          },
-          {
-            name: "1263a",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/263a.png"
-          },
-          {
-            name: "1f60b",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f60b.png"
-          },
-          {
-            name: "1f60c",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f60c.png"
-          },
-          {
-            name: "1f60d",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f60d.png"
-          },
-          {
-            name: "1f970",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f970.png"
-          },
-          {
-            name: "1f618",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f618.png"
-          },
-          {
-            name: "1f617",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f617.png"
-          },
-          {
-            name: "1f619",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f619.png"
-          },
-          {
-            name: "1f61a",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f61a.png"
-          },
-          {
-            name: "1f61c",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f61c.png"
-          },
-          {
-            name: "1f92a",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f92a.png"
-          },
-          {
-            name: "1f928",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f928.png"
-          },
-          {
-            name: "1f9d0",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f9d0.png"
-          },
-          {
-            name: "1f61d",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f61d.png"
-          },
-          {
-            name: "1f61b",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f61b.png"
-          },
-          {
-            name: "1f911",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f911.png"
-          },
-          {
-            name: "1f913",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f913.png"
-          },
-          {
-            name: "1f60e",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f60e.png"
-          },
-          {
-            name: "1f929",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f929.png"
-          },
-          {
-            name: "1f921",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f921.png"
-          },
-          {
-            name: "1f920",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f920.png"
-          },
-          {
-            name: "1f917",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f917.png"
-          },
-          {
-            name: "1f60f",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f60f.png"
-          },
-          {
-            name: "1f636",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f636.png"
-          },
-          {
-            name: "1f610",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f610.png"
-          },
-          {
-            name: "1f611",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f611.png"
-          },
-          {
-            name: "1f612",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f612.png"
-          },
-          {
-            name: "1f644",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f644.png"
-          },
-          {
-            name: "1f914",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f914.png"
-          },
-          {
-            name: "1f925",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f925.png"
-          },
-          {
-            name: "1f92d",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f92d.png"
-          },
-          {
-            name: "1f92b",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f92b.png"
-          },
-          {
-            name: "1f92c",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f92c.png"
-          },
-          {
-            name: "1f92f",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f92f.png"
-          },
-          {
-            name: "1f633",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f633.png"
-          },
-          {
-            name: "1f61e",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f61e.png"
-          },
-          {
-            name: "1f61f",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f61f.png"
-          },
-          {
-            name: "1f620",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f620.png"
-          },
-          {
-            name: "1f621",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f621.png"
-          }
-        ]
+        },
       },
-      {
-        label: "收藏",
-        children: [
-          {
-            name: "1f62c",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f62c.png"
-          },
-          {
-            name: "1f621",
-            title: "微笑",
-            src: "https://twemoji.maxcdn.com/2/72x72/1f621.png"
-          }
-        ]
-      }
-    ];
-    IMUI.initEmoji(emojiData);
+    ]);
+    IMUI.initEmoji(EmojiData);
 
     IMUI.setLastContentRender("voice", message => {
       return <span>[语音]</span>;
@@ -1714,13 +1353,8 @@ export default {
     const { SimpleIMUI } = this.$refs;
     contactData1.id = "11";
     SimpleIMUI.initContacts([contactData1]);
-    SimpleIMUI.initEmoji(emojiData);
+    SimpleIMUI.initEmoji(EmojiData);
     SimpleIMUI.changeContact(contactData1.id);
-
-    const { SlotIMUI } = this.$refs;
-    contactData3.id = "333";
-    SlotIMUI.initContacts([contactData4, contactData3]);
-    SlotIMUI.initEmoji(emojiData);
   },
   methods: {
     changeTheme() {
@@ -1739,13 +1373,13 @@ export default {
         instance.updateMessage({
           id: message.id,
           status: "going",
-          content: "正在重新发送消息..."
+          content: "正在重新发送消息...",
         });
         setTimeout(() => {
           instance.updateMessage({
             id: message.id,
             status: "succeed",
-            content: "发送成功"
+            content: "发送成功",
           });
         }, 2000);
       }
@@ -1780,7 +1414,7 @@ export default {
           status: "succeed",
           type: "file",
           fileName: "被修改成文件了.txt",
-          fileSize: "4200000"
+          fileSize: "4200000",
         };
         if (message.type == "event") {
           update.fromUser = this.user;
@@ -1800,7 +1434,7 @@ export default {
         params1: "1",
         params2: "2",
         toContactId: "contact-1",
-        fromUser: this.user
+        fromUser: this.user,
       };
       IMUI.appendMessage(message, true);
     },
@@ -1810,7 +1444,7 @@ export default {
       const message = generateMessage("contact-3");
       message.fromUser = {
         ...message.fromUser,
-        ...this.user
+        ...this.user,
       };
       IMUI.appendMessage(message, true);
     },
@@ -1831,7 +1465,7 @@ export default {
           </span>
         ),
         toContactId: "contact-3",
-        sendTime: getTime()
+        sendTime: getTime(),
       };
       IMUI.appendMessage(message, true);
     },
@@ -1841,7 +1475,7 @@ export default {
         unread: 10,
         displayName: generateRandWord(),
         lastSendTime: getTime(),
-        lastContent: "修改昵称为随机字母"
+        lastContent: "修改昵称为随机字母",
       });
     },
     changeDrawer(contact, instance) {
@@ -1863,14 +1497,14 @@ export default {
               <p>{contact.displayName}</p>
             </div>
           );
-        }
+        },
       });
     },
     handleChangeContact(contact, instance) {
       console.log("Event:change-contact");
       instance.updateContact({
         id: contact.id,
-        unread: 0
+        unread: 0,
       });
       instance.closeDrawer();
     },
@@ -1884,7 +1518,7 @@ export default {
       const otheruser = {
         id: contact.id,
         displayName: contact.displayName,
-        avatar: contact.avatar
+        avatar: contact.avatar,
       };
       setTimeout(() => {
         const messages = [
@@ -1897,8 +1531,8 @@ export default {
           generateMessage(instance.currentContactId, otheruser),
           {
             ...generateMessage(instance.currentContactId, this.user),
-            ...{ status: "failed" }
-          }
+            ...{ status: "failed" },
+          },
         ];
         let isEnd = false;
         if (
@@ -1913,8 +1547,8 @@ export default {
     handleChangeMenu() {
       console.log("Event:change-menu");
     },
-    openCustomContainer() {}
-  }
+    openCustomContainer() {},
+  },
 };
 </script>
 

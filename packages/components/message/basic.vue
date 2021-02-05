@@ -7,8 +7,8 @@ export default {
       from: "IMUI",
       default() {
         return this;
-      }
-    }
+      },
+    },
   },
   props: {
     contextmenu: Array,
@@ -16,21 +16,22 @@ export default {
       type: Object,
       default: () => {
         return {};
-      }
+      },
     },
     timeFormat: {
       type: Function,
-      default: () => ""
+      default: () => "",
     },
     reverse: Boolean,
     hideName: Boolean,
-    hideTime: Boolean
+    hideTime: Boolean,
   },
   data() {
     return {};
   },
   render() {
     const { fromUser, status, sendTime } = this.message;
+    const hideTitle = this.hideName == true && this.hideTime == true;
     return (
       <div
         class={[
@@ -38,8 +39,8 @@ export default {
           `lemon-message--status-${status}`,
           {
             "lemon-message--reverse": this.reverse,
-            "lemon-message--hide-name": this.hideName
-          }
+            "lemon-message--hide-title": hideTitle,
+          },
         ]}
       >
         <div class="lemon-message__avatar">
@@ -54,14 +55,16 @@ export default {
         </div>
         <div class="lemon-message__inner">
           <div class="lemon-message__title">
-            <span
-              on-click={e => {
-                this._emitClick(e, "displayName");
-              }}
-            >
-              {fromUser.displayName}
-            </span>
-            {this.hideTime == true && (
+            {this.hideName == false && (
+              <span
+                on-click={e => {
+                  this._emitClick(e, "displayName");
+                }}
+              >
+                {fromUser.displayName}
+              </span>
+            )}
+            {this.hideTime == false && (
               <span
                 class="lemon-message__time"
                 on-click={e => {
@@ -86,7 +89,7 @@ export default {
               {useScopedSlot(
                 this.IMUI.$scopedSlots["message-after"],
                 null,
-                this.message
+                this.message,
               )}
             </div>
             <div
@@ -101,7 +104,7 @@ export default {
                 title="重发消息"
                 style={{
                   color: "#ff2525",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
               />
             </div>
@@ -117,8 +120,8 @@ export default {
   methods: {
     _emitClick(e, key) {
       this.IMUI.$emit("message-click", e, key, this.message, this.IMUI);
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="stylus">
@@ -223,12 +226,12 @@ arrow()
     +e(avatar)
       padding-right 0
       padding-left 10px
-  +m(hide-name)
+  +m(hide-title)
     +e(status)
-      top 3px
-    +e(title)
-      display none
+      top 5px
     +e(content)
+      position relative
+      top -5px
       &:before
         top 14px
 </style>

@@ -9,26 +9,26 @@ export default {
     hideName: Boolean,
     //是否隐藏显示消息时间
     hideTime: Boolean,
-    reverseUserId: String,
+    reverseUserId: [String, Number],
     timeRange: {
       type: Number,
-      default: 1
+      default: 1,
     },
     timeFormat: {
       type: Function,
       default(val) {
         return hoursTimeFormat(val);
-      }
+      },
     },
     messages: {
       type: Array,
-      default: () => []
-    }
+      default: () => [],
+    },
   },
   data() {
     return {
       _loading: false,
-      _loadend: false
+      _loadend: false,
     };
   },
   render() {
@@ -37,7 +37,7 @@ export default {
         <div
           class={[
             "lemon-messages__load",
-            `lemon-messages__load--${this._loadend ? "end" : "ing"}`
+            `lemon-messages__load--${this._loadend ? "end" : "ing"}`,
           ]}
         >
           {this._loadend ? this._renderLoadEnd() : this._renderLoading()}
@@ -57,10 +57,10 @@ export default {
                   message: {
                     id: "__time__",
                     type: "event",
-                    content: hoursTimeFormat(message.sendTime)
-                  }
+                    content: hoursTimeFormat(message.sendTime),
+                  },
                 }}
-              />
+              />,
             );
           }
 
@@ -73,7 +73,7 @@ export default {
               message: message,
               reverse: this.reverseUserId == message.fromUser.id,
               hideTime: this.hideTime,
-              hideName: this.hideName
+              hideName: this.hideName,
             };
           }
           node.push(<tagName ref="message" refInFor={true} attrs={attrs} />);
@@ -85,7 +85,7 @@ export default {
   computed: {
     msecRange() {
       return this.timeRange * 1000 * 60;
-    }
+    },
   },
   watch: {},
   methods: {
@@ -129,10 +129,10 @@ export default {
       if (wrap) {
         wrap.scrollTop = wrap.scrollHeight;
       }
-    }
+    },
   },
   created() {},
-  mounted() {}
+  mounted() {},
 };
 </script>
 <style lang="stylus">

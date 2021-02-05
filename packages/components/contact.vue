@@ -9,8 +9,8 @@ export default {
       from: "IMUI",
       default() {
         return this;
-      }
-    }
+      },
+    },
   },
   data() {
     return {};
@@ -22,19 +22,20 @@ export default {
       type: Function,
       default(val) {
         return timeFormat(val, isToday(val) ? "h:i" : "y/m/d");
-      }
-    }
+      },
+    },
   },
   render() {
     return (
       <div
         class={["lemon-contact", { "lemon-contact--name-center": this.simple }]}
+        title={this.contact.displayName}
         on-click={e => this._handleClick(e, this.contact)}
       >
         {useScopedSlot(
           this.$scopedSlots.default,
           this._renderInner(),
-          this.contact
+          this.contact,
         )}
       </div>
     );
@@ -71,13 +72,13 @@ export default {
               )}
             </p>
           )}
-        </div>
+        </div>,
       ];
     },
     _handleClick(e, data) {
       this.$emit("click", data);
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="stylus">

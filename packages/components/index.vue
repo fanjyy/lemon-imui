@@ -5,7 +5,7 @@ import contextmenu from "../directives/contextmenu";
 import {
   DEFAULT_MENUS,
   DEFAULT_MENU_LASTMESSAGES,
-  DEFAULT_MENU_CONTACTS
+  DEFAULT_MENU_CONTACTS,
 } from "utils/constant";
 import lastContentRender from "../lastContentRender";
 
@@ -26,25 +26,25 @@ export default {
   name: "LemonImui",
   provide() {
     return {
-      IMUI: this
+      IMUI: this,
     };
   },
   props: {
     width: {
       type: [String, Number],
-      default: 850
+      default: 850,
     },
     height: {
       type: [String, Number],
-      default: 580
+      default: 580,
     },
     theme: {
       type: String,
-      default: "default"
+      default: "default",
     },
     simple: {
       type: Boolean,
-      default: false
+      default: false,
     },
     /**
      * 消息时间格式化规则
@@ -59,7 +59,7 @@ export default {
      */
     hideDrawer: {
       type: Boolean,
-      default: true
+      default: true,
     },
     /**
      * 是否隐藏导航按钮上的头像
@@ -83,8 +83,8 @@ export default {
       type: Object,
       default: () => {
         return {};
-      }
-    }
+      },
+    },
   },
   data() {
     this.CacheContactContainer = new MemoryCache();
@@ -98,7 +98,7 @@ export default {
       activeSidebar: DEFAULT_MENU_LASTMESSAGES,
       contacts: [],
       menus: [],
-      editorTools: []
+      editorTools: [],
     };
   },
 
@@ -108,7 +108,7 @@ export default {
       this._renderSidebarMessage(),
       this._renderSidebarContact(),
       this._renderContainer(),
-      this._renderDrawer()
+      this._renderDrawer(),
     ]);
   },
   created() {
@@ -133,10 +133,10 @@ export default {
         return a2.lastSendTime - a1.lastSendTime;
       });
       return data;
-    }
+    },
   },
   watch: {
-    activeSidebar() {}
+    activeSidebar() {},
   },
   methods: {
     _menuIsContacts() {
@@ -154,10 +154,10 @@ export default {
           sendTime: new Date().getTime(),
           toContactId: this.currentContactId,
           fromUser: {
-            ...this.user
-          }
+            ...this.user,
+          },
         },
-        ...message
+        ...message,
       };
     },
     /**
@@ -169,14 +169,14 @@ export default {
           id: message.toContactId,
           unread: "+1",
           lastSendTime: message.sendTime,
-          lastContent: this.lastContentRender(message)
+          lastContent: this.lastContentRender(message),
         });
       } else {
         this._addMessage(message, message.toContactId, 1);
         const updateContact = {
           id: message.toContactId,
           lastContent: this.lastContentRender(message),
-          lastSendTime: message.sendTime
+          lastSendTime: message.sendTime,
         };
         if (message.toContactId == this.currentContactId) {
           if (scrollToBottom == true) {
@@ -197,7 +197,7 @@ export default {
           next();
           this.updateMessage(Object.assign(message, replaceMessage));
         },
-        file
+        file,
       );
     },
     _handleSend(text) {
@@ -207,7 +207,7 @@ export default {
         this.updateContact({
           id: message.toContactId,
           lastContent: this.lastContentRender(message),
-          lastSendTime: message.sendTime
+          lastSendTime: message.sendTime,
         });
         this.CacheDraft.remove(message.toContactId);
       });
@@ -218,14 +218,14 @@ export default {
       if (imageTypes.includes(file.type)) {
         joinMessage = {
           type: "image",
-          content: URL.createObjectURL(file)
+          content: URL.createObjectURL(file),
         };
       } else {
         joinMessage = {
           type: "file",
           fileSize: file.size,
           fileName: file.name,
-          content: ""
+          content: "",
         };
       }
       const message = this._createMessage(joinMessage);
@@ -236,10 +236,10 @@ export default {
           this.updateContact({
             id: message.toContactId,
             lastContent: this.lastContentRender(message),
-            lastSendTime: message.sendTime
+            lastSendTime: message.sendTime,
           });
         },
-        file
+        file,
       );
     },
     _emitPullMessages(next) {
@@ -247,7 +247,7 @@ export default {
       this.$emit(
         "pull-messages",
         this.currentContact,
-        (messages, isEnd = false) => {
+        (messages = [], isEnd = false) => {
           this._addMessage(messages, this.currentContactId, 0);
           this.CacheMessageLoaded.set(this.currentContactId, isEnd);
           if (isEnd == true) this.$refs.messages.loaded();
@@ -255,7 +255,7 @@ export default {
           this._changeContactLock = false;
           next(isEnd);
         },
-        this
+        this,
       );
     },
     clearCacheContainer(name) {
@@ -267,14 +267,14 @@ export default {
         <div
           style={{
             width: toPx(this.width),
-            height: toPx(this.height)
+            height: toPx(this.height),
           }}
           ref="wrapper"
           class={[
             "lemon-wrapper",
             `lemon-wrapper--theme-${this.theme}`,
             { "lemon-wrapper--simple": this.simple },
-            this.drawerVisible && "lemon-wrapper--drawer-show"
+            this.drawerVisible && "lemon-wrapper--drawer-show",
           ]}
         >
           {children}
@@ -316,7 +316,7 @@ export default {
           <div
             class={[
               "lemon-menu__item",
-              { "lemon-menu__item--active": this.activeSidebar == name }
+              { "lemon-menu__item--active": this.activeSidebar == name },
             ]}
             on-click={() => {
               funCall(click, () => {
@@ -332,7 +332,7 @@ export default {
       });
       return {
         top,
-        bottom
+        bottom,
       };
     },
     _renderSidebarMessage() {
@@ -343,22 +343,26 @@ export default {
             return this._renderContact(
               {
                 contact,
-                timeFormat: this.contactTimeFormat
+                timeFormat: this.contactTimeFormat,
               },
               () => this.changeContact(contact.id),
-              this.$scopedSlots["sidebar-message"]
+              this.$scopedSlots["sidebar-message"],
             );
-          })
+          }),
         ],
         DEFAULT_MENU_LASTMESSAGES,
-        useScopedSlot(this.$scopedSlots["sidebar-message-fixedtop"], null, this)
+        useScopedSlot(
+          this.$scopedSlots["sidebar-message-fixedtop"],
+          null,
+          this,
+        ),
       );
     },
     _renderContact(props, onClick, slot) {
       const {
         click: customClick,
         renderContainer,
-        id: contactId
+        id: contactId,
       } = props.contact;
       const click = () => {
         funCall(customClick, () => {
@@ -366,7 +370,7 @@ export default {
           this._customContainerReady(
             renderContainer,
             this.CacheContactContainer,
-            contactId
+            contactId,
           );
         });
       };
@@ -374,13 +378,13 @@ export default {
       return (
         <lemon-contact
           class={{
-            "lemon-contact--active": this.currentContactId == props.contact.id
+            "lemon-contact--active": this.currentContactId == props.contact.id,
           }}
           v-lemon-contextmenu_contact={this.contactContextmenu}
           props={props}
           on-click={click}
           scopedSlots={{ default: slot }}
-        ></lemon-contact>
+        />
       );
     },
     _renderSidebarContact() {
@@ -398,20 +402,24 @@ export default {
               this._renderContact(
                 {
                   contact: contact,
-                  simple: true
+                  simple: true,
                 },
                 () => {
                   this.changeContact(contact.id);
                 },
-                this.$scopedSlots["sidebar-contact"]
-              )
+                this.$scopedSlots["sidebar-contact"],
+              ),
             ];
             prevIndex = contact.index;
             return node;
-          })
+          }),
         ],
         DEFAULT_MENU_CONTACTS,
-        useScopedSlot(this.$scopedSlots["sidebar-contact-fixedtop"], null, this)
+        useScopedSlot(
+          this.$scopedSlots["sidebar-contact-fixedtop"],
+          null,
+          this,
+        ),
       );
     },
     _renderSidebar(children, name, fixedtop) {
@@ -429,7 +437,7 @@ export default {
     _renderDrawer() {
       return this._menuIsMessages() && this.currentContactId ? (
         <div class="lemon-drawer" ref="drawer">
-          {renderDrawerContent()}
+          {renderDrawerContent(this.currentContact)}
           {useScopedSlot(this.$scopedSlots.drawer, "", this.currentContact)}
         </div>
       ) : (
@@ -450,7 +458,7 @@ export default {
         nodes.push(
           <div class={cls} v-show={show}>
             {this.CacheContactContainer.get(name)}
-          </div>
+          </div>,
         );
       }
       for (const name in this.CacheMenuContainer.get()) {
@@ -460,7 +468,7 @@ export default {
             v-show={this.activeSidebar == name && !this.currentIsDefSidebar}
           >
             {this.CacheMenuContainer.get(name)}
-          </div>
+          </div>,
         );
       }
 
@@ -475,7 +483,7 @@ export default {
               <div class="lemon-container__displayname">
                 {curact.displayName}
               </div>,
-              curact
+              curact,
             )}
           </div>
           <div class="lemon-vessel">
@@ -499,19 +507,15 @@ export default {
               />
             </div>
             <div class="lemon-vessel__right">
-              {useScopedSlot(
-                this.$scopedSlots["message-side"],
-                null,
-                curact
-              )}
+              {useScopedSlot(this.$scopedSlots["message-side"], null, curact)}
             </div>
           </div>
-        </div>
+        </div>,
       );
       nodes.push(
         <div class={cls} v-show={!curact.id && this.currentIsDefSidebar}>
           {this.$slots.cover}
-        </div>
+        </div>,
       );
       nodes.push(
         <div
@@ -528,7 +532,7 @@ export default {
                   if (isEmpty(curact.lastContent)) {
                     this.updateContact({
                       id: curact.id,
-                      lastContent: " "
+                      lastContent: " ",
                     });
                   }
                   this.changeContact(curact.id, DEFAULT_MENU_LASTMESSAGES);
@@ -537,9 +541,9 @@ export default {
                 发送消息
               </lemon-button>
             </div>,
-            curact
+            curact,
           )}
-        </div>
+        </div>,
       );
       return nodes;
     },
@@ -549,14 +553,14 @@ export default {
     _addContact(data, t) {
       const type = {
         0: "unshift",
-        1: "push"
+        1: "push",
       }[t];
       this.contacts[type](data);
     },
     _addMessage(data, contactId, t) {
       const type = {
         0: "unshift",
-        1: "push"
+        1: "push",
       }[t];
       if (!Array.isArray(data)) data = [data];
       allMessages[contactId] = allMessages[contactId] || [];
@@ -573,7 +577,9 @@ export default {
     lastContentRender(message) {
       if (!isFunction(lastContentRender[message.type])) {
         console.error(
-          `not found '${message.type}' of the latest message renderer,try to use ‘setLastContentRender()’`
+          `not found '${
+            message.type
+          }' of the latest message renderer,try to use ‘setLastContentRender()’`,
         );
         return "";
       }
@@ -615,13 +621,13 @@ export default {
       if (isEmpty(contact)) return false;
       this.CacheDraft.set(contactId, {
         editorValue: editorValue,
-        lastContent: contact.lastContent
+        lastContent: contact.lastContent,
       });
       this.updateContact({
         id: contactId,
         lastContent: `<span style="color:red;">[草稿]</span><span>${this.lastContentRender(
-          { type: "text", content: editorValue }
-        )}</span>`
+          { type: "text", content: editorValue },
+        )}</span>`,
       });
     },
     /**
@@ -632,7 +638,7 @@ export default {
       if (draft) {
         this.updateContact({
           id: contactId,
-          lastContent: draft.lastContent
+          lastContent: draft.lastContent,
         });
         this.CacheDraft.remove(contactId);
       }
@@ -696,7 +702,7 @@ export default {
       const message = this.findMessage(messageId);
       if (!message) return false;
       const index = allMessages[message.toContactId].findIndex(
-        ({ id }) => id == messageId
+        ({ id }) => id == messageId,
       );
       allMessages[message.toContactId].splice(index, 1);
       return true;
@@ -711,7 +717,7 @@ export default {
       let historyMessage = this.findMessage(message.id);
       if (!historyMessage) return false;
       historyMessage = Object.assign(historyMessage, message, {
-        toContactId: historyMessage.toContactId
+        toContactId: historyMessage.toContactId,
       });
       return true;
     },
@@ -726,7 +732,7 @@ export default {
         const components = this.$refs.messages.$refs.message;
         if (components) {
           const messageComponent = components.find(
-            com => com.$attrs.message.id == messageId
+            com => com.$attrs.message.id == messageId,
           );
           if (messageComponent) messageComponent.$forceUpdate();
         }
@@ -782,7 +788,7 @@ export default {
           render: menu => {
             return <i class="lemon-icon-message" />;
           },
-          isBottom: false
+          isBottom: false,
         },
         {
           name: DEFAULT_MENU_CONTACTS,
@@ -792,14 +798,14 @@ export default {
           render: menu => {
             return <i class="lemon-icon-addressbook" />;
           },
-          isBottom: false
-        }
+          isBottom: false,
+        },
       ];
       let menus = [];
       if (Array.isArray(data)) {
         const indexMap = {
           messages: 0,
-          contacts: 1
+          contacts: 1,
         };
         const indexKeys = Object.keys(indexMap);
         menus = data.map(item => {
@@ -807,7 +813,7 @@ export default {
             return {
               ...defaultMenus[indexMap[item.name]],
               ...item,
-              ...{ renderContainer: null }
+              ...{ renderContainer: null },
             };
           }
 
@@ -815,7 +821,7 @@ export default {
             this._customContainerReady(
               item.renderContainer,
               this.CacheMenuContainer,
-              item.name
+              item.name,
             );
           }
 
@@ -859,10 +865,10 @@ export default {
             index: "",
             unread: 0,
             lastSendTime: "",
-            lastContent: ""
+            lastContent: "",
           },
-          contact
-        )
+          contact,
+        ),
       );
       return true;
     },
@@ -893,7 +899,7 @@ export default {
         }
         this.$set(this.contacts, index, {
           ...this.contacts[index],
-          ...data
+          ...data,
         });
       }
     },
@@ -1000,8 +1006,8 @@ export default {
     },
     closeDrawer() {
       this.drawerVisible = false;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="stylus">
@@ -1093,7 +1099,7 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
     height 100%
     flex 1
   +e(right)
-    flex 0
+    flex none
 +b(lemon-messages)
   flex 1
   height auto
@@ -1102,7 +1108,6 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   top 0
   overflow hidden
   background #f6f6f6
-  transition width .4s bezier
   z-index 11
   display none
 +b(lemon-wrapper)

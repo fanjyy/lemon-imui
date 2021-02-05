@@ -758,6 +758,11 @@
         <td width="350">左侧联系人详细页</td>
         <td width="150">Contact</td>
       </tr>
+      <tr>
+        <td width="150">message-side</td>
+        <td width="350">消息列表右侧</td>
+        <td width="150">Contact</td>
+      </tr>
     </table>
 
     <div class="title">组件事件</div>

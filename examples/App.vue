@@ -21,7 +21,9 @@
         >
       </div>
       <br />
-      <div><a style="font-size:14px;" href="#help1">1.如何创建消息？</a></div>
+      <div>
+        <a style="font-size:14px;" href="#help1">1.如何创建自定义消息？</a>
+      </div>
       <div>
         <a style="font-size:14px;" href="#help2">2.如何对接后端接口？</a>
       </div>
@@ -808,7 +810,7 @@
       </tr>
     </table>
 
-    <div class="title" id="help1">如何创建消息？</div>
+    <div class="title" id="help1">如何创建自定义消息？</div>
     <div>
       <p>
         Lemon-IMUI

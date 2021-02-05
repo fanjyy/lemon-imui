@@ -478,23 +478,34 @@ export default {
               curact
             )}
           </div>
-          <lemon-messages
-            ref="messages"
-            hide-time={this.hideMessageTime}
-            hide-name={this.hideMessageName}
-            time-format={this.messageTimeFormat}
-            reverse-user-id={this.user.id}
-            on-reach-top={this._emitPullMessages}
-            messages={this.currentMessages}
-          />
-          <lemon-editor
-            ref="editor"
-            tools={this.editorTools}
-            sendText={this.sendText}
-            sendKey={this.sendKey}
-            onSend={this._handleSend}
-            onUpload={this._handleUpload}
-          />
+          <div class="lemon-vessel">
+            <div class="lemon-vessel__left">
+              <lemon-messages
+                ref="messages"
+                hide-time={this.hideMessageTime}
+                hide-name={this.hideMessageName}
+                time-format={this.messageTimeFormat}
+                reverse-user-id={this.user.id}
+                on-reach-top={this._emitPullMessages}
+                messages={this.currentMessages}
+              />
+              <lemon-editor
+                ref="editor"
+                tools={this.editorTools}
+                sendText={this.sendText}
+                sendKey={this.sendKey}
+                onSend={this._handleSend}
+                onUpload={this._handleUpload}
+              />
+            </div>
+            <div class="lemon-vessel__right">
+              {useScopedSlot(
+                this.$scopedSlots["message-side"],
+                null,
+                curact
+              )}
+            </div>
+          </div>
         </div>
       );
       nodes.push(
@@ -1051,10 +1062,9 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
   background #efefef
   display flex
   flex-direction column
-  +e(scroll){
+  +e(scroll)
     overflow-y auto
     scrollbar-light()
-  }
   +e(label)
     padding 6px 14px 6px 14px
     color #666
@@ -1074,6 +1084,16 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
     padding 15px 15px
   +e(displayname)
     font-size 16px
++b(lemon-vessel)
+  display flex
+  flex 1
+  +e(left)
+    display flex
+    flex-direction column
+    height 100%
+    flex 1
+  +e(right)
+    flex 0
 +b(lemon-messages)
   flex 1
   height auto

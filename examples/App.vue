@@ -57,6 +57,7 @@
               ($refs.IMUI ? $refs.IMUI.drawerVisible : false) ? "关闭" : "打开"
             }}抽屉</small
           >
+          <br />
         </template>
       </lemon-imui>
       <a
@@ -1296,8 +1297,8 @@ export default {
 
     const { IMUI } = this.$refs;
     setTimeout(() => {
-      console.log(IMUI.hasContact("cont1act-3"));
-    }, 2000);
+      IMUI.changeContact('contact-1');
+    }, 500);
 
     IMUI.setLastContentRender("event", message => {
       return `[自定义通知内容]`;

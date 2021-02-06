@@ -8560,7 +8560,7 @@ var renderDrawerContent = function renderDrawerContent() {};
                   this.updateCurrentMessages();
 
                   this._emitPullMessages(function (isEnd) {
-                    return _this13.messageViewToBottom();
+                    _this13.messageViewToBottom();
                   });
                 } else {
                   setTimeout(function () {

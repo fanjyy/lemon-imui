@@ -17,6 +17,7 @@ export default {
           user={UserData}
           width={900}
           avatar-cricle
+          hide-message-name
           hide-message-time
           ref="IMUI"
           on={{

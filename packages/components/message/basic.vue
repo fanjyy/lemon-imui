@@ -149,8 +149,9 @@ arrow()
   +e(title)
     display flex
     font-size 12px
-    line-height 14px
-    padding-bottom 6px
+    line-height 16px
+    height 16px
+    padding-bottom 4px
     user-select none
     color #666
   +e(content-flex)
@@ -227,11 +228,13 @@ arrow()
       padding-right 0
       padding-left 10px
   +m(hide-title)
+    +e(avatar)
+      padding-top 10px
     +e(status)
-      top 5px
+      top 14px
     +e(content)
       position relative
-      top -5px
+      top -10px
       &:before
         top 14px
 </style>

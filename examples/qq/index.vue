@@ -120,11 +120,9 @@ export default {
   created() {},
   mounted() {
     const IMUI = this.$refs.IMUI;
-    //contactData3.id = "333";
     IMUI.initContacts(ContactsData);
+    IMUI.initEmoji(EmojiData);
     IMUI.changeContact(13);
-    //console.log(IMUI.getContacts());
-    // SlotIMUI.initEmoji(emojiData);
   },
   methods: {
     openDrawer(position) {

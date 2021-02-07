@@ -577,9 +577,7 @@ export default {
     lastContentRender(message) {
       if (!isFunction(lastContentRender[message.type])) {
         console.error(
-          `not found '${
-            message.type
-          }' of the latest message renderer,try to use ‘setLastContentRender()’`,
+          `not found '${message.type}' of the latest message renderer,try to use ‘setLastContentRender()’`,
         );
         return "";
       }
@@ -1095,11 +1093,10 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 +b(lemon-vessel)
   display flex
   flex 1
-  height 100%
+  overflow hidden
   +e(left)
     display flex
     flex-direction column
-    height 100%
     flex 1
   +e(right)
     flex none

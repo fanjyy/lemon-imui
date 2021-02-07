@@ -138,7 +138,7 @@ export default {
 <style lang="stylus">
 @import '~styles/utils/index'
 +b(lemon-messages)
-  height 400px
+  //height 400px
   overflow-x hidden
   overflow-y auto
   scrollbar-light()

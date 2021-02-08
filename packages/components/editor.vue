@@ -14,25 +14,25 @@ export default {
       from: "IMUI",
       default() {
         return this;
-      }
-    }
+      },
+    },
   },
   components: {},
   props: {
     tools: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     sendText: {
       type: String,
-      default: "发 送"
+      default: "发 送",
     },
     sendKey: {
       type: Function,
       default(e) {
         return e.keyCode == 13 && e.ctrlKey === true;
-      }
-    }
+      },
+    },
   },
   data() {
     this.clipboardBlob = null;
@@ -41,7 +41,7 @@ export default {
       clipboardUrl: "",
       submitDisabled: true,
       proxyTools: [],
-      accept: ""
+      accept: "",
     };
   },
   created() {
@@ -51,7 +51,7 @@ export default {
       this.initTools([
         { name: "emoji" },
         { name: "uploadFile" },
-        { name: "uploadImage" }
+        { name: "uploadImage" },
       ]);
     }
     this.IMUI.$on("change-contact", () => {
@@ -65,7 +65,7 @@ export default {
       click = click || new Function();
       const classes = [
         "lemon-editor__tool-item",
-        { "lemon-editor__tool-item--right": isRight }
+        { "lemon-editor__tool-item--right": isRight },
       ];
       let node;
       if (name == "emoji") {
@@ -141,7 +141,7 @@ export default {
           <div class="lemon-editor__tip">
             {useScopedSlot(
               this.IMUI.$scopedSlots["editor-footer"],
-              "使用 ctrl + enter 快捷发送消息"
+              "使用 ctrl + enter 快捷发送消息",
             )}
           </div>
           <div class="lemon-editor__submit">
@@ -178,7 +178,7 @@ export default {
           click: null,
           render: menu => {
             return <i class="lemon-icon-emoji" />;
-          }
+          },
         },
         {
           name: "uploadFile",
@@ -186,7 +186,7 @@ export default {
           click: () => this.selectFile("*"),
           render: menu => {
             return <i class="lemon-icon-folder" />;
-          }
+          },
         },
         {
           name: "uploadImage",
@@ -194,22 +194,22 @@ export default {
           click: () => this.selectFile("image/*"),
           render: menu => {
             return <i class="lemon-icon-image" />;
-          }
-        }
+          },
+        },
       ];
       let tools = [];
       if (Array.isArray(data)) {
         const indexMap = {
           emoji: 0,
           uploadFile: 1,
-          uploadImage: 2
+          uploadImage: 2,
         };
         const indexKeys = Object.keys(indexMap);
         tools = data.map(item => {
           if (indexKeys.includes(item.name)) {
             return {
               ...defaultTools[indexMap[item.name]],
-              ...item
+              ...item,
             };
           }
           return item;
@@ -320,7 +320,7 @@ export default {
     },
     _checkSubmitDisabled() {
       this.submitDisabled = !clearHtmlExcludeImg(
-        this.$refs.textarea.innerHTML.trim()
+        this.$refs.textarea.innerHTML.trim(),
       );
     },
     _handleSend(e) {
@@ -346,8 +346,8 @@ export default {
     setValue(val) {
       this.$refs.textarea.innerHTML = this.IMUI.emojiNameToImage(val);
       this._checkSubmitDisabled();
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="stylus">

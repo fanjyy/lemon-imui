@@ -1,5 +1,10 @@
 <script>
-import { useScopedSlot, funCall, generateUUID } from "utils";
+import {
+  useScopedSlot,
+  funCall,
+  generateUUID,
+  clearHtmlExcludeImg,
+} from "utils";
 import { isFunction, isString, isEmpty } from "utils/validate";
 import contextmenu from "../directives/contextmenu";
 import {
@@ -577,9 +582,7 @@ export default {
     lastContentRender(message) {
       if (!isFunction(lastContentRender[message.type])) {
         console.error(
-          `not found '${
-            message.type
-          }' of the latest message renderer,try to use ‘setLastContentRender()’`,
+          `not found '${message.type}' of the latest message renderer,try to use ‘setLastContentRender()’`,
         );
         return "";
       }
@@ -657,8 +660,9 @@ export default {
 
       //保存上个聊天目标的草稿
       if (this.currentContactId) {
-        const editorValue = this.getEditorValue();
+        const editorValue = clearHtmlExcludeImg(this.getEditorValue()).trim();
         if (editorValue) {
+          alert(editorValue);
           this.setDraft(this.currentContactId, editorValue);
           this.setEditorValue();
         } else {
@@ -1095,11 +1099,11 @@ bezier = cubic-bezier(0.645, 0.045, 0.355, 1)
 +b(lemon-vessel)
   display flex
   flex 1
+  min-height 100px
   +e(left)
     display flex
     flex-direction column
     flex 1
-    height 100%
   +e(right)
     flex none
 +b(lemon-messages)

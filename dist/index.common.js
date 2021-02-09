@@ -5817,7 +5817,7 @@ document.addEventListener("click", function (e) {
   bind: function bind(el, binding, vnode) {
     el.addEventListener(binding.modifiers.click ? "click" : "contextmenu", function (e) {
       if (isEmpty(binding.value) || !Array.isArray(binding.value)) return;
-      e.stopPropagation();
+      if (binding.modifiers.click == "click") e.stopPropagation();
       e.preventDefault();
       popover.methods.closeAll();
       var component;

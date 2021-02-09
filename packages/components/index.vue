@@ -582,7 +582,9 @@ export default {
     lastContentRender(message) {
       if (!isFunction(lastContentRender[message.type])) {
         console.error(
-          `not found '${message.type}' of the latest message renderer,try to use ‘setLastContentRender()’`,
+          `not found '${
+            message.type
+          }' of the latest message renderer,try to use ‘setLastContentRender()’`,
         );
         return "";
       }
@@ -662,7 +664,6 @@ export default {
       if (this.currentContactId) {
         const editorValue = clearHtmlExcludeImg(this.getEditorValue()).trim();
         if (editorValue) {
-          alert(editorValue);
           this.setDraft(this.currentContactId, editorValue);
           this.setEditorValue();
         } else {

@@ -64,6 +64,9 @@ export default {
                         v-lemon-contextmenu_click={[
                           {
                             text: "操作一",
+                            click(e, instance, hide) {
+                              hide();
+                            },
                           },
                           {
                             text: "操作二",

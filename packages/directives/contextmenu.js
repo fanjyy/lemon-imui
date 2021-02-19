@@ -19,7 +19,7 @@ export default {
       binding.modifiers.click ? "click" : "contextmenu",
       e => {
         if (isEmpty(binding.value) || !Array.isArray(binding.value)) return;
-        if (binding.modifiers.click == "click") e.stopPropagation();
+        if (binding.modifiers.click) e.stopPropagation();
         e.preventDefault();
         LemonPopover.methods.closeAll();
         let component;

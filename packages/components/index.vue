@@ -586,9 +586,7 @@ export default {
     lastContentRender(message) {
       if (!isFunction(lastContentRender[message.type])) {
         console.error(
-          `not found '${
-            message.type
-          }' of the latest message renderer,try to use ‘setLastContentRender()’`,
+          `not found '${message.type}' of the latest message renderer,try to use ‘setLastContentRender()’`,
         );
         return "";
       }
@@ -624,16 +622,20 @@ export default {
     /**
      * 设置联系人的草稿信息
      */
-    setDraft(contactId, editorValue) {
-      if (isEmpty(contactId) || isEmpty(editorValue)) return false;
-      const contact = this.findContact(contactId);
+    setDraft(cid, editorValue) {
+      if (isEmpty(cid) || isEmpty(editorValue)) return false;
+      const contact = this.findContact(cid);
+      let lastContent = contact.lastContent;
       if (isEmpty(contact)) return false;
-      this.CacheDraft.set(contactId, {
-        editorValue: editorValue,
-        lastContent: contact.lastContent,
+      if (this.CacheDraft.has(cid)) {
+        lastContent = this.CacheDraft.get(cid).lastContent;
+      }
+      this.CacheDraft.set(cid, {
+        editorValue,
+        lastContent,
       });
       this.updateContact({
-        id: contactId,
+        id: cid,
         lastContent: `<span style="color:red;">[草稿]</span><span>${this.lastContentRender(
           { type: "text", content: editorValue },
         )}</span>`,
@@ -645,10 +647,15 @@ export default {
     clearDraft(contactId) {
       const draft = this.CacheDraft.get(contactId);
       if (draft) {
-        this.updateContact({
-          id: contactId,
-          lastContent: draft.lastContent,
-        });
+        const currentContent = this.findContact(contactId).lastContent;
+        if (
+          currentContent.indexOf('<span style="color:red;">[草稿]</span>') === 0
+        ) {
+          this.updateContact({
+            id: contactId,
+            lastContent: draft.lastContent,
+          });
+        }
         this.CacheDraft.remove(contactId);
       }
     },

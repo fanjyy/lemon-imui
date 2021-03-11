@@ -397,6 +397,27 @@
         <td></td>
       </tr>
       <tr>
+        <td width="150">theme</td>
+        <td width="350">主题</td>
+        <td width="150">default | blue</td>
+        <td width="100">default</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="150">loadingText</td>
+        <td width="350">消息加载文字</td>
+        <td width="150">String | Function</td>
+        <td width="100"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="150">loadendText</td>
+        <td width="350">消息加载结束文字</td>
+        <td width="150">String | Function</td>
+        <td width="100">暂无更多消息</td>
+        <td></td>
+      </tr>
+      <tr>
         <td width="150">avatarCricle</td>
         <td width="350">使用圆形头像</td>
         <td width="150">Boolean</td>
@@ -591,6 +612,15 @@
         <td>updateContact</td>
         <td>修改联系人，根据 Contact.id 查找联系人并覆盖传入的值</td>
         <td>Function(Contact)</td>
+        <td>-</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>clearMessages</td>
+        <td>
+          清空某个联系人的本地消息记录，重新切换到该联系人时会再次触发pull-messages事件，Contact.id为空则清空所有
+        </td>
+        <td>Function(Contact.id)=>Boolean</td>
         <td>-</td>
         <td></td>
       </tr>

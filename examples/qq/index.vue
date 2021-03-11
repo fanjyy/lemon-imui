@@ -151,7 +151,10 @@ export default {
       IMUI.openDrawer(params);
     },
     handlePullMessages(contact, next) {
-      next(MessagesData[contact.id], true);
+      const { IMUI } = this.$refs;
+      setTimeout(() => {
+        next(MessagesData[contact.id], true);
+      }, 3000);
     },
     handleChangeContact() {},
     handleSend(message, next, file) {

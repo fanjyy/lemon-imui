@@ -16,7 +16,7 @@ import lastContentRender from "../lastContentRender";
 
 import MemoryCache from "utils/cache/memory";
 
-const allMessages = {};
+let allMessages = {};
 const emojiMap = {};
 const toPx = val => {
   return isString(val) ? val : `${val}px`;
@@ -51,6 +51,8 @@ export default {
       type: Boolean,
       default: false,
     },
+    loadingText: [String, Function],
+    loadendText: [String, Function],
     /**
      * 消息时间格式化规则
      */
@@ -495,6 +497,8 @@ export default {
             <div class="lemon-vessel__left">
               <lemon-messages
                 ref="messages"
+                loading-text={this.loadingText}
+                loadend-text={this.loadendText}
                 hide-time={this.hideMessageTime}
                 hide-name={this.hideMessageName}
                 time-format={this.messageTimeFormat}
@@ -955,6 +959,21 @@ export default {
     },
     getEditorValue() {
       return this.$refs.editor.getFormatValue();
+    },
+    /**
+     * 清空某个联系人的消息，切换到该联系人时会重新触发pull-messages事件
+     */
+    clearMessages(contactId) {
+      if (contactId) {
+        delete allMessages[contactId];
+        this.CacheMessageLoaded.remove(contactId);
+        this.CacheDraft.remove(contactId);
+      } else {
+        allMessages = {};
+        this.CacheMessageLoaded.remove();
+        this.CacheDraft.remove();
+      }
+      return true;
     },
     /**
      * 返回所有消息

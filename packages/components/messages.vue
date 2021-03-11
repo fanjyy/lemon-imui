@@ -1,5 +1,6 @@
 <script>
 import { hoursTimeFormat } from "utils";
+import { isString } from "utils/validate";
 import contextmenu from "../directives/contextmenu";
 export default {
   name: "LemonMessages",
@@ -20,12 +21,20 @@ export default {
         return hoursTimeFormat(val);
       },
     },
+    loadingText: {
+      type: [String, Function],
+    },
+    loadendText: {
+      type: [String, Function],
+      default: "暂无更多消息",
+    },
     messages: {
       type: Array,
       default: () => [],
     },
   },
   data() {
+    this._lockScroll = false;
     return {
       _loading: false,
       _loadend: false,
@@ -40,7 +49,20 @@ export default {
             `lemon-messages__load--${this._loadend ? "end" : "ing"}`,
           ]}
         >
-          {this._loadend ? this._renderLoadEnd() : this._renderLoading()}
+          <span class="lemon-messages__loadend">
+            {isString(this.loadendText) ? this.loadendText : this.loadendText()}
+          </span>
+          <span class="lemon-messages__loading">
+            {this.loadingText ? (
+              isString(this.loadingText) ? (
+                this.loadingText
+              ) : (
+                this.loadingText()
+              )
+            ) : (
+              <i class="lemon-icon-loading lemonani-spin" />
+            )}
+          </span>
         </div>
         {this.messages.map((message, index) => {
           const node = [];
@@ -89,21 +111,20 @@ export default {
   },
   watch: {},
   methods: {
-    _renderLoading() {
-      return <i class="lemon-icon-loading lemonani-spin" />;
-    },
-    _renderLoadEnd() {
-      return <span>暂无更多消息</span>;
-    },
     loaded() {
       this._loadend = true;
       this.$forceUpdate();
     },
     resetLoadState() {
+      this._lockScroll = true;
       this._loading = false;
       this._loadend = false;
+      setTimeout(() => {
+        this._lockScroll = false;
+      }, 200);
     },
     async _handleScroll(e) {
+      if (this._lockScroll) return;
       const { target } = e;
       contextmenu.hide();
       if (
@@ -152,6 +173,15 @@ export default {
     text-align center
     color #999
     line-height 30px
+    .lemon-messages__loading
+    .lemon-messages__loadend
+      display none
     +m(ing)
-      font-size 22px
+      .lemon-icon-loading
+        font-size 22px
+      .lemon-messages__loading
+        display block
+    +m(end)
+      .lemon-messages__loadend
+        display block
 </style>

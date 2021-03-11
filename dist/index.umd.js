@@ -6960,6 +6960,7 @@ var editor_component = normalizeComponent(
 
 
 
+
 /* harmony default export */ var messagesvue_type_script_lang_js_ = ({
   name: "LemonMessages",
   components: {},
@@ -6979,6 +6980,13 @@ var editor_component = normalizeComponent(
         return hoursTimeFormat(val);
       }
     },
+    loadingText: {
+      type: [String, Function]
+    },
+    loadendText: {
+      type: [String, Function],
+      default: "暂无更多消息"
+    },
     messages: {
       type: Array,
       default: function _default() {
@@ -6987,6 +6995,7 @@ var editor_component = normalizeComponent(
     }
   },
   data: function data() {
+    this._lockScroll = false;
     return {
       _loading: false,
       _loadend: false
@@ -7004,7 +7013,13 @@ var editor_component = normalizeComponent(
       }
     }, [h("div", {
       "class": ["lemon-messages__load", "lemon-messages__load--".concat(this._loadend ? "end" : "ing")]
-    }, [this._loadend ? this._renderLoadEnd() : this._renderLoading()]), this.messages.map(function (message, index) {
+    }, [h("span", {
+      "class": "lemon-messages__loadend"
+    }, [isString(this.loadendText) ? this.loadendText : this.loadendText()]), h("span", {
+      "class": "lemon-messages__loading"
+    }, [this.loadingText ? isString(this.loadingText) ? this.loadingText : this.loadingText() : h("i", {
+      "class": "lemon-icon-loading lemonani-spin"
+    })])]), this.messages.map(function (message, index) {
       var node = [];
       var tagName = "lemon-message-".concat(message.type);
       var prev = _this.messages[index - 1];
@@ -7053,48 +7068,52 @@ var editor_component = normalizeComponent(
   },
   watch: {},
   methods: {
-    _renderLoading: function _renderLoading() {
-      var h = this.$createElement;
-      return h("i", {
-        "class": "lemon-icon-loading lemonani-spin"
-      });
-    },
-    _renderLoadEnd: function _renderLoadEnd() {
-      var h = this.$createElement;
-      return h("span", ["\u6682\u65E0\u66F4\u591A\u6D88\u606F"]);
-    },
     loaded: function loaded() {
       this._loadend = true;
       this.$forceUpdate();
     },
     resetLoadState: function resetLoadState() {
+      var _this2 = this;
+
+      this._lockScroll = true;
       this._loading = false;
       this._loadend = false;
+      setTimeout(function () {
+        _this2._lockScroll = false;
+      }, 200);
     },
     _handleScroll: function () {
       var _handleScroll2 = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee2(e) {
-        var _this2 = this;
+        var _this3 = this;
 
         var target, hst;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                if (!this._lockScroll) {
+                  _context2.next = 2;
+                  break;
+                }
+
+                return _context2.abrupt("return");
+
+              case 2:
                 target = e.target;
                 contextmenu.hide();
 
                 if (!(target.scrollTop == 0 && this._loading == false && this._loadend == false)) {
-                  _context2.next = 8;
+                  _context2.next = 10;
                   break;
                 }
 
                 this._loading = true;
-                _context2.next = 6;
+                _context2.next = 8;
                 return this.$nextTick();
 
-              case 6:
+              case 8:
                 hst = target.scrollHeight;
                 this.$emit("reach-top",
                 /*#__PURE__*/
@@ -7107,12 +7126,12 @@ var editor_component = normalizeComponent(
                         switch (_context.prev = _context.next) {
                           case 0:
                             _context.next = 2;
-                            return _this2.$nextTick();
+                            return _this3.$nextTick();
 
                           case 2:
                             target.scrollTop = target.scrollHeight - hst;
-                            _this2._loading = false;
-                            _this2._loadend = !!isEnd;
+                            _this3._loading = false;
+                            _this3._loadend = !!isEnd;
 
                           case 5:
                           case "end":
@@ -7127,7 +7146,7 @@ var editor_component = normalizeComponent(
                   };
                 }());
 
-              case 8:
+              case 10:
               case "end":
                 return _context2.stop();
             }
@@ -7827,6 +7846,8 @@ var renderDrawerContent = function renderDrawerContent() {};
       type: Boolean,
       default: false
     },
+    loadingText: [String, Function],
+    loadendText: [String, Function],
 
     /**
      * 消息时间格式化规则
@@ -8321,6 +8342,8 @@ var renderDrawerContent = function renderDrawerContent() {};
       }, [h("lemon-messages", {
         "ref": "messages",
         "attrs": {
+          "loading-text": this.loadingText,
+          "loadend-text": this.loadendText,
           "hide-time": this.hideMessageTime,
           "hide-name": this.hideMessageName,
           "time-format": this.messageTimeFormat,
@@ -8863,6 +8886,23 @@ var renderDrawerContent = function renderDrawerContent() {};
     },
     getEditorValue: function getEditorValue() {
       return this.$refs.editor.getFormatValue();
+    },
+
+    /**
+     * 清空某个联系人的消息，切换到该联系人时会重新触发pull-messages事件
+     */
+    clearMessages: function clearMessages(contactId) {
+      if (contactId) {
+        delete allMessages[contactId];
+        this.CacheMessageLoaded.remove(contactId);
+        this.CacheDraft.remove(contactId);
+      } else {
+        allMessages = {};
+        this.CacheMessageLoaded.remove();
+        this.CacheDraft.remove();
+      }
+
+      return true;
     },
 
     /**

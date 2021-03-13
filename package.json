@@ -1,6 +1,6 @@
 {
   "name": "lemon-imui",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "main": "dist/index.umd.min.js",
   "description": "基于 VUE2.0 的 IM 聊天组件",
   "homepage": "http://june000.gitee.io/lemon-im/",

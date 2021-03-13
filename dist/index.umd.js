@@ -8535,7 +8535,6 @@ var renderDrawerContent = function renderDrawerContent() {};
                   break;
                 }
 
-                //this.activeSidebar = menuName;
                 this.changeMenu(menuName);
                 _context2.next = 6;
                 break;
@@ -8573,7 +8572,7 @@ var renderDrawerContent = function renderDrawerContent() {};
               case 10:
                 this.$emit("change-contact", this.currentContact, this);
 
-                if (!isFunction(this.currentContact.renderContainer)) {
+                if (!(isFunction(this.currentContact.renderContainer) || this.activeSidebar == DEFAULT_MENU_CONTACTS)) {
                   _context2.next = 13;
                   break;
                 }

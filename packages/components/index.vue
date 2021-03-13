@@ -667,7 +667,6 @@ export default {
      */
     async changeContact(contactId, menuName) {
       if (menuName) {
-        //this.activeSidebar = menuName;
         this.changeMenu(menuName);
       } else {
         if (this._changeContactLock || this.currentContactId == contactId)
@@ -689,7 +688,10 @@ export default {
       if (!this.currentContactId) return false;
 
       this.$emit("change-contact", this.currentContact, this);
-      if (isFunction(this.currentContact.renderContainer)) {
+      if (
+        isFunction(this.currentContact.renderContainer) ||
+        this.activeSidebar == DEFAULT_MENU_CONTACTS
+      ) {
         return;
       }
       //填充草稿内容

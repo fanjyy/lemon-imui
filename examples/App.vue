@@ -39,6 +39,7 @@
         :hide-menu-avatar="hideMenuAvatar"
         :hide-message-name="hideMessageName"
         :hide-message-time="hideMessageTime"
+        :message-time-format="messageTimeFormat"
         @change-menu="handleChangeMenu"
         @change-contact="handleChangeContact"
         @pull-messages="handlePullMessages"
@@ -1394,6 +1395,9 @@ export default {
     SimpleIMUI.changeContact(contactData1.id);
   },
   methods: {
+    messageTimeFormat(a) {
+      console.log(a);
+    },
     changeTheme() {
       this.theme = this.theme == "default" ? "blue" : "default";
     },

@@ -8526,6 +8526,7 @@ var renderDrawerContent = function renderDrawerContent() {};
                   break;
                 }
 
+                //this.activeSidebar = menuName;
                 this.changeMenu(menuName);
                 _context2.next = 6;
                 break;
@@ -8670,7 +8671,6 @@ var renderDrawerContent = function renderDrawerContent() {};
      * @param {String} name 按钮 name
      */
     changeMenu: function changeMenu(name) {
-      if (this._changeContactLock) return false;
       this.$emit("change-menu", name);
       this.activeSidebar = name;
     },

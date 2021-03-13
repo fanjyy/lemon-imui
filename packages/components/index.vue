@@ -586,7 +586,9 @@ export default {
     lastContentRender(message) {
       if (!isFunction(lastContentRender[message.type])) {
         console.error(
-          `not found '${message.type}' of the latest message renderer,try to use ‘setLastContentRender()’`,
+          `not found '${
+            message.type
+          }' of the latest message renderer,try to use ‘setLastContentRender()’`,
         );
         return "";
       }
@@ -665,6 +667,7 @@ export default {
      */
     async changeContact(contactId, menuName) {
       if (menuName) {
+        //this.activeSidebar = menuName;
         this.changeMenu(menuName);
       } else {
         if (this._changeContactLock || this.currentContactId == contactId)
@@ -766,7 +769,6 @@ export default {
      * @param {String} name 按钮 name
      */
     changeMenu(name) {
-      if (this._changeContactLock) return false;
       this.$emit("change-menu", name);
       this.activeSidebar = name;
     },

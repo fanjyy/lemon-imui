@@ -39,7 +39,6 @@
         :hide-menu-avatar="hideMenuAvatar"
         :hide-message-name="hideMessageName"
         :hide-message-time="hideMessageTime"
-        :message-time-format="messageTimeFormat"
         @change-menu="handleChangeMenu"
         @change-contact="handleChangeContact"
         @pull-messages="handlePullMessages"
@@ -1269,6 +1268,22 @@ export default {
       IMUI.changeContact("contact-1");
     }, 500);
 
+    // setTimeout(() => {
+    //   var info = JSON.parse(
+    //     '{"type":0,"fromId":"666666666","toId":"8888888","fromName":"AAAA","toName":"BBBB","message":"您与客户[AAAA]建立连接","isError":false,"time":"2021-05-13T16:04:18.7158482+08:00","id":"666666666","avatar":"","displayName":"AAAA","unread":1,"lastSendTime":1620893058612,"lastContent":"您与客户[AAAA]建立连接"}',
+    //   );
+    //   console.log(info);
+    //   IMUI.appendContact(info);
+
+    //   setTimeout(() => {
+    //     var message = JSON.parse(
+    //       '{"type":"text","fromId":"666666666","toId":"8888888","fromName":"AAAA","toName":"BBBB","message":"我是消息123","isError":false,"time":"2021-05-13T16:04:19.0679223+08:00","id":"1426f5d4-0616-4d4b-93ac-499873f1b7ff","status":"succeed","sendTime":1620893057833,"content":"111","toContactId":"666666666","fromUser":{"type":0,"fromId":"666666666","toId":"8888888","fromName":"AAAA","toName":"BBBB","message":"您与客户[AAAA]建立连接","isError":false,"time":"2021-05-13T16:04:18.7158482+08:00","id":"666666666","avatar":"","displayName":"AAAA","unread":0,"lastSendTime":1620893058614,"lastContent":"[通知]","pageNum":0}}',
+    //     );
+    //     console.log("message", message);
+    //     IMUI.appendMessage(message);
+    //   }, 2000);
+    // }, 1000);
+
     IMUI.setLastContentRender("event", message => {
       return `[自定义通知内容]`;
     });
@@ -1395,9 +1410,9 @@ export default {
     SimpleIMUI.changeContact(contactData1.id);
   },
   methods: {
-    messageTimeFormat(a) {
-      console.log(a);
-    },
+    // messageTimeFormat(a) {
+    //   console.log(a);
+    // },
     changeTheme() {
       this.theme = this.theme == "default" ? "blue" : "default";
     },

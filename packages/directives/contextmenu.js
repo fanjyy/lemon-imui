@@ -1,4 +1,4 @@
-import Vue from "vue";
+// import Vue from "vue";
 import { isFunction, isEmpty } from "utils/validate";
 import LemonPopover from "../components/popover.vue";
 let popover;
@@ -64,16 +64,16 @@ export default {
             if (isFunction(click)) click(e, component, hidePopover);
           });
 
-          if (isFunction(render)) {
-            const ins = Vue.extend({
-              render: h => {
-                return render(h, component, hidePopover);
-              },
-            });
-            const renderComponent = new ins().$mount();
-            node.querySelector("span").innerHTML =
-              renderComponent.$el.outerHTML;
-          }
+          // if (isFunction(render)) {
+          //   const ins = Vue.extend({
+          //     render: h => {
+          //       return render(h, component, hidePopover);
+          //     },
+          //   });
+          //   const renderComponent = new ins().$mount();
+          //   node.querySelector("span").innerHTML =
+          //     renderComponent.$el.outerHTML;
+          // }
         });
 
         showPopover();

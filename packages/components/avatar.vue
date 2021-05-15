@@ -6,22 +6,22 @@ export default {
     src: String,
     icon: {
       type: String,
-      default: "lemon-icon-people"
+      default: "lemon-icon-people",
     },
     circle: {
       type: Boolean,
       default() {
         return this.IMUI ? this.IMUI.avatarCricle : false;
-      }
+      },
     },
     size: {
       type: Number,
-      default: 32
-    }
+      default: 32,
+    },
   },
   data() {
     return {
-      imageFinishLoad: true
+      imageFinishLoad: true,
     };
   },
   render() {
@@ -31,7 +31,7 @@ export default {
         class={["lemon-avatar", { "lemon-avatar--circle": this.circle }]}
         on-click={e => this.$emit("click", e)}
       >
-        {this.imageFinishLoad && <i class={this.icon} />}
+        {(this.imageFinishLoad || !this.src) && <i class={this.icon} />}
         <img src={this.src} onLoad={this._handleLoad} />
       </span>
     );
@@ -43,15 +43,15 @@ export default {
         width: size,
         height: size,
         lineHeight: size,
-        fontSize: `${this.size / 2}px`
+        fontSize: `${this.size / 2}px`,
       };
-    }
+    },
   },
   methods: {
     _handleLoad() {
       this.imageFinishLoad = false;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="stylus">

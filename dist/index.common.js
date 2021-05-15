@@ -3189,13 +3189,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ "8bbf":
-/***/ (function(module, exports) {
-
-module.exports = require("vue");
-
-/***/ }),
-
 /***/ "8e60":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5408,10 +5401,6 @@ var es6_function_name = __webpack_require__("7f7f");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/web.dom.iterable.js
 var web_dom_iterable = __webpack_require__("ac6a");
 
-// EXTERNAL MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
-var external_commonjs_vue_commonjs2_vue_root_Vue_ = __webpack_require__("8bbf");
-var external_commonjs_vue_commonjs2_vue_root_Vue_default = /*#__PURE__*/__webpack_require__.n(external_commonjs_vue_commonjs2_vue_root_Vue_);
-
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.regexp.constructor.js
 var es6_regexp_constructor = __webpack_require__("3b2b");
 
@@ -5796,7 +5785,7 @@ var popover_component = normalizeComponent(
 /* harmony default export */ var popover = (popover_component.exports);
 // CONCATENATED MODULE: ./packages/directives/contextmenu.js
 
-
+// import Vue from "vue";
 
 
 var contextmenu_popover;
@@ -5852,21 +5841,20 @@ document.addEventListener("click", function (e) {
       contextmenu_popover.childNodes.forEach(function (node, index) {
         var _visibleItems$index = visibleItems[index],
             click = _visibleItems$index.click,
-            _render = _visibleItems$index.render;
+            render = _visibleItems$index.render;
         node.addEventListener("click", function (e) {
           e.stopPropagation();
           if (isFunction(click)) click(e, component, hidePopover);
-        });
-
-        if (isFunction(_render)) {
-          var ins = external_commonjs_vue_commonjs2_vue_root_Vue_default.a.extend({
-            render: function render(h) {
-              return _render(h, component, hidePopover);
-            }
-          });
-          var renderComponent = new ins().$mount();
-          node.querySelector("span").innerHTML = renderComponent.$el.outerHTML;
-        }
+        }); // if (isFunction(render)) {
+        //   const ins = Vue.extend({
+        //     render: h => {
+        //       return render(h, component, hidePopover);
+        //     },
+        //   });
+        //   const renderComponent = new ins().$mount();
+        //   node.querySelector("span").innerHTML =
+        //     renderComponent.$el.outerHTML;
+        // }
       });
       showPopover();
     });
@@ -6109,7 +6097,7 @@ var badge_component = normalizeComponent(
           return _this.$emit("click", e);
         }
       }
-    }, [this.imageFinishLoad && h("i", {
+    }, [(this.imageFinishLoad || !this.src) && h("i", {
       "class": this.icon
     }), h("img", {
       "attrs": {

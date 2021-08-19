@@ -1,10 +1,10 @@
 <script>
-import { toEmojiName, useScopedSlot, clearHtmlExcludeImg } from "utils";
-const exec = (val, command = "insertHTML") => {
+import { useScopedSlot, messageToHtml, clearHtmlExcludeImg } from "utils";
+const command = (command, val) => {
   document.execCommand(command, false, val);
 };
 const selection = window.getSelection();
-let lastSelectionRange;
+let range;
 let emojiData = [];
 let isInitTool = false;
 export default {
@@ -27,6 +27,12 @@ export default {
       type: String,
       default: "发 送",
     },
+    wrapKey: {
+      type: Function,
+      default: function(e) {
+        return e.keyCode == 13 && e.ctrlKey == false && e.shiftKey == false;
+      },
+    },
     sendKey: {
       type: Function,
       default(e) {
@@ -40,20 +46,11 @@ export default {
       //剪切板图片URL
       clipboardUrl: "",
       submitDisabled: true,
-      proxyTools: [],
+      //proxyTools: [],
       accept: "",
     };
   },
   created() {
-    if (this.tools && this.tools.length > 0) {
-      this.initTools(this.tools);
-    } else {
-      this.initTools([
-        { name: "emoji" },
-        { name: "uploadFile" },
-        { name: "uploadImage" },
-      ]);
-    }
     this.IMUI.$on("change-contact", () => {
       this.closeClipboardImage();
     });
@@ -156,21 +153,10 @@ export default {
       </div>
     );
   },
-  methods: {
-    closeClipboardImage() {
-      this.clipboardUrl = "";
-      this.clipboardBlob = null;
-    },
-    sendClipboardImage() {
-      if (!this.clipboardBlob) return;
-      this.$emit("upload", this.clipboardBlob);
-      this.closeClipboardImage();
-    },
-    /**
-     * 初始化工具栏
-     */
-    initTools(data) {
-      if (!data) return;
+  computed: {
+    proxyTools() {
+      console.log("this.tools", this.tools);
+      if (!this.tools) return [];
       const defaultTools = [
         {
           name: "emoji",
@@ -198,14 +184,14 @@ export default {
         },
       ];
       let tools = [];
-      if (Array.isArray(data)) {
+      if (Array.isArray(this.tools)) {
         const indexMap = {
           emoji: 0,
           uploadFile: 1,
           uploadImage: 2,
         };
         const indexKeys = Object.keys(indexMap);
-        tools = data.map(item => {
+        tools = this.tools.map(item => {
           if (indexKeys.includes(item.name)) {
             return {
               ...defaultTools[indexMap[item.name]],
@@ -217,20 +203,46 @@ export default {
       } else {
         tools = defaultTools;
       }
-      this.proxyTools = tools;
+      return tools;
     },
-    _saveLastRange() {
-      lastSelectionRange = selection.getRangeAt(0);
+  },
+  methods: {
+    closeClipboardImage() {
+      this.clipboardUrl = "";
+      this.clipboardBlob = null;
     },
-    _focusLastRange() {
+    sendClipboardImage() {
+      if (!this.clipboardBlob) return;
+      this.$emit("upload", this.clipboardBlob);
+      this.closeClipboardImage();
+    },
+    saveRangeToLast() {
+      if (!range) {
+        range = document.createRange();
+      }
+      range.selectNodeContents(textarea.value);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    },
+    inertContent(val, toLast = false) {
+      if (toLast) saveRangeToLast();
+      this.focusRange();
+      command("insertHTML", val);
+      this.saveRange();
+    },
+    saveRange() {
+      range = selection.getRangeAt(0);
+    },
+    focusRange() {
       this.$refs.textarea.focus();
-      if (lastSelectionRange) {
+      if (range) {
         selection.removeAllRanges();
-        selection.addRange(lastSelectionRange);
+        selection.addRange(range);
       }
     },
     _handleClick() {
-      this._saveLastRange();
+      this.saveRange();
     },
     _renderEmojiTabs() {
       const renderImageGrid = items => {
@@ -261,10 +273,10 @@ export default {
       }
     },
     _handleSelectEmoji(item) {
-      this._focusLastRange();
-      exec(`<img emoji-name="${item.name}" src="${item.src}"></img>`);
+      this.inertContent(
+        `<img emoji-name="${item.name}" src="${item.src}"></img>`,
+      );
       this._checkSubmitDisabled();
-      this._saveLastRange();
     },
     async selectFile(accept) {
       this.accept = accept;
@@ -279,7 +291,7 @@ export default {
         if (window.clipboardData) {
           this.$refs.textarea.innerHTML = text;
         } else {
-          exec(text, "insertText");
+          command("insertText", text);
         }
       } else {
         const { blob, blobUrl } = this._getClipboardBlob(clipboardData);
@@ -301,10 +313,42 @@ export default {
       return { blob, blobUrl };
     },
     _handleKeyup(e) {
-      this._saveLastRange();
+      this.saveRange();
       this._checkSubmitDisabled();
     },
     _handleKeydown(e) {
+      const ATing = false;
+      if (ATing) {
+        if (e.keyCode == 38 || e.keyCode == 40) {
+          e.preventDefault();
+          if (e.keyCode == 38) {
+            ATSelectedPrev();
+          }
+          if (e.keyCode == 40) {
+            ATSelectedNext();
+          }
+          return;
+        }
+        if (e.keyCode == 13) {
+          e.preventDefault();
+          ATSelected();
+          return;
+        }
+        if (e.keyCode == 37 || e.keyCode == 39) {
+          ATPopupClose();
+        }
+      }
+      if (e.keyCode == 13 || (e.keyCode == 13 && e.shiftKey)) {
+        e.preventDefault();
+      }
+      if (this.wrapKey(e)) {
+        e.preventDefault();
+        command("insertLineBreak");
+      }
+      if (this.at && (e.key == "@" || (e.shiftKey && e.keyCode == 229))) {
+        setTimeout(() => (ATing = true), 300);
+      }
+
       if (this.submitDisabled == false && this.sendKey(e)) {
         this._handleSend();
       }

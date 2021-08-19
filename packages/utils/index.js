@@ -1,4 +1,6 @@
 import { isPlainObject, isFunction } from "utils/validate";
+export function messageToHtml() {}
+export function messageToText() {}
 /**
  * 使用某个组件上的作用域插槽
  * @param {VueComponent} inject
@@ -44,7 +46,7 @@ export function timeFormat(t, format) {
     padZero(t.getDate().toString()),
     padZero(t.getHours().toString()),
     padZero(t.getMinutes().toString()),
-    padZero(t.getSeconds().toString())
+    padZero(t.getSeconds().toString()),
   ];
   const reg = "ymdhis";
   for (let i = 0; i < formatArr.length; i++) {
@@ -71,12 +73,12 @@ export function arrayIntersect(a, b) {
   return a.filter(x => b.includes(x));
 }
 //清除字符串内的所有HTML标签
-export function clearHtml(str){
-  return str.replace(/<.*?>/ig,"");
+export function clearHtml(str) {
+  return str.replace(/<.*?>/gi, "");
 }
 //清除字符串内的所有HTML标签，除了IMG
-export function clearHtmlExcludeImg(str){
-  return str.replace(/<(?!img).*?>/ig, "");
+export function clearHtmlExcludeImg(str) {
+  return str.replace(/<(?!img).*?>/gi, "");
 }
 export function error(text) {
   throw new Error(text);
@@ -122,7 +124,7 @@ export function generateUUID() {
     d += performance.now(); //use high-precision timer if available
   }
   var uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(
-    c
+    c,
   ) {
     var r = (d + Math.random() * 16) % 16 | 0;
     d = Math.floor(d / 16);

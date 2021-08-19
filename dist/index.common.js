@@ -2828,52 +2828,6 @@ module.exports = function (TO_STRING) {
 
 /***/ }),
 
-/***/ "7333":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// 19.1.2.1 Object.assign(target, source, ...)
-var DESCRIPTORS = __webpack_require__("9e1e");
-var getKeys = __webpack_require__("0d58");
-var gOPS = __webpack_require__("2621");
-var pIE = __webpack_require__("52a7");
-var toObject = __webpack_require__("4bf8");
-var IObject = __webpack_require__("626a");
-var $assign = Object.assign;
-
-// should work with symbols and should have deterministic property order (V8 bug)
-module.exports = !$assign || __webpack_require__("79e5")(function () {
-  var A = {};
-  var B = {};
-  // eslint-disable-next-line no-undef
-  var S = Symbol();
-  var K = 'abcdefghijklmnopqrst';
-  A[S] = 7;
-  K.split('').forEach(function (k) { B[k] = k; });
-  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
-}) ? function assign(target, source) { // eslint-disable-line no-unused-vars
-  var T = toObject(target);
-  var aLen = arguments.length;
-  var index = 1;
-  var getSymbols = gOPS.f;
-  var isEnum = pIE.f;
-  while (aLen > index) {
-    var S = IObject(arguments[index++]);
-    var keys = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S);
-    var length = keys.length;
-    var j = 0;
-    var key;
-    while (length > j) {
-      key = keys[j++];
-      if (!DESCRIPTORS || isEnum.call(S, key)) T[key] = S[key];
-    }
-  } return T;
-} : $assign;
-
-
-/***/ }),
-
 /***/ "7514":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5334,17 +5288,6 @@ $export($export.P + $export.F * __webpack_require__("5147")(STARTS_WITH), 'Strin
 
 /***/ }),
 
-/***/ "f751":
-/***/ (function(module, exports, __webpack_require__) {
-
-// 19.1.3.1 Object.assign(target, source)
-var $export = __webpack_require__("5ca1");
-
-$export($export.S + $export.F, 'Object', { assign: __webpack_require__("7333") });
-
-
-/***/ }),
-
 /***/ "f772":
 /***/ (function(module, exports) {
 
@@ -6191,12 +6134,13 @@ var es6_regexp_replace = __webpack_require__("a481");
 
 
 
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 
+function messageToHtml() {}
+function messageToText() {}
 /**
  * 使用某个组件上的作用域插槽
  * @param {VueComponent} inject
@@ -6271,11 +6215,11 @@ function arrayIntersect(a, b) {
 } //清除字符串内的所有HTML标签
 
 function clearHtml(str) {
-  return str.replace(/<.*?>/ig, "");
+  return str.replace(/<.*?>/gi, "");
 } //清除字符串内的所有HTML标签，除了IMG
 
 function clearHtmlExcludeImg(str) {
-  return str.replace(/<(?!img).*?>/ig, "");
+  return str.replace(/<(?!img).*?>/gi, "");
 }
 function error(text) {
   throw new Error(text);
@@ -6448,6 +6392,10 @@ var es6_string_iterator = __webpack_require__("5df3");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.array.from.js
 var es6_array_from = __webpack_require__("1c4c");
 
+// CONCATENATED MODULE: ./node_modules/@babel/runtime-corejs2/helpers/esm/readOnlyError.js
+function _readOnlyError(name) {
+  throw new Error("\"" + name + "\" is read-only");
+}
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./packages/components/editor.vue?vue&type=script&lang=js&
 
 
@@ -6468,13 +6416,12 @@ function editorvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i 
 
 
 
-var exec = function exec(val) {
-  var command = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "insertHTML";
-  document.execCommand(command, false, val);
+var command = function command(_command, val) {
+  document.execCommand(_command, false, val);
 };
 
 var selection = window.getSelection();
-var lastSelectionRange;
+var range;
 var emojiData = [];
 var isInitTool = false;
 /* harmony default export */ var editorvue_type_script_lang_js_ = ({
@@ -6499,6 +6446,12 @@ var isInitTool = false;
       type: String,
       default: "发 送"
     },
+    wrapKey: {
+      type: Function,
+      default: function _default(e) {
+        return e.keyCode == 13 && e.ctrlKey == false && e.shiftKey == false;
+      }
+    },
     sendKey: {
       type: Function,
       default: function _default(e) {
@@ -6512,24 +6465,12 @@ var isInitTool = false;
       //剪切板图片URL
       clipboardUrl: "",
       submitDisabled: true,
-      proxyTools: [],
+      //proxyTools: [],
       accept: ""
     };
   },
   created: function created() {
     var _this = this;
-
-    if (this.tools && this.tools.length > 0) {
-      this.initTools(this.tools);
-    } else {
-      this.initTools([{
-        name: "emoji"
-      }, {
-        name: "uploadFile"
-      }, {
-        name: "uploadImage"
-      }]);
-    }
 
     this.IMUI.$on("change-contact", function () {
       _this.closeClipboardImage();
@@ -6651,25 +6592,13 @@ var isInitTool = false;
       }
     }, [this.sendText])])])]);
   },
-  methods: {
-    closeClipboardImage: function closeClipboardImage() {
-      this.clipboardUrl = "";
-      this.clipboardBlob = null;
-    },
-    sendClipboardImage: function sendClipboardImage() {
-      if (!this.clipboardBlob) return;
-      this.$emit("upload", this.clipboardBlob);
-      this.closeClipboardImage();
-    },
-
-    /**
-     * 初始化工具栏
-     */
-    initTools: function initTools(data) {
+  computed: {
+    proxyTools: function proxyTools() {
       var _this3 = this;
 
       var h = this.$createElement;
-      if (!data) return;
+      console.log("this.tools", this.tools);
+      if (!this.tools) return [];
       var defaultTools = [{
         name: "emoji",
         title: "表情",
@@ -6704,14 +6633,14 @@ var isInitTool = false;
       }];
       var tools = [];
 
-      if (Array.isArray(data)) {
+      if (Array.isArray(this.tools)) {
         var indexMap = {
           emoji: 0,
           uploadFile: 1,
           uploadImage: 2
         };
         var indexKeys = Object.keys(indexMap);
-        tools = data.map(function (item) {
+        tools = this.tools.map(function (item) {
           if (indexKeys.includes(item.name)) {
             return editorvue_type_script_lang_js_objectSpread({}, defaultTools[indexMap[item.name]], {}, item);
           }
@@ -6722,21 +6651,49 @@ var isInitTool = false;
         tools = defaultTools;
       }
 
-      this.proxyTools = tools;
+      return tools;
+    }
+  },
+  methods: {
+    closeClipboardImage: function closeClipboardImage() {
+      this.clipboardUrl = "";
+      this.clipboardBlob = null;
     },
-    _saveLastRange: function _saveLastRange() {
-      lastSelectionRange = selection.getRangeAt(0);
+    sendClipboardImage: function sendClipboardImage() {
+      if (!this.clipboardBlob) return;
+      this.$emit("upload", this.clipboardBlob);
+      this.closeClipboardImage();
     },
-    _focusLastRange: function _focusLastRange() {
+    saveRangeToLast: function saveRangeToLast() {
+      if (!range) {
+        range = document.createRange();
+      }
+
+      range.selectNodeContents(textarea.value);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    },
+    inertContent: function inertContent(val) {
+      var toLast = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (toLast) saveRangeToLast();
+      this.focusRange();
+      command("insertHTML", val);
+      this.saveRange();
+    },
+    saveRange: function saveRange() {
+      range = selection.getRangeAt(0);
+    },
+    focusRange: function focusRange() {
       this.$refs.textarea.focus();
 
-      if (lastSelectionRange) {
+      if (range) {
         selection.removeAllRanges();
-        selection.addRange(lastSelectionRange);
+        selection.addRange(range);
       }
     },
     _handleClick: function _handleClick() {
-      this._saveLastRange();
+      this.saveRange();
     },
     _renderEmojiTabs: function _renderEmojiTabs() {
       var _this4 = this;
@@ -6781,13 +6738,9 @@ var isInitTool = false;
       }
     },
     _handleSelectEmoji: function _handleSelectEmoji(item) {
-      this._focusLastRange();
-
-      exec("<img emoji-name=\"".concat(item.name, "\" src=\"").concat(item.src, "\"></img>"));
+      this.inertContent("<img emoji-name=\"".concat(item.name, "\" src=\"").concat(item.src, "\"></img>"));
 
       this._checkSubmitDisabled();
-
-      this._saveLastRange();
     },
     selectFile: function () {
       var _selectFile = _asyncToGenerator(
@@ -6827,7 +6780,7 @@ var isInitTool = false;
         if (window.clipboardData) {
           this.$refs.textarea.innerHTML = text;
         } else {
-          exec(text, "insertText");
+          command("insertText", text);
         }
       } else {
         var _this$_getClipboardBl = this._getClipboardBlob(clipboardData),
@@ -6854,11 +6807,54 @@ var isInitTool = false;
       };
     },
     _handleKeyup: function _handleKeyup(e) {
-      this._saveLastRange();
+      this.saveRange();
 
       this._checkSubmitDisabled();
     },
     _handleKeydown: function _handleKeydown(e) {
+      var ATing = false;
+
+      if (ATing) {
+        if (e.keyCode == 38 || e.keyCode == 40) {
+          e.preventDefault();
+
+          if (e.keyCode == 38) {
+            ATSelectedPrev();
+          }
+
+          if (e.keyCode == 40) {
+            ATSelectedNext();
+          }
+
+          return;
+        }
+
+        if (e.keyCode == 13) {
+          e.preventDefault();
+          ATSelected();
+          return;
+        }
+
+        if (e.keyCode == 37 || e.keyCode == 39) {
+          ATPopupClose();
+        }
+      }
+
+      if (e.keyCode == 13 || e.keyCode == 13 && e.shiftKey) {
+        e.preventDefault();
+      }
+
+      if (this.wrapKey(e)) {
+        e.preventDefault();
+        command("insertLineBreak");
+      }
+
+      if (this.at && (e.key == "@" || e.shiftKey && e.keyCode == 229)) {
+        setTimeout(function () {
+          return ATing = (_readOnlyError("ATing"), true);
+        }, 300);
+      }
+
       if (this.submitDisabled == false && this.sendKey(e)) {
         this._handleSend();
       }
@@ -7645,9 +7641,6 @@ function _toConsumableArray(arr) {
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.string.starts-with.js
 var es6_string_starts_with = __webpack_require__("f559");
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es6.object.assign.js
-var es6_object_assign = __webpack_require__("f751");
-
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.array.sort.js
 var es6_array_sort = __webpack_require__("55dd");
 
@@ -7776,8 +7769,6 @@ function () {
 
 
 
-
-
 function componentsvue_type_script_lang_js_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function componentsvue_type_script_lang_js_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { componentsvue_type_script_lang_js_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { componentsvue_type_script_lang_js_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -7885,7 +7876,13 @@ var renderDrawerContent = function renderDrawerContent() {};
       activeSidebar: DEFAULT_MENU_LASTMESSAGES,
       contacts: [],
       menus: [],
-      editorTools: []
+      editorTools: [{
+        name: "emoji"
+      }, {
+        name: "uploadFile"
+      }, {
+        name: "uploadImage"
+      }]
     };
   },
   render: function render() {
@@ -8689,8 +8686,8 @@ var renderDrawerContent = function renderDrawerContent() {};
       });
     },
     initEditorTools: function initEditorTools(data) {
-      this.editorTools = data;
-      this.$refs.editor.initTools(data);
+      //this.editorTools = data;
+      this.editorTools = data; //this.$refs.editor.initTools(data);
     },
 
     /**

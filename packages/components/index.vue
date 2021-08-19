@@ -105,7 +105,11 @@ export default {
       activeSidebar: DEFAULT_MENU_LASTMESSAGES,
       contacts: [],
       menus: [],
-      editorTools: [],
+      editorTools: [
+        { name: "emoji" },
+        { name: "uploadFile" },
+        { name: "uploadImage" },
+      ],
     };
   },
 
@@ -793,8 +797,9 @@ export default {
       flatData.forEach(({ name, src }) => (emojiMap[name] = src));
     },
     initEditorTools(data) {
+      //this.editorTools = data;
       this.editorTools = data;
-      this.$refs.editor.initTools(data);
+      //this.$refs.editor.initTools(data);
     },
     /**
      * 初始化左侧按钮

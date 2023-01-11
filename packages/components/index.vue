@@ -171,30 +171,25 @@ export default {
      * 新增一条消息
      */
     appendMessage(message, scrollToBottom = false) {
-      if (allMessages[message.toContactId] === undefined) {
-        this.updateContact({
-          id: message.toContactId,
-          unread: "+1",
-          lastSendTime: message.sendTime,
-          lastContent: this.lastContentRender(message),
-        });
-      } else {
+      if (allMessages[message.toContactId]) {
         this._addMessage(message, message.toContactId, 1);
-        const updateContact = {
-          id: message.toContactId,
-          lastContent: this.lastContentRender(message),
-          lastSendTime: message.sendTime,
-        };
+        
         if (message.toContactId == this.currentContactId) {
           if (scrollToBottom == true) {
             this.messageViewToBottom();
           }
           this.CacheDraft.remove(message.toContactId);
-        } else {
-          updateContact.unread = "+1";
         }
-        this.updateContact(updateContact);
       }
+      const updateContact = {
+        id: message.toContactId,
+        lastContent: this.lastContentRender(message),
+        lastSendTime: message.sendTime,
+      };
+      if (message.fromUser.id !== this.user.id) {
+        updateContact.unread = "+1";
+      }
+      this.updateContact(updateContact);
     },
     _emitSend(message, next, file) {
       this.$emit(

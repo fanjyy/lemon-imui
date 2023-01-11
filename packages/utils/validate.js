@@ -5,7 +5,9 @@ export function isString(str) {
   return typeof str == "string";
 }
 export function isToday(time) {
-  return new Date().getTime() - time < 86400000;
+  const passInDate = new Date(time).setHours(0, 0, 0, 0);
+  const currentDate = new Date().setHours(0, 0, 0, 0);
+  return passInDate === currentDate;
 }
 export function isEmpty(obj) {
   if (!obj) return true;
